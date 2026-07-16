@@ -348,7 +348,7 @@
 <section class="view" id="attendanceView">
 <div class="attendance-command-header futuristic-command-header">
 <div><p class="eyebrow">Attendance Intelligence</p><h3>Semester Attendance Command Center</h3><p>Record rehearsals, review individual performance, and generate reports without mixing First and Second Semester data.</p></div>
-<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Semester Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
+<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Semester Report</button><button class="button button-secondary" id="printMonthlyAttendance" type="button">Print Monthly Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
 </div>
 <div class="semester-control-panel panel">
 <div><p class="eyebrow">Academic Term</p><h4>Choose the attendance semester</h4><small>Calendar events, totals, percentages, individual history, and printouts use only the selected semester.</small></div>
@@ -368,14 +368,14 @@
 <div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Member Attendance Record</h3><p class="panel-subtitle">The selected semester is calculated independently.</p></div></div>
 <label class="field"><span>Select Member</span><select id="attendanceIndividualSelect"><option value="">Choose a member…</option></select></label>
 <div class="individual-attendance-summary" id="individualAttendanceSummary"><div class="dashboard-empty-state"><span>⌕</span><strong>Select a member</strong><small>Their semester rehearsal totals and printable history will appear here.</small></div></div>
-<div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-primary" id="printIndividualAttendance" type="button">Print Semester Report</button></div>
+<div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-secondary" id="printIndividualMonthlyAttendance" type="button">Print Member Monthly Report</button><button class="button button-primary" id="printIndividualAttendance" type="button">Print Member Semester Report</button></div>
 <div class="individual-attendance-history" id="individualAttendanceHistory"></div>
 </article>
 </div>
 <article class="panel attendance-calendar-panel">
 <div class="calendar-header-row">
-<div><p class="eyebrow">Monthly Schedule</p><h3 id="attendanceCalendarMonth">Attendance Calendar</h3><p class="panel-subtitle">Only events from the selected semester are shown.</p></div>
-<div class="calendar-controls"><button class="icon-button" id="calendarPreviousMonth" type="button" aria-label="Previous month">‹</button><button class="button button-secondary" id="calendarToday" type="button">Today</button><button class="icon-button" id="calendarNextMonth" type="button" aria-label="Next month">›</button></div>
+<div><p class="eyebrow">Monthly Schedule</p><h3 id="attendanceCalendarMonth">Attendance Calendar</h3><p class="panel-subtitle">Only events from the selected semester are shown. Monthly reports use the month currently displayed here.</p></div>
+<div class="calendar-controls"><button class="button button-secondary calendar-print-button" id="printCalendarMonthlyAttendance" type="button">Print This Month</button><button class="icon-button" id="calendarPreviousMonth" type="button" aria-label="Previous month">‹</button><button class="button button-secondary" id="calendarToday" type="button">Today</button><button class="icon-button" id="calendarNextMonth" type="button" aria-label="Next month">›</button></div>
 </div>
 <div class="attendance-calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
 <div class="attendance-calendar-grid" id="attendanceCalendarGrid"></div>

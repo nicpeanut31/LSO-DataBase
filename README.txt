@@ -67,3 +67,10 @@ Rendered duty no longer requires manually calculating Hour and Minute. Enter the
 service date, Time In, and Time Out. The application calculates Time Out minus
 Time In, displays a live duration preview, and saves the result as exact minutes.
 Existing manual-duration entries remain readable and are labeled Manual duration.
+
+ATTENDANCE PRINT REPORTS
+------------------------
+Attendance now provides separate print-ready Semester and Monthly reports.
+The Monthly report follows the month displayed in the Attendance Calendar and
+never mixes records from the other semester. Individual member reports are also
+available for both the full selected semester and the displayed calendar month.

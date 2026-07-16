@@ -97,3 +97,9 @@ SECURITY
 --------
 The publishable key in supabase-config.js is intended for browser use.
 Never put a Supabase secret or service_role key in GitHub.
+
+ATTENDANCE REPORT UPDATE
+------------------------
+No additional SQL change is required for the Semester and Monthly report buttons.
+After uploading all updated files to GitHub, hard-refresh the live website.
+Monthly reports use the month currently displayed in the Attendance Calendar.

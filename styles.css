@@ -2291,3 +2291,26 @@ body::before {
     transform: rotate(90deg);
   }
 }
+
+/* Attendance report printing controls */
+.individual-report-actions {
+  display: grid;
+  gap: 9px;
+}
+.calendar-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.calendar-print-button {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .calendar-controls {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .calendar-print-button {
+    flex: 1 0 100%;
+  }
+}

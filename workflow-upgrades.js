@@ -87,6 +87,19 @@
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
   }
 
+  function calendarMonthKey() {
+    return `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  function calendarMonthLabel() {
+    return new Intl.DateTimeFormat('en-PH', { month: 'long', year: 'numeric' }).format(calendarCursor);
+  }
+
+  function eventsInCalendarMonth(events) {
+    const month = calendarMonthKey();
+    return events.filter((event) => String(event.date || '').slice(0, 7) === month);
+  }
+
   function statusCounts(records) {
     const statuses = ['Present', 'Late', 'Absent', 'Excused', 'Not Required'];
     return Object.fromEntries(statuses.map((status) => [status, records.filter((record) => record.status === status).length]));
@@ -97,8 +110,7 @@
     return denominator ? Math.round(((counts.Present + counts.Late) / denominator) * 100) : null;
   }
 
-  function memberRehearsalSummary(memberId) {
-    const events = rehearsalEvents();
+  function memberSummaryForEvents(memberId, events) {
     const attendance = getAttendance();
     const eventMap = new Map(events.map((event) => [event.id, event]));
     const records = attendance.filter((record) => record.memberId === memberId && eventMap.has(record.eventId));
@@ -107,10 +119,15 @@
       events,
       records,
       counts,
+      totalEvents: events.length,
       totalRehearsals: events.length,
       recorded: records.filter((record) => record.status).length,
       rate: rateFromCounts(counts)
     };
+  }
+
+  function memberRehearsalSummary(memberId) {
+    return memberSummaryForEvents(memberId, rehearsalEvents());
   }
 
   function metricMarkup(label, value, helper = '') {
@@ -278,7 +295,7 @@
 
   function printableDocument({ title, subtitle, summaryHtml, tableHtml, footer = '' }) {
     return `<!doctype html><html><head><title>${safeText(title)}</title><style>
-      @page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17362d;margin:0}.header{display:flex;justify-content:space-between;border-bottom:4px solid #167055;padding-bottom:12px;margin-bottom:16px}.org{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#167055;font-weight:700}h1{font-size:25px;margin:5px 0}.sub{font-size:12px;color:#60766e}.summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:15px 0}.summary>div{border:1px solid #d8e6df;padding:10px;border-radius:8px}.summary span{display:block;font-size:9px;text-transform:uppercase;color:#6b8078}.summary strong{font-size:20px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #d8e6df;padding:7px;text-align:left}th{background:#eff8f3;text-transform:uppercase;font-size:9px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:90px;margin-top:45px;text-align:center}.sign div{border-top:1px solid #333;padding-top:6px}.footer{font-size:9px;color:#6c8079;margin-top:15px;text-align:center}</style></head><body>
+      @page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17362d;margin:0}.header{display:flex;justify-content:space-between;border-bottom:4px solid #167055;padding-bottom:12px;margin-bottom:16px}.org{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#167055;font-weight:700}h1{font-size:25px;margin:5px 0}.sub{font-size:12px;color:#60766e}.summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:15px 0}.summary>div{border:1px solid #d8e6df;padding:10px;border-radius:8px}.summary span{display:block;font-size:9px;text-transform:uppercase;color:#6b8078}.summary strong{font-size:20px}.report-section{margin:18px 0 8px;font-size:14px;color:#0b3b2e}.report-note{font-size:10px;color:#60766e;margin:0 0 8px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #d8e6df;padding:7px;text-align:left}th{background:#eff8f3;text-transform:uppercase;font-size:9px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:90px;margin-top:45px;text-align:center}.sign div{border-top:1px solid #333;padding-top:6px}.footer{font-size:9px;color:#6c8079;margin-top:15px;text-align:center}</style></head><body>
       <div class="header"><div><div class="org">Lasallian Symphony Orchestra</div><h1>${safeText(title)}</h1><div class="sub">${safeText(subtitle)}</div></div><div class="sub">Generated ${safeText(dateLabel(today()))}</div></div>
       ${summaryHtml}${tableHtml}<div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">${safeText(footer || 'Generated from the LSO Orchestra Management System.')}</div><script>window.onload=()=>window.print()<\/script></body></html>`;
   }
@@ -314,6 +331,16 @@
     }));
   }
 
+  function eventDetailReportTable(events) {
+    const attendance = getAttendance();
+    const rows = events.map((event, index) => {
+      const records = attendance.filter((record) => record.eventId === event.id && record.status);
+      const counts = statusCounts(records);
+      return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.type || 'Activity')}</td><td>${safeText(event.venue || '—')}</td><td>${counts.Present}</td><td>${counts.Late}</td><td>${counts.Absent}</td><td>${counts.Excused}</td><td>${records.length}</td></tr>`;
+    }).join('');
+    return `<h2 class="report-section">Activity Breakdown</h2><p class="report-note">Each row summarizes the recorded attendance for one completed activity.</p><table><thead><tr><th>#</th><th>Date</th><th>Activity</th><th>Type</th><th>Venue</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Recorded</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No completed activities in this report period.</td></tr>'}</tbody></table>`;
+  }
+
   function printOverallAttendance() {
     const events = activityEvents();
     const eventIds = new Set(events.map((event) => event.id));
@@ -331,7 +358,54 @@
       title: `${activeSemester()} Overall Attendance Report`,
       subtitle: `${events.length} completed activities • ${records.length} recorded attendance statuses`,
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`
+      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Semester Summary</h2><p class="report-note">Member totals below are based on completed rehearsal events in ${safeText(activeSemester())}.</p><table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`
+    }));
+  }
+
+  function printMonthlyAttendance() {
+    const monthLabel = calendarMonthLabel();
+    const events = eventsInCalendarMonth(activityEvents());
+    const eventIds = new Set(events.map((event) => event.id));
+    const records = getAttendance().filter((record) => eventIds.has(record.eventId) && record.status);
+    const counts = statusCounts(records);
+    const rate = rateFromCounts(counts);
+    const summaryHtml = `<div class="summary">${[
+      ['Activities', events.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Excused', counts.Excused], ['Overall Rate', rate === null ? '—' : `${rate}%`]
+    ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
+    const rows = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName))).map((member, index) => {
+      const summary = memberSummaryForEvents(member.id, events);
+      return `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.periodGroup)}</td><td>${summary.totalEvents}</td><td>${summary.counts.Present}</td><td>${summary.counts.Late}</td><td>${summary.counts.Absent}</td><td>${summary.counts.Excused}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
+    }).join('');
+    openPrintDocument(printableDocument({
+      title: `${monthLabel} Monthly Attendance Report`,
+      subtitle: `${activeSemester()} • ${events.length} completed activities • ${records.length} recorded attendance statuses`,
+      summaryHtml,
+      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Monthly Summary</h2><p class="report-note">The table includes only completed activities in ${safeText(monthLabel)} under ${safeText(activeSemester())}.</p><table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Activities</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`,
+      footer: `Monthly attendance report for ${monthLabel}, ${activeSemester()}. Only completed activities inside the displayed calendar month are included.`
+    }));
+  }
+
+  function printIndividualMonthlyAttendance() {
+    const member = getMembers().find((item) => item.id === selectedAttendanceMemberId);
+    if (!member) return;
+    const monthLabel = calendarMonthLabel();
+    const events = eventsInCalendarMonth(rehearsalEvents());
+    const summary = memberSummaryForEvents(member.id, events);
+    const recordMap = new Map(summary.records.map((record) => [record.eventId, record]));
+    const summaryHtml = `<div class="summary">${[
+      ['Rehearsals', summary.totalEvents], ['Present', summary.counts.Present], ['Late', summary.counts.Late],
+      ['Absent', summary.counts.Absent], ['Excused', summary.counts.Excused], ['Attendance Rate', summary.rate === null ? '—' : `${summary.rate}%`]
+    ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
+    const rows = summary.events.map((event, index) => {
+      const record = recordMap.get(event.id) || {};
+      return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+    }).join('');
+    openPrintDocument(printableDocument({
+      title: `${member.fullName} — ${monthLabel} Attendance`,
+      subtitle: `${activeSemester()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`,
+      summaryHtml,
+      tableHtml: `<table><thead><tr><th>#</th><th>Date</th><th>Rehearsal</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No completed rehearsal records for this month.</td></tr>'}</tbody></table>`,
+      footer: `Individual monthly attendance report for ${monthLabel}, ${activeSemester()}.`
     }));
   }
 
@@ -476,7 +550,10 @@
       renderIndividualAttendance();
     });
     el('printIndividualAttendance')?.addEventListener('click', printIndividualAttendance);
+    el('printIndividualMonthlyAttendance')?.addEventListener('click', printIndividualMonthlyAttendance);
     el('printOverallAttendance')?.addEventListener('click', printOverallAttendance);
+    el('printMonthlyAttendance')?.addEventListener('click', printMonthlyAttendance);
+    el('printCalendarMonthlyAttendance')?.addEventListener('click', printMonthlyAttendance);
     el('printEventAttendance')?.addEventListener('click', printSelectedEventAttendance);
     el('attendanceSemesterToggle')?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-attendance-semester]');

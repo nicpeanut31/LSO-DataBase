@@ -1,0 +1,36 @@
+ATTENDANCE REPORT PRINT UPGRADE
+================================
+
+NEW PRINT OPTIONS
+-----------------
+1. Print Semester Report
+   - Uses only the currently selected First or Second Semester.
+   - Includes semester totals, activity-by-activity breakdown, and member summary.
+
+2. Print Monthly Report
+   - Uses the month currently displayed in the Attendance Calendar.
+   - Uses only the currently selected semester.
+   - Includes monthly totals, activity breakdown, and member summary.
+
+3. Print Member Semester Report
+   - Available after selecting a member in Member Attendance Record.
+   - Uses completed rehearsals in the selected semester.
+
+4. Print Member Monthly Report
+   - Available after selecting a member.
+   - Uses completed rehearsals in the month displayed in the calendar and the selected semester.
+
+HOW TO USE THE MONTHLY REPORT
+-----------------------------
+1. Open Attendance.
+2. Choose 1st Semester or 2nd Semester.
+3. Use the calendar arrow buttons to display the desired month.
+4. Click Print Monthly Report at the top or Print This Month beside the calendar controls.
+5. Use the browser print dialog to print or Save as PDF.
+
+NOTES
+-----
+- First and Second Semester records remain separate.
+- Future events are not counted until their event date arrives.
+- Excused attendance is excluded from the attendance-rate denominator.
+- This is a frontend reporting upgrade; no new Supabase SQL is required if the latest semester/duty-hours SQL is already installed.
