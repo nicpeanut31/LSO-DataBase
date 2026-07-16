@@ -4,6 +4,6 @@
  * service_role key in this file or in a public GitHub repository.
  */
 window.LSO_SUPABASE_CONFIG = {
-  url: 'https://alvimpdslvoqylehhind.supabase.co',
-  anonKey: 'sb_publishable_wxSE5mYmSZP7pPQFouva-w_SWYREzNq'
+  url: 'https://tlburpxpzlgyzlzgitbg.supabase.co',
+  anonKey: 'sb_publishable_9V26-MAGsQEHqxBcz5qpWw_5jq9nn3U'
 };
