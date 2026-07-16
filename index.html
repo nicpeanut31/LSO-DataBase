@@ -104,6 +104,7 @@
 <button class="nav-item" data-view="membersView">Members</button>
 <button class="nav-item" data-view="lookupView">Member Lookup</button>
 <button class="nav-item" data-view="attendanceView">Attendance</button>
+<button class="nav-item" data-view="dutyHoursView">Duty Hours</button>
 
 <button class="nav-item" data-view="alertsView">Action Center</button>
 <button class="nav-item admin-only" data-view="accountsView">Accounts <span class="nav-count hidden" id="pendingAccountCount">0</span></button>
@@ -176,7 +177,8 @@
 <div class="quick-action-grid">
 <button class="quick-action-card" data-dashboard-action="add-member" type="button"><span class="quick-action-icon">+</span><strong>Add Member</strong><small>Create a validated member record</small></button>
 <button class="quick-action-card" data-dashboard-action="new-event" type="button"><span class="quick-action-icon">▣</span><strong>New Event</strong><small>Schedule a rehearsal or activity</small></button>
-<button class="quick-action-card" data-dashboard-action="attendance" type="button"><span class="quick-action-icon">✓</span><strong>Take Attendance</strong><small>Open the current event roster</small></button>
+<button class="quick-action-card" data-dashboard-action="attendance" type="button"><span class="quick-action-icon">✓</span><strong>Take Attendance</strong><small>Open the semester event roster</small></button>
+<button class="quick-action-card" data-dashboard-action="duty-hours" type="button"><span class="quick-action-icon">◷</span><strong>Duty Hours</strong><small>Track exact hours, minutes, and incentives</small></button>
 <button class="quick-action-card" data-dashboard-action="member-lookup" type="button"><span class="quick-action-icon">ID</span><strong>Member Record</strong><small>Search and print an official profile</small></button>
 <button class="quick-action-card" data-dashboard-action="alerts" type="button"><span class="quick-action-icon">!</span><strong>Review Alerts</strong><small>Resolve urgent action items</small></button>
 <button class="quick-action-card" data-dashboard-action="data" type="button"><span class="quick-action-icon">↓</span><strong>Data &amp; Backup</strong><small>Export or protect system records</small></button>
@@ -200,6 +202,11 @@
 <div class="panel-header"><div><p class="eyebrow">Membership Flow</p><h3>Recruitment Pipeline</h3><p class="panel-subtitle" id="dashboardMembershipFlowSummary">Loading membership stages…</p></div><button class="text-button" data-dashboard-action="members" type="button">Open directory →</button></div>
 <div id="dashboardMembershipFlow"></div>
 <div class="hidden" id="dashboardInventorySummary"></div><div class="hidden" id="dashboardInventorySnapshot"></div>
+</article>
+
+<article class="panel dashboard-module duty-signal-module">
+<div class="panel-header"><div><p class="eyebrow">Training Compliance</p><h3>Duty Hours Signal</h3><p class="panel-subtitle" id="dashboardDutySummary">Loading semester duty records…</p></div><button class="text-button" data-dashboard-action="duty-hours" type="button">Open duty hours →</button></div>
+<div id="dashboardDutyOverview"></div>
 </article>
 
 <article class="panel dashboard-module activity-module">
@@ -339,92 +346,49 @@
 </section>
 
 <section class="view" id="attendanceView">
-<div class="attendance-command-header">
-<div><p class="eyebrow">Attendance &amp; Duty Intelligence</p><h3>Calendar, Analytics, Duty Hours &amp; Reports</h3><p>Manage rehearsal attendance, monitor Trainee and Probationary duty-hour requirements, and generate print-ready records.</p></div>
-<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Overall Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
+<div class="attendance-command-header futuristic-command-header">
+<div><p class="eyebrow">Attendance Intelligence</p><h3>Semester Attendance Command Center</h3><p>Record rehearsals, review individual performance, and generate reports without mixing First and Second Semester data.</p></div>
+<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Semester Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
+</div>
+<div class="semester-control-panel panel">
+<div><p class="eyebrow">Academic Term</p><h4>Choose the attendance semester</h4><small>Calendar events, totals, percentages, individual history, and printouts use only the selected semester.</small></div>
+<div class="segmented-control semester-toggle" id="attendanceSemesterToggle" aria-label="Attendance semester">
+<button class="segment-button active" data-attendance-semester="First Semester" type="button">1st Semester</button>
+<button class="segment-button" data-attendance-semester="Second Semester" type="button">2nd Semester</button>
+</div>
+<div class="semester-live-label"><span>Viewing</span><strong id="attendanceSemesterLabel">First Semester</strong></div>
 </div>
 <div class="attendance-overview-grid">
 <article class="panel attendance-overall-panel">
-<div class="panel-header"><div><p class="eyebrow">Organization Summary</p><h3>Overall Attendance</h3><p class="panel-subtitle" id="overallAttendanceCaption">Across all recorded activities</p></div></div>
+<div class="panel-header"><div><p class="eyebrow">Organization Summary</p><h3>Overall Attendance</h3><p class="panel-subtitle" id="overallAttendanceCaption">First Semester records only</p></div></div>
 <div class="attendance-kpi-grid" id="overallAttendanceMetrics"></div>
 <div class="table-wrap compact-report-table"><table><thead><tr><th>Member</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Attendance Rate</th></tr></thead><tbody id="attendanceOverallTableBody"></tbody></table></div>
 </article>
 <article class="panel individual-attendance-panel">
-<div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Member Attendance Record</h3><p class="panel-subtitle">Search a name to see their total rehearsals and attendance history.</p></div></div>
+<div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Member Attendance Record</h3><p class="panel-subtitle">The selected semester is calculated independently.</p></div></div>
 <label class="field"><span>Select Member</span><select id="attendanceIndividualSelect"><option value="">Choose a member…</option></select></label>
-<div class="individual-attendance-summary" id="individualAttendanceSummary"><div class="dashboard-empty-state"><span>⌕</span><strong>Select a member</strong><small>Their rehearsal totals and printable history will appear here.</small></div></div>
-<div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-primary" id="printIndividualAttendance" type="button">Print Individual Report</button></div>
+<div class="individual-attendance-summary" id="individualAttendanceSummary"><div class="dashboard-empty-state"><span>⌕</span><strong>Select a member</strong><small>Their semester rehearsal totals and printable history will appear here.</small></div></div>
+<div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-primary" id="printIndividualAttendance" type="button">Print Semester Report</button></div>
 <div class="individual-attendance-history" id="individualAttendanceHistory"></div>
 </article>
 </div>
-
-<div class="duty-hours-layout">
-<article class="panel duty-hours-individual-panel">
-<div class="panel-header stack-mobile">
-<div><p class="eyebrow">Training Compliance</p><h3>Duty Hours Lookup</h3><p class="panel-subtitle">Review Trainee and Probationary commitments, rendered hours, incentives, and combined balance.</p></div>
-<div class="inline-actions"><button class="button button-secondary" id="printDutyHoursIndividual" type="button" disabled>Print Individual</button></div>
-</div>
-<div class="duty-member-picker">
-<label class="field"><span>Search Name</span><input id="dutyMemberSearch" type="search" placeholder="Type a member name, ID, or student number..." autocomplete="off"/></label>
-<label class="field"><span>Select Member</span><select id="dutyMemberSelect"><option value="">Choose a member…</option></select></label>
-</div>
-<div class="duty-hours-summary" id="dutyHoursSummary"><div class="dashboard-empty-state"><span>◷</span><strong>Select a member</strong><small>Their Trainee, Probationary, and combined duty-hour totals will appear here.</small></div></div>
-<div class="duty-hours-admin-grid admin-only hidden" id="dutyHoursAdminControls">
-<form class="duty-commitment-card" id="dutyCommitmentForm">
-<div class="duty-card-heading"><div><p class="eyebrow">Required Hours</p><h4>Committed Hours</h4></div><span class="duty-card-icon">◎</span></div>
-<p class="duty-form-help">Set the required hours the selected member must render for each period.</p>
-<div class="form-grid two-columns">
-<label class="field"><span>Trainee Period Hours</span><input id="dutyTraineeCommitted" type="number" min="0" step="0.25" placeholder="0"/></label>
-<label class="field"><span>Probationary Period Hours</span><input id="dutyProbationaryCommitted" type="number" min="0" step="0.25" placeholder="0"/></label>
-</div>
-<button class="button button-primary" type="submit">Save Committed Hours</button>
-</form>
-<form class="duty-entry-card" id="dutyEntryForm">
-<div class="duty-card-heading"><div><p class="eyebrow">Duty Ledger</p><h4>Add Rendered Hours or Incentive</h4></div><span class="duty-card-icon">＋</span></div>
-<div class="form-grid duty-entry-fields">
-<label class="field"><span>Period</span><select id="dutyEntryPeriod" required><option>Trainee Period</option><option>Probationary Period</option></select></label>
-<label class="field"><span>Entry Type</span><select id="dutyEntryType" required><option value="Duty">Rendered Duty Hours</option><option value="Incentive">Incentive / Adjustment</option></select></label>
-<label class="field"><span>Date</span><input id="dutyEntryDate" type="date" required/></label>
-<label class="field"><span>Hours</span><input id="dutyEntryHours" type="number" step="0.25" placeholder="e.g., 3 or -1" required/></label>
-<label class="field duty-description-field"><span>Description / Basis</span><input id="dutyEntryDescription" maxlength="160" placeholder="Duty assignment, incentive reason, or correction..."/></label>
-</div>
-<p class="duty-form-help" id="dutyEntryHelp">Rendered duty hours must be positive. Incentives may be positive to reduce the remaining requirement or negative to add hours back.</p>
-<button class="button button-primary" type="submit">Add to Duty Ledger</button>
-</form>
-</div>
-<div class="duty-ledger-section hidden" id="dutyLedgerSection">
-<div class="individual-history-header"><strong>Duty Hours Ledger</strong><span id="dutyLedgerCaption">0 entries</span></div>
-<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Period</th><th>Type</th><th>Hours</th><th>Effect</th><th>Description</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
-</div>
-</article>
-
-<article class="panel duty-hours-overall-panel">
-<div class="panel-header stack-mobile">
-<div><p class="eyebrow">Organization Totals</p><h3>Overall Duty Hours</h3><p class="panel-subtitle" id="dutyOverallCaption">Across Trainee and Probationary periods</p></div>
-<button class="button button-secondary" id="printDutyHoursOverall" type="button">Print Overall</button>
-</div>
-<div class="attendance-kpi-grid duty-overall-metrics" id="dutyOverallMetrics"></div>
-<div class="table-wrap compact-report-table duty-overall-table"><table><thead><tr><th>Member</th><th>Trainee Required</th><th>Trainee Credited</th><th>Trainee Balance</th><th>Probationary Required</th><th>Probationary Credited</th><th>Probationary Balance</th><th>Combined Balance</th></tr></thead><tbody id="dutyOverallTableBody"></tbody></table></div>
-</article>
-</div>
-
 <article class="panel attendance-calendar-panel">
 <div class="calendar-header-row">
-<div><p class="eyebrow">Monthly Schedule</p><h3 id="attendanceCalendarMonth">Attendance Calendar</h3><p class="panel-subtitle">Click a date to open its rehearsal or create a new one.</p></div>
+<div><p class="eyebrow">Monthly Schedule</p><h3 id="attendanceCalendarMonth">Attendance Calendar</h3><p class="panel-subtitle">Only events from the selected semester are shown.</p></div>
 <div class="calendar-controls"><button class="icon-button" id="calendarPreviousMonth" type="button" aria-label="Previous month">‹</button><button class="button button-secondary" id="calendarToday" type="button">Today</button><button class="icon-button" id="calendarNextMonth" type="button" aria-label="Next month">›</button></div>
 </div>
 <div class="attendance-calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
 <div class="attendance-calendar-grid" id="attendanceCalendarGrid"></div>
-<div class="calendar-selected-date-bar"><div><strong id="calendarSelectedDateLabel">Select a date</strong><small id="calendarSelectedDateMeta">Events for the selected date will appear below.</small></div><button class="button button-primary" id="createEventOnSelectedDate" type="button">+ Create on Selected Date</button></div>
+<div class="calendar-selected-date-bar"><div><strong id="calendarSelectedDateLabel">Select a date</strong><small id="calendarSelectedDateMeta">Events for the selected semester and date will appear below.</small></div><button class="button button-primary" id="createEventOnSelectedDate" type="button">+ Create on Selected Date</button></div>
 </article>
 <div class="management-layout attendance-management-layout">
 <article class="panel management-sidebar-panel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Event List</p><h3>Rehearsals &amp; Activities</h3><p class="panel-subtitle" id="eventCountLabel">0 events</p></div></div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Semester Event List</p><h3>Rehearsals &amp; Activities</h3><p class="panel-subtitle" id="eventCountLabel">0 events</p></div></div>
 <label class="field"><span>Search events</span><input id="eventSearch" type="search" placeholder="Title, venue, or date..."/></label>
 <div class="event-list" id="eventList"></div>
 </article>
 <article class="panel attendance-roster-panel">
-<div class="record-placeholder" id="attendancePlaceholder"><div class="empty-icon">✓</div><h3>Select or create an event</h3><p>Choose an activity to record attendance for active members.</p></div>
+<div class="record-placeholder" id="attendancePlaceholder"><div class="empty-icon">✓</div><h3>Select or create an event</h3><p>Choose an activity in the selected semester to record attendance.</p></div>
 <div class="hidden" id="attendanceWorkspace">
 <div class="panel-header stack-mobile"><div><p class="eyebrow" id="attendanceEventType">Rehearsal</p><h3 id="attendanceEventTitle"></h3><p class="panel-subtitle" id="attendanceEventMeta"></p></div><div class="inline-actions"><button class="button button-secondary" id="printEventAttendance" type="button">Print Roster</button><button class="button button-secondary" id="editEventButton">Edit</button><button class="button button-danger" id="deleteEventButton">Delete</button></div></div>
 <div class="attendance-summary" id="attendanceSummary"></div>
@@ -433,6 +397,104 @@
 </div>
 </article>
 </div>
+</section>
+
+<section class="view" id="dutyHoursView">
+<div class="attendance-command-header futuristic-command-header duty-command-header">
+<div><p class="eyebrow">Duty Hours Management</p><h3>Training Compliance Workspace</h3><p>Keep Trainee and Probationary rosters separate, calculate exact hours and minutes, and maintain independent First and Second Semester ledgers.</p></div>
+<div class="inline-actions"><button class="button button-secondary" id="printDutyHoursIndividual" type="button" disabled>Print Individual</button><button class="button button-primary" id="printDutyHoursOverall" type="button">Print Roster Report</button></div>
+</div>
+<div class="semester-control-panel panel duty-semester-panel">
+<div><p class="eyebrow">Duty Semester</p><h4>Select the ledger to manage</h4><small>Committed, rendered, incentive, and remaining time are never mixed between semesters.</small></div>
+<div class="segmented-control semester-toggle" id="dutySemesterToggle" aria-label="Duty hours semester">
+<button class="segment-button active" data-duty-semester="First Semester" type="button">1st Semester</button>
+<button class="segment-button" data-duty-semester="Second Semester" type="button">2nd Semester</button>
+</div>
+<div class="semester-live-label"><span>Active ledger</span><strong id="dutySemesterLabel">First Semester</strong></div>
+</div>
+
+<div class="panel duty-roster-command-panel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Separated Rosters</p><h3>Trainee and Probationary Lists</h3><p class="panel-subtitle">Choose a person from the correct period. Historical records remain available after progression.</p></div><label class="field duty-global-search"><span>Search both rosters</span><input id="dutyMemberSearch" type="search" placeholder="Name, membership ID, or student number..." autocomplete="off"/></label></div>
+<div class="duty-roster-grid">
+<article class="duty-roster-card trainee-roster-card">
+<header><div><span class="roster-orbit blue-orbit">01</span><div><p class="eyebrow">Training Stage</p><h4>Trainee Period</h4></div></div><strong id="dutyTraineeCount">0</strong></header>
+<div class="duty-roster-list" id="dutyTraineeRoster"></div>
+</article>
+<article class="duty-roster-card probationary-roster-card">
+<header><div><span class="roster-orbit gold-orbit">02</span><div><p class="eyebrow">Evaluation Stage</p><h4>Probationary Period</h4></div></div><strong id="dutyProbationaryCount">0</strong></header>
+<div class="duty-roster-list" id="dutyProbationaryRoster"></div>
+</article>
+</div>
+</div>
+
+<div class="duty-workspace-grid">
+<article class="panel duty-hours-individual-panel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Selected Duty Profile</p><h3 id="dutySelectedTitle">Choose a Trainee or Probationary member</h3><p class="panel-subtitle" id="dutySelectedContext">The selected semester and period control every calculation below.</p></div><span class="badge badge-gray" id="dutySelectedBadge">No selection</span></div>
+<div class="duty-hours-summary" id="dutyHoursSummary"><div class="dashboard-empty-state"><span>◷</span><strong>Select a name from either roster</strong><small>Committed time, rendered time, incentives, and remaining balance will appear here.</small></div></div>
+
+<div class="duty-hours-admin-grid duty-forms-grid admin-only hidden" id="dutyHoursAdminControls">
+<form class="duty-commitment-card duty-form-card" id="dutyCommitmentForm">
+<div class="duty-card-heading"><div><p class="eyebrow">Required Time</p><h4>Committed Hours</h4></div><span class="duty-card-icon">◎</span></div>
+<p class="duty-form-help">Set the exact commitment for the selected semester and period.</p>
+<div class="time-input-pair">
+<label class="field"><span>Hour</span><input id="dutyCommittedHours" type="number" min="0" step="1" placeholder="0"/></label>
+<label class="field"><span>Minute</span><input id="dutyCommittedMinutes" type="number" min="0" max="59" step="1" placeholder="0"/></label>
+</div>
+<button class="button button-primary" type="submit">Save Commitment</button>
+</form>
+
+<form class="duty-entry-card duty-form-card clock-duty-card" id="dutyRenderedForm">
+<div class="duty-card-heading"><div><p class="eyebrow">Actual Service</p><h4>Add Clock-Based Duty</h4></div><span class="duty-card-icon">◷</span></div>
+<p class="duty-form-help">Enter the actual Time In and Time Out. The system computes the rendered hours and minutes automatically.</p>
+<div class="form-grid two-columns clock-duty-form-grid">
+<label class="field span-2"><span>Date</span><input id="dutyRenderedDate" type="date" required/></label>
+<div class="clock-input-grid span-2">
+<label class="field"><span>Time In</span><input id="dutyRenderedTimeIn" type="time" step="60" required/></label>
+<span class="clock-range-arrow" aria-hidden="true">→</span>
+<label class="field"><span>Time Out</span><input id="dutyRenderedTimeOut" type="time" step="60" required/></label>
+</div>
+<div class="clock-duration-preview span-2" id="dutyRenderedDurationPreview" aria-live="polite">
+<span>Computed duration</span><strong>Select Time In and Time Out</strong><small>Example: 12:00 PM to 5:00 PM = 5 hrs</small>
+</div>
+<label class="field span-2"><span>Duty Assignment / Description</span><input id="dutyRenderedDescription" maxlength="160" placeholder="e.g., Rehearsal setup, documentation, ushering..."/></label>
+</div>
+<button class="button button-primary" type="submit">Add Render Time</button>
+</form>
+
+<form class="duty-incentive-card duty-form-card" id="dutyIncentiveForm">
+<div class="duty-card-heading"><div><p class="eyebrow">Manual Adjustment</p><h4>Add Incentive</h4></div><span class="duty-card-icon">±</span></div>
+<div class="form-grid two-columns">
+<label class="field"><span>Date</span><input id="dutyIncentiveDate" type="date" required/></label>
+<label class="field"><span>Effect</span><select id="dutyIncentiveDirection"><option value="Credit">Add credit — reduce remaining</option><option value="Deduction">Deduct credit — increase remaining</option></select></label>
+<div class="time-input-pair compact-time-pair span-2">
+<label class="field"><span>Hour</span><input id="dutyIncentiveHours" type="number" min="0" step="1" placeholder="0"/></label>
+<label class="field"><span>Minute</span><input id="dutyIncentiveMinutes" type="number" min="0" max="59" step="1" placeholder="0"/></label>
+</div>
+<label class="field span-2"><span>Incentive Reason / Basis</span><input id="dutyIncentiveDescription" maxlength="160" placeholder="Explain the incentive or deduction..."/></label>
+</div>
+<p class="duty-form-help">Credits reduce the remaining duty requirement. Deductions add time back to the remaining requirement.</p>
+<button class="button button-primary" type="submit">Add Incentive Adjustment</button>
+</form>
+</div>
+
+<div class="duty-ledger-section hidden" id="dutyLedgerSection">
+<div class="individual-history-header"><strong>Semester Duty Ledger</strong><span id="dutyLedgerCaption">0 entries</span></div>
+<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Semester</th><th>Period</th><th>Entry</th><th>Computed Time</th><th>Effect</th><th>Description</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
+</div>
+</article>
+
+<aside class="duty-insight-stack">
+<article class="panel duty-year-summary-panel"><div class="panel-header"><div><p class="eyebrow">Academic-Year Lookup</p><h3>Semester Breakdown</h3><p class="panel-subtitle">View each semester separately and the whole record without changing the active ledger.</p></div></div><div id="dutyAcademicYearSummary"></div></article>
+<article class="panel duty-guide-panel"><p class="eyebrow">Calculation Guide</p><h3>Exact minute accounting</h3><div class="formula-stack"><div><span>Clock-Based Rendered Time</span><strong>Time Out − Time In</strong></div><div><span>Credited Time</span><strong>Rendered + Incentive Credit − Incentive Deduction</strong></div><div><span>Remaining Time</span><strong>Committed − Credited</strong></div></div><small>Clock ranges are converted into whole minutes automatically to prevent manual computation and decimal rounding errors.</small></article>
+</aside>
+</div>
+
+<article class="panel duty-hours-overall-panel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Semester Roster Totals</p><h3>Overall Duty Hours</h3><p class="panel-subtitle" id="dutyOverallCaption">First Semester • Trainee Period</p></div>
+<div class="segmented-control compact-segmented" id="dutyOverallPeriodToggle"><button class="segment-button active" data-duty-period="Trainee Period" type="button">Trainees</button><button class="segment-button" data-duty-period="Probationary Period" type="button">Probationary</button></div></div>
+<div class="attendance-kpi-grid duty-overall-metrics" id="dutyOverallMetrics"></div>
+<div class="table-wrap compact-report-table duty-overall-table"><table><thead><tr><th>Member</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody id="dutyOverallTableBody"></tbody></table></div>
+</article>
 </section>
 
 <section class="view hidden retired-module" id="instrumentsView" aria-hidden="true">
@@ -647,6 +709,7 @@
 <div class="form-grid two-columns">
 <label class="field span-2"><span>Event Title *</span><input id="eventTitle" required="" placeholder="e.g., Saturday Full Orchestra Rehearsal"/></label>
 <label class="field"><span>Type *</span><select id="eventType" required=""><option>Rehearsal</option><option>Sectional</option><option>Performance</option><option>Audition</option><option>Meeting</option><option>Other</option></select></label>
+<label class="field"><span>Semester *</span><select id="eventSemester" required=""><option>First Semester</option><option>Second Semester</option></select></label>
 <label class="field"><span>Date *</span><input id="eventDate" required="" type="date"/></label>
 <label class="field"><span>Start Time</span><input id="eventStartTime" type="time"/></label>
 <label class="field"><span>End Time</span><input id="eventEndTime" type="time"/></label>

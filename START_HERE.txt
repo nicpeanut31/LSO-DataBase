@@ -1,64 +1,99 @@
-LSO ONLINE SYSTEM — DUTY HOURS UPGRADE
-======================================
+LSO ONLINE SYSTEM — SEMESTER ATTENDANCE + DUTY HOURS UPGRADE
+============================================================
 
 DEFAULT ADMINISTRATOR
 ---------------------
 Username: SNA1161
 Password: SNA1161
 
-WHAT WAS ADDED
---------------
-- Duty Hours lookup inside Attendance.
-- Separate Trainee and Probationary committed-hour targets.
-- Rendered duty-hour entries with date and description.
-- Positive or negative incentive/adjustment entries.
-- Automatic credited and remaining-hour calculations.
-- Trainee, Probationary, and Combined totals for each member.
-- Overall organization totals and member-by-member balances.
-- Printable individual and overall Duty Hours reports.
-- Duty Hours included in cloud synchronization and Complete Backups.
+WHAT CHANGED
+------------
+ATTENDANCE
+- First Semester and Second Semester are separate ledgers.
+- Events now require a Semester field.
+- Calendar, overall totals, percentages, individual lookup, event roster, and
+  printable reports use only the selected semester.
+- Older events without a semester are treated as First Semester and may be
+  edited when they belong in Second Semester.
 
-IMPORTANT: RUN THE UPDATED SQL FIRST
-------------------------------------
-This release adds a new shared database field named duty_hours.
+DUTY HOURS
+- Duty Hours now has its own navigation page instead of appearing inside
+  Attendance.
+- First Semester and Second Semester are separate.
+- Trainee and Probationary rosters are displayed in separate lists.
+- Committed time and incentive adjustments use exact Hour and Minute inputs.
+- Rendered duty uses clock-based Time In and Time Out and computes the exact
+  duration automatically, including minutes.
+- Incentives have their own form:
+    Add credit = reduce remaining time
+    Deduct credit = increase remaining time
+- Calculations are stored as whole minutes to prevent decimal rounding errors.
+- Individual, semester roster, and academic-year totals are printable.
+- Existing decimal-hour records are preserved and migrated into First Semester.
 
-1. Open the Supabase project connected to:
-   https://alvimpdslvoqylehhind.supabase.co
-2. Open SQL Editor > New query.
-3. Open supabase-setup.sql from this folder.
-4. Copy the ENTIRE SQL file and paste it into the editor.
-5. Click Run and wait for a successful result.
+DASHBOARD
+- Separate attendance signals for First and Second Semester.
+- Duty Hours signal for both semesters.
+- Functional shortcuts to Attendance and Duty Hours.
+- Upcoming events display their assigned semester.
 
-The SQL is written so it can upgrade the existing project without deleting the
-current members, events, attendance, accounts, or settings.
+IMPORTANT: BACK UP FIRST
+------------------------
+Before replacing the live files:
+1. Open the current website.
+2. Go to Data & Backup.
+3. Download Complete Backup.
+4. Keep the JSON file safely.
+
+SUPABASE
+--------
+This package is configured for:
+https://tlburpxpzlgyzlzgitbg.supabase.co
+
+Run the included supabase-setup.sql in that same Supabase project:
+1. Open Supabase > SQL Editor > New query.
+2. Copy the ENTIRE supabase-setup.sql file.
+3. Paste it into the editor.
+4. Click Run and wait for Success.
+
+The SQL upgrade is designed not to delete existing members, events, attendance,
+accounts, settings, or duty-hour records.
 
 GITHUB DEPLOYMENT
 -----------------
-1. Download a Complete Backup from the current website first.
-2. Upload every file in this folder to the existing GitHub Pages repository.
-3. Replace the old files. Do not rename files with (1), (2), or other suffixes.
-4. Commit the changes and wait for GitHub Pages to redeploy.
+1. Extract this folder.
+2. Upload every file inside it to the GitHub Pages repository.
+3. Replace the old files. Do not rename them with (1), (2), or other suffixes.
+4. Commit the changes and wait for GitHub Pages to deploy.
 5. Open the live website and press Ctrl + F5.
 6. Log in using SNA1161 / SNA1161.
 
-USING DUTY HOURS
+USING ATTENDANCE
 ----------------
 1. Open Attendance.
-2. In Duty Hours Lookup, search and select a member.
-3. Enter the Trainee and Probationary committed hours, then save.
-4. Add an entry:
-   - Rendered Duty Hours: use a positive number.
-   - Incentive / Adjustment: a positive number reduces the remaining hours;
-     a negative number adds required hours back.
-5. The system automatically shows:
-   - committed hours
-   - rendered duty hours
-   - net incentives
-   - total credited hours
-   - remaining or excess hours
-6. Use Print Individual or Print Overall to generate an A4-ready report.
+2. Select 1st Semester or 2nd Semester.
+3. Create or edit an event and assign the correct semester.
+4. All calculations and printouts remain inside the selected semester.
+
+USING DUTY HOURS
+----------------
+1. Open Duty Hours from the sidebar.
+2. Select 1st Semester or 2nd Semester.
+3. Choose a name from the Trainee or Probationary roster.
+4. Set committed Hour and Minute.
+5. In Add Clock-Based Duty, select the date, Time In, and Time Out.
+6. The computed duration appears immediately. Click Add Render Time or press Enter.
+7. Example: 12:00 PM to 5:00 PM is automatically recorded as 5 hours.
+8. Add an incentive using the separate Incentive form.
+9. Use Print Individual or Print Roster Report for A4-ready documents.
+
+CLOCK RULE
+----------
+Time Out must be later than Time In because each duty entry is treated as a
+same-day record. Existing manual rendered-time entries remain available and are
+shown as Manual duration in the ledger.
 
 SECURITY
 --------
-The Supabase publishable key in supabase-config.js is for browser use.
-Never place a secret key or service_role key in GitHub.
+The publishable key in supabase-config.js is intended for browser use.
+Never put a Supabase secret or service_role key in GitHub.

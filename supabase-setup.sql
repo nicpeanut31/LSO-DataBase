@@ -65,7 +65,7 @@ create table if not exists public.system_state (
   members jsonb not null default '[]'::jsonb,
   events jsonb not null default '[]'::jsonb,
   attendance jsonb not null default '[]'::jsonb,
-  duty_hours jsonb not null default '{"version":1,"commitments":{},"entries":[]}'::jsonb,
+  duty_hours jsonb not null default '{"version":2,"commitments":{},"entries":[]}'::jsonb,
   instruments jsonb not null default '[]'::jsonb,
   settings jsonb not null default '{}'::jsonb,
   activity_log jsonb not null default '[]'::jsonb,
@@ -79,7 +79,7 @@ on conflict (id) do nothing;
 -- Upgrade existing projects created before Duty Hours was added.
 alter table public.system_state
   add column if not exists duty_hours jsonb not null
-  default '{"version":1,"commitments":{},"entries":[]}'::jsonb;
+  default '{"version":2,"commitments":{},"entries":[]}'::jsonb;
 
 create or replace function public.lso_set_updated_at()
 returns trigger

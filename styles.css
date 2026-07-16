@@ -1882,3 +1882,412 @@ body::before {
   .duty-overall-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .duty-hours-summary { padding: 13px; }
 }
+
+/* ================================================================
+   Semester Attendance + Organized Duty Hours Upgrade
+   ================================================================ */
+.futuristic-command-header {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(64, 214, 154, .24);
+  background:
+    radial-gradient(circle at 88% 20%, rgba(80, 231, 173, .22), transparent 28%),
+    linear-gradient(125deg, #082f27, #0d5844 62%, #14775a);
+  box-shadow: 0 24px 60px rgba(6, 52, 40, .16);
+}
+.futuristic-command-header::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  right: -120px;
+  bottom: -190px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 50%;
+  box-shadow: 0 0 0 42px rgba(255,255,255,.035), 0 0 0 84px rgba(255,255,255,.02);
+  pointer-events: none;
+}
+.futuristic-command-header > * { position: relative; z-index: 1; }
+
+.semester-control-panel {
+  margin: 18px 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto minmax(150px, .35fr);
+  align-items: center;
+  gap: 22px;
+  padding: 20px 22px;
+  background:
+    linear-gradient(120deg, rgba(242,252,247,.95), rgba(255,255,255,.98)),
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(22,112,85,.025) 34px 35px);
+}
+.semester-control-panel h4 { margin: 5px 0 4px; font-size: 18px; }
+.semester-control-panel small { color: var(--muted); line-height: 1.5; }
+.semester-toggle { min-width: 310px; }
+.semester-toggle .segment-button { min-width: 145px; }
+.semester-live-label {
+  min-height: 62px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: white;
+}
+.semester-live-label span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+.semester-live-label strong { display: block; margin-top: 6px; color: var(--green-800); font-size: 14px; }
+
+.duty-command-header { margin-bottom: 18px; }
+.duty-semester-panel { margin-bottom: 18px; }
+.duty-roster-command-panel { margin-bottom: 18px; }
+.duty-global-search { width: min(420px, 100%); }
+.duty-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.duty-roster-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(145deg, #fff, #f8fcfa);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+.duty-roster-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line);
+}
+.duty-roster-card > header > div { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.duty-roster-card h4 { margin: 3px 0 0; font-size: 17px; }
+.duty-roster-card > header > strong {
+  min-width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--green-50);
+  color: var(--green-800);
+  font-size: 18px;
+}
+.roster-orbit {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+  border: 1px solid currentColor;
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.75);
+}
+.blue-orbit { color: #246b9a; background: #e7f4fc; }
+.gold-orbit { color: #956c13; background: #fff4cc; }
+.duty-roster-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+.duty-roster-person {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) minmax(90px, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  transition: .18s ease;
+}
+.duty-roster-person:hover { transform: translateY(-1px); border-color: var(--green-500); box-shadow: 0 10px 25px rgba(9,60,45,.07); }
+.duty-roster-person.active { border-color: var(--green-500); background: var(--green-50); box-shadow: 0 0 0 3px rgba(32,166,111,.1); }
+.duty-roster-person-copy { min-width: 0; }
+.duty-roster-person-copy strong, .duty-roster-person-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.duty-roster-person-copy strong { color: var(--ink); font-size: 13px; }
+.duty-roster-person-copy small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.duty-roster-balance { text-align: right; color: var(--warning); font-size: 10px; font-weight: 800; line-height: 1.25; }
+.duty-roster-balance.complete { color: var(--green-700); }
+.roster-empty { padding: 25px 12px; text-align: center; color: var(--muted); }
+.roster-empty strong, .roster-empty small { display: block; }
+.roster-empty small { margin-top: 4px; }
+
+.duty-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, .65fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+.duty-hours-individual-panel { min-width: 0; overflow: hidden; }
+.duty-insight-stack { display: grid; gap: 18px; min-width: 0; }
+.duty-profile-snapshot { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(240px, .85fr); gap: 14px; }
+.duty-focus-card,
+.duty-semester-total-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  background: linear-gradient(145deg, #fff, #f8fcfa);
+}
+.duty-focus-card { box-shadow: 0 14px 34px rgba(9,60,45,.06); }
+.duty-semester-total-card {
+  color: white;
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255,255,255,.17), transparent 26%),
+    linear-gradient(145deg, var(--green-900), var(--green-600));
+}
+.duty-semester-total-card .eyebrow { color: #bcefd4; }
+.duty-semester-total-card h4 { margin: 5px 0 16px; font-size: 18px; }
+.duty-semester-total-card .duty-focus-stats span,
+.duty-semester-total-card .duty-focus-stats small { color: rgba(255,255,255,.65); }
+.duty-semester-total-card .duty-focus-stats strong { color: white; }
+.duty-focus-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.duty-focus-heading h4 { margin: 5px 0 0; font-size: 19px; }
+.duty-focus-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.duty-focus-stats > div { min-width: 0; }
+.duty-focus-stats span { display: block; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .07em; }
+.duty-focus-stats strong { display: block; margin-top: 4px; color: var(--green-900); font-size: 14px; overflow-wrap: anywhere; }
+.duty-focus-stats small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+
+.duty-forms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.duty-form-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: #fbfefc;
+}
+.duty-form-card .button { width: 100%; margin-top: 12px; }
+.duty-incentive-card { background: linear-gradient(145deg, #fffdf7, #fffaf0); border-color: #f0dfb3; }
+.time-input-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.compact-time-pair { align-items: end; }
+.duty-ledger-section { margin-top: 18px; }
+.duty-ledger-table { max-height: 420px; }
+.duty-ledger-table table { min-width: 1120px; }
+
+.duty-year-card-grid { display: grid; gap: 10px; }
+.duty-year-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fbfefc;
+}
+.duty-year-card.total { color: white; border-color: transparent; background: linear-gradient(145deg, var(--green-900), var(--green-700)); }
+.duty-year-card span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.duty-year-card strong { display: block; margin-top: 5px; color: var(--green-900); font-size: 15px; }
+.duty-year-card small { display: block; margin-top: 4px; color: var(--muted); }
+.duty-year-card.total span, .duty-year-card.total small { color: rgba(255,255,255,.66); }
+.duty-year-card.total strong { color: white; }
+.duty-guide-panel {
+  color: white;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255,255,255,.13), transparent 30%),
+    linear-gradient(145deg, #0a3b30, #12654d);
+  border-color: transparent;
+}
+.duty-guide-panel .eyebrow { color: #bcefd4; }
+.duty-guide-panel h3 { margin: 6px 0 15px; }
+.duty-guide-panel > small { display: block; margin-top: 13px; color: rgba(255,255,255,.64); line-height: 1.45; }
+.formula-stack { display: grid; gap: 9px; }
+.formula-stack div { padding: 11px; border: 1px solid rgba(255,255,255,.13); border-radius: 12px; background: rgba(255,255,255,.06); }
+.formula-stack span { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.58); }
+.formula-stack strong { display: block; margin-top: 4px; font-size: 11px; color: white; }
+.compact-dashboard-empty { min-height: 200px; }
+
+.duty-hours-overall-panel { overflow: hidden; }
+.duty-overall-metrics { grid-template-columns: repeat(6, minmax(105px, 1fr)); }
+.duty-overall-table { max-height: 620px; }
+.duty-overall-table table { min-width: 1080px; }
+.table-progress { width: 90px; height: 7px; margin-bottom: 4px; border-radius: 999px; overflow: hidden; background: #e9f1ed; }
+.table-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green-700), var(--green-500)); }
+.compact-segmented { min-width: 245px; }
+
+.dashboard-semester-signal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dashboard-semester-signal {
+  min-width: 0;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #f5fbf8);
+}
+.dashboard-semester-signal:hover { border-color: var(--green-500); transform: translateY(-1px); }
+.dashboard-semester-signal > span { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--green-600); }
+.dashboard-semester-signal > strong { display: block; margin-top: 5px; color: var(--green-900); font-size: 17px; }
+.dashboard-semester-signal > small { display: block; margin-top: 3px; color: var(--muted); }
+.mini-progress { height: 6px; margin-top: 11px; overflow: hidden; border-radius: 999px; background: #e8f1ed; }
+.mini-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green-700), var(--green-500)); }
+.duty-signal-module { position: relative; overflow: hidden; }
+.duty-signal-module::after { content: "◷"; position: absolute; right: 15px; bottom: -24px; font-size: 90px; opacity: .035; pointer-events: none; }
+
+@media (max-width: 1180px) {
+  .semester-control-panel { grid-template-columns: 1fr auto; }
+  .semester-live-label { grid-column: 1 / -1; }
+  .duty-workspace-grid { grid-template-columns: 1fr; }
+  .duty-insight-stack { grid-template-columns: 1fr 1fr; }
+  .duty-forms-grid { grid-template-columns: 1fr 1fr; }
+  .duty-incentive-card { grid-column: 1 / -1; }
+  .duty-overall-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .semester-control-panel { grid-template-columns: 1fr; }
+  .semester-toggle { width: 100%; min-width: 0; }
+  .semester-toggle .segment-button { min-width: 0; flex: 1; }
+  .duty-roster-grid,
+  .duty-profile-snapshot,
+  .duty-insight-stack,
+  .duty-forms-grid { grid-template-columns: 1fr; }
+  .duty-incentive-card { grid-column: auto; }
+  .duty-roster-person { grid-template-columns: 42px minmax(0, 1fr); }
+  .duty-roster-balance { grid-column: 2; text-align: left; }
+  .duty-overall-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-semester-signal-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .semester-control-panel,
+  .duty-roster-command-panel,
+  .duty-hours-individual-panel,
+  .duty-hours-overall-panel { padding: 15px; }
+  .semester-toggle { display: grid; grid-template-columns: 1fr; }
+  .duty-focus-stats,
+  .time-input-pair { grid-template-columns: 1fr 1fr; }
+  .duty-overall-metrics { grid-template-columns: 1fr 1fr; }
+  .compact-segmented { min-width: 0; width: 100%; }
+}
+.dashboard-semester-attendance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dashboard-semester-attendance-card {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff, #f6fbf8);
+}
+.dashboard-semester-attendance-card:hover { border-color: var(--green-500); transform: translateY(-1px); }
+.dashboard-semester-attendance-card > div:last-child { min-width: 0; }
+.dashboard-semester-attendance-card span { display: block; color: var(--green-600); font-size: 9px; text-transform: uppercase; letter-spacing: .07em; }
+.dashboard-semester-attendance-card > div:last-child > strong { display: block; margin-top: 4px; color: var(--green-900); font-size: 14px; }
+.dashboard-semester-attendance-card > div:last-child > small { display: block; margin-top: 4px; color: var(--muted); line-height: 1.4; }
+.compact-ring { width: 76px; height: 76px; }
+.compact-ring::before { inset: 8px; }
+.compact-ring strong { font-size: 17px; }
+@media (max-width: 680px) {
+  .dashboard-semester-attendance-grid { grid-template-columns: 1fr; }
+}
+
+/* ================================================================
+   Clock-Based Duty Rendering
+   ================================================================ */
+.clock-duty-card {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(32, 166, 111, .10), transparent 28%),
+    linear-gradient(145deg, #ffffff, #f5fcf8);
+  border-color: #cfe8dc;
+}
+.clock-duty-form-grid { align-items: end; }
+.clock-input-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  align-items: end;
+  gap: 8px;
+}
+.clock-input-grid input[type="time"] {
+  min-height: 47px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--green-900);
+  background: #fff;
+}
+.clock-range-arrow {
+  width: 34px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  color: var(--green-600);
+  font-size: 18px;
+  font-weight: 900;
+}
+.clock-duration-preview {
+  position: relative;
+  overflow: hidden;
+  min-height: 82px;
+  padding: 13px 14px;
+  border: 1px solid #d7e7df;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f8fcfa, #ffffff);
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.clock-duration-preview::after {
+  content: "◷";
+  position: absolute;
+  right: 10px;
+  bottom: -18px;
+  font-size: 66px;
+  color: var(--green-700);
+  opacity: .045;
+  pointer-events: none;
+}
+.clock-duration-preview span,
+.clock-duration-preview strong,
+.clock-duration-preview small {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+.clock-duration-preview span {
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+.clock-duration-preview strong {
+  margin-top: 5px;
+  color: var(--green-900);
+  font-size: 18px;
+}
+.clock-duration-preview small {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.clock-duration-preview.valid {
+  border-color: var(--green-500);
+  background: linear-gradient(145deg, var(--green-50), #ffffff);
+  box-shadow: 0 0 0 3px rgba(32, 166, 111, .09);
+}
+.clock-duration-preview.invalid {
+  border-color: #e8a9ae;
+  background: #fff8f8;
+  box-shadow: 0 0 0 3px rgba(181, 58, 69, .07);
+}
+.clock-duration-preview.invalid strong { color: var(--danger); font-size: 14px; }
+.duty-ledger-table table { min-width: 1260px; }
+
+@media (max-width: 560px) {
+  .clock-input-grid { grid-template-columns: 1fr; }
+  .clock-range-arrow {
+    width: 100%;
+    height: 22px;
+    transform: rotate(90deg);
+  }
+}

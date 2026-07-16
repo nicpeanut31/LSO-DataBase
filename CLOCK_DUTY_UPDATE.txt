@@ -1,0 +1,28 @@
+CLOCK-BASED DUTY HOURS UPDATE
+=============================
+
+WHAT CHANGED
+------------
+- Rendered duty now uses Date, Time In, and Time Out.
+- Duration is computed automatically as Time Out minus Time In.
+- Minutes are included automatically.
+- A live duration preview appears before saving.
+- Pressing Enter in either clock field submits Add Render Time.
+- Clock In–Out appears in the duty ledger and printable individual report.
+- Existing manual rendered-time records are preserved and labeled Manual duration.
+
+EXAMPLES
+--------
+12:00 PM to 5:00 PM = 5 hours
+12:15 PM to 5:45 PM = 5 hours 30 minutes
+8:05 AM to 8:50 AM = 45 minutes
+
+RULE
+----
+Each entry is treated as same-day duty. Time Out must be later than Time In.
+
+DEPLOYMENT
+----------
+Replace the GitHub Pages files with this package and press Ctrl + F5 after the
+site redeploys. If the latest Supabase SQL from the previous semester-duty
+package is already running, no new SQL change is required for this clock update.

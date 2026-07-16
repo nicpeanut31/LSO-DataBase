@@ -1,19 +1,36 @@
-LSO DUTY HOURS ONLINE — VALIDATION RESULTS
-==========================================
+LSO SEMESTER ATTENDANCE + DUTY HOURS — VALIDATION RESULTS
+=========================================================
 
 PASS — JavaScript syntax checked for every .js file.
 PASS — No duplicate HTML element IDs.
 PASS — All local CSS and JavaScript references exist.
-PASS — Duty Hours calculation test:
-       Credited = Rendered + Incentive
-       Balance = Committed - Credited
-       Positive and negative incentive adjustments verified.
-PASS — Supabase SQL contains:
-       duty_hours column creation/upgrade
-       shared-state read support
-       shared-state update support
-       complete-state restore/migration support
-PASS — Complete Backup includes dutyHours and restores older backups safely.
+PASS — Duty Hours desktop layout tested at 1440 px with no page overflow.
+PASS — Duty Hours mobile layout tested at 390 px with no page overflow.
+PASS — Separate Trainee and Probationary roster rendering verified.
+PASS — Hour-and-minute calculations verified using whole minutes.
+PASS — Legacy decimal-hour migration verified:
+       40.00 hours -> 2,400 minutes
+       2.50 hours -> 150 minutes
+       0.50 incentive hour -> 30 minutes
+PASS — Incentive credit and deduction signs supported.
+PASS — First and Second Semester attendance calculations tested independently.
+PASS — Attendance calendar filtering by semester verified.
+PASS — Event modal includes a required Semester field.
+PASS — Individual and overall report functions use the active semester/period.
+PASS — Supabase configuration is present and JavaScript-valid.
+PASS — Supabase SQL retains the shared duty_hours field and uses version 2 defaults.
 
-Live cross-device saving requires the updated supabase-setup.sql to be run in
-the configured Supabase project before the GitHub files are deployed.
+Configured Supabase project:
+https://tlburpxpzlgyzlzgitbg.supabase.co
+
+Live cross-device synchronization requires supabase-setup.sql to be successfully
+run in that project and the complete folder to be deployed to GitHub Pages.
+
+
+CLOCK-BASED DUTY TESTS
+----------------------
+PASS - Time In 12:00 and Time Out 17:00 computes 300 minutes / 5 hours.
+PASS - Time In 12:15 and Time Out 17:45 computes 330 minutes / 5 hours 30 minutes.
+PASS - Time Out equal to or earlier than Time In is rejected for same-day duty.
+PASS - Existing manual rendered-time entries are preserved.
+PASS - Clock range appears in the ledger and individual printable report.

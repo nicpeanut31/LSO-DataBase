@@ -1,39 +1,69 @@
-LASALLIAN SYMPHONY ORCHESTRA — DUTY HOURS ONLINE RELEASE
-=======================================================
+LASALLIAN SYMPHONY ORCHESTRA — SEMESTER OPERATIONS RELEASE
+=========================================================
 
-This version keeps the existing online Membership + Attendance system and adds
-Duty Hours tracking for the Trainee and Probationary Periods.
+This release preserves the current online shared system and reorganizes
+Attendance and Duty Hours into independent, semester-aware modules.
 
-DUTY HOURS DATA MODEL
----------------------
-The shared system_state record now includes a duty_hours JSON object containing:
-- commitments: required Trainee and Probationary hours per member
-- entries: rendered-duty and incentive/adjustment ledger entries
+ATTENDANCE DATA
+---------------
+Every event may contain:
+- semester: First Semester or Second Semester
+- title, type, date, time, venue, and notes
+
+Attendance analytics filter events by semester before calculating:
+- Present
+- Late
+- Absent
+- Excused
+- Attendance rate
+- Individual rehearsal totals and history
+
+Legacy events without a semester are interpreted as First Semester.
+
+DUTY HOURS DATA MODEL — VERSION 2
+---------------------------------
+Duty Hours stores:
+- commitment minutes per member, semester, and period
+- rendered-duty entries in minutes
+- signed incentive adjustments in minutes
+
+Periods:
+- Trainee Period
+- Probationary Period
+
+Semesters:
+- First Semester
+- Second Semester
 
 CALCULATION
 -----------
-Rendered Hours = total Rendered Duty entries
-Net Incentive = positive and negative Incentive / Adjustment entries
-Credited Hours = Rendered Hours + Net Incentive
-Balance = Committed Hours - Credited Hours
+Credited Time = Rendered Time + Net Incentive
+Remaining Time = Committed Time - Credited Time
 
-A positive incentive reduces the remaining requirement. A negative adjustment
-increases the remaining requirement.
+A positive incentive is a credit and reduces remaining time.
+A negative incentive is a deduction and increases remaining time.
+All calculations use whole minutes.
+
+MIGRATION
+---------
+Earlier Duty Hours records used decimal hours and had no semester field.
+The browser automatically converts those values to minutes and places them in
+First Semester. No prior duty entry is intentionally discarded.
 
 ONLINE SYNCHRONIZATION
 ----------------------
-Duty Hours uses the same Supabase shared-storage layer as members, events,
-attendance, settings, and activity logs. Approved users on other devices receive
-updated data through the existing cloud polling process.
+The same Supabase shared state synchronizes members, events, attendance,
+duty hours, settings, and activity logs across approved devices.
 
 BACKUPS
 -------
-Complete System Backup files now include the dutyHours object. Older backup files
-without dutyHours can still be restored; the system creates an empty Duty Hours
-ledger for them.
+Complete System Backup continues to include dutyHours. Download a backup before
+replacing live files or running a database upgrade.
 
-REQUIRED UPGRADE
-----------------
-Run the included supabase-setup.sql in the existing Supabase project before
-publishing the website files. It adds the duty_hours column when missing and
-replaces the controlled state functions without deleting current records.
+
+CLOCK-BASED DUTY ENTRY
+----------------------
+Rendered duty no longer requires manually calculating Hour and Minute. Enter the
+service date, Time In, and Time Out. The application calculates Time Out minus
+Time In, displays a live duration preview, and saves the result as exact minutes.
+Existing manual-duration entries remain readable and are labeled Manual duration.

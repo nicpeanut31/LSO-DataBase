@@ -12,6 +12,8 @@
   calendarCursor.setDate(1);
   let selectedCalendarDate = localISO(new Date());
   let selectedAttendanceMemberId = '';
+  const SEMESTERS = ['First Semester', 'Second Semester'];
+  window.LSOAttendanceSemester = SEMESTERS.includes(window.LSOAttendanceSemester) ? window.LSOAttendanceSemester : 'First Semester';
 
   function localISO(date) {
     const offset = date.getTimezoneOffset();
@@ -53,18 +55,34 @@
     return window.LSOOperations?.getAttendance?.() || [];
   }
 
+  function normalizeSemester(value) {
+    return SEMESTERS.includes(value) ? value : 'First Semester';
+  }
+
+  function activeSemester() {
+    return normalizeSemester(window.LSOAttendanceSemester);
+  }
+
+  function eventSemester(event) {
+    return normalizeSemester(event?.semester);
+  }
+
+  function semesterEvents(semester = activeSemester()) {
+    return getEvents().filter((event) => eventSemester(event) === normalizeSemester(semester));
+  }
+
   function eventIsPastOrToday(event) {
     return !event.date || event.date <= today();
   }
 
-  function rehearsalEvents() {
-    return getEvents()
+  function rehearsalEvents(semester = activeSemester()) {
+    return semesterEvents(semester)
       .filter((event) => normalize(event.type) === 'rehearsal' && eventIsPastOrToday(event))
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
   }
 
-  function activityEvents() {
-    return getEvents()
+  function activityEvents(semester = activeSemester()) {
+    return semesterEvents(semester)
       .filter(eventIsPastOrToday)
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
   }
@@ -123,8 +141,8 @@
 
     if (el('overallAttendanceCaption')) {
       el('overallAttendanceCaption').textContent = events.length
-        ? `${events.length} completed activit${events.length === 1 ? 'y' : 'ies'} • percentages use ${marked} recorded statuses`
-        : 'No completed attendance activities yet.';
+        ? `${activeSemester()} • ${events.length} completed activit${events.length === 1 ? 'y' : 'ies'} • ${marked} recorded statuses`
+        : `No completed attendance activities in ${activeSemester()}.`;
     }
 
     const members = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName)));
@@ -170,7 +188,7 @@
     const summary = memberRehearsalSummary(member.id);
     container.innerHTML = `<div class="individual-member-heading"><div class="member-avatar">${safeText(String(member.fullName || 'M').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase())}</div><div><strong>${safeText(member.fullName)}</strong><small>${safeText(member.membershipId)} • ${safeText(member.periodGroup)}</small></div></div>
       <div class="individual-stat-grid">
-        ${metricMarkup('Total Rehearsals', summary.totalRehearsals, 'Completed schedule')}
+        ${metricMarkup('Total Rehearsals', summary.totalRehearsals, activeSemester())}
         ${metricMarkup('Present', summary.counts.Present)}
         ${metricMarkup('Late', summary.counts.Late)}
         ${metricMarkup('Absent', summary.counts.Absent)}
@@ -179,7 +197,7 @@
       </div>`;
 
     const attendanceByEvent = new Map(summary.records.map((record) => [record.eventId, record]));
-    history.innerHTML = summary.events.length ? `<div class="individual-history-header"><strong>Rehearsal History</strong><span>${summary.recorded} of ${summary.totalRehearsals} marked</span></div>${summary.events.map((event) => {
+    history.innerHTML = summary.events.length ? `<div class="individual-history-header"><strong>${safeText(activeSemester())} Rehearsal History</strong><span>${summary.recorded} of ${summary.totalRehearsals} marked</span></div>${summary.events.map((event) => {
       const record = attendanceByEvent.get(event.id) || {};
       const status = record.status || 'Not marked';
       const badge = status === 'Present' ? 'badge-green' : status === 'Late' || status === 'Excused' ? 'badge-gold' : status === 'Absent' ? 'badge-red' : 'badge-gray';
@@ -196,12 +214,12 @@
     const monthStart = new Date(year, month, 1);
     const gridStart = new Date(year, month, 1 - monthStart.getDay());
     const eventsByDate = new Map();
-    getEvents().forEach((event) => {
+    semesterEvents().forEach((event) => {
       if (!eventsByDate.has(event.date)) eventsByDate.set(event.date, []);
       eventsByDate.get(event.date).push(event);
     });
 
-    el('attendanceCalendarMonth').textContent = new Intl.DateTimeFormat('en-PH', { month: 'long', year: 'numeric' }).format(monthStart);
+    el('attendanceCalendarMonth').textContent = `${new Intl.DateTimeFormat('en-PH', { month: 'long', year: 'numeric' }).format(monthStart)} — ${activeSemester()}`;
     const cells = [];
     for (let index = 0; index < 42; index += 1) {
       const date = new Date(gridStart);
@@ -221,7 +239,7 @@
   }
 
   function renderSelectedCalendarDate() {
-    const events = getEvents().filter((event) => event.date === selectedCalendarDate);
+    const events = semesterEvents().filter((event) => event.date === selectedCalendarDate);
     if (el('calendarSelectedDateLabel')) el('calendarSelectedDateLabel').textContent = dateLabel(selectedCalendarDate, { weekday: true });
     if (el('calendarSelectedDateMeta')) el('calendarSelectedDateMeta').textContent = events.length
       ? `${events.length} scheduled event${events.length === 1 ? '' : 's'} • click the date again to open the first one`
@@ -235,7 +253,7 @@
       calendarCursor = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
     }
     renderCalendar();
-    const event = getEvents().find((item) => item.date === value);
+    const event = semesterEvents().find((item) => item.date === value);
     if (event && openEvent) {
       if (el('eventSearch')) el('eventSearch').value = '';
       window.LSOOperations?.refreshAll?.();
@@ -252,6 +270,7 @@
     setTimeout(() => {
       if (el('eventDate')) el('eventDate').value = selectedCalendarDate || today();
       if (el('eventType')) el('eventType').value = 'Rehearsal';
+      if (el('eventSemester')) el('eventSemester').value = activeSemester();
       if (el('eventTitle') && !el('eventTitle').value) el('eventTitle').value = 'Full Orchestra Rehearsal';
       el('eventTitle')?.focus();
     }, 20);
@@ -288,8 +307,8 @@
       return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
-      title: `${member.fullName} — Rehearsal Attendance`,
-      subtitle: `${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`,
+      title: `${member.fullName} — ${activeSemester()} Attendance`,
+      subtitle: `${activeSemester()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`, 
       summaryHtml,
       tableHtml: `<table><thead><tr><th>#</th><th>Date</th><th>Rehearsal</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No completed rehearsal records.</td></tr>'}</tbody></table>`
     }));
@@ -309,7 +328,7 @@
       return `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.periodGroup)}</td><td>${summary.totalRehearsals}</td><td>${summary.counts.Present}</td><td>${summary.counts.Late}</td><td>${summary.counts.Absent}</td><td>${summary.counts.Excused}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
-      title: 'Overall Attendance Report',
+      title: `${activeSemester()} Overall Attendance Report`,
       subtitle: `${events.length} completed activities • ${records.length} recorded attendance statuses`,
       summaryHtml,
       tableHtml: `<table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`
@@ -333,7 +352,7 @@
     }).join('');
     openPrintDocument(printableDocument({
       title: event.title,
-      subtitle: `${dateLabel(event.date)} • ${event.venue || 'Venue not recorded'} • ${event.type || 'Activity'}`,
+      subtitle: `${eventSemester(event)} • ${dateLabel(event.date)} • ${event.venue || 'Venue not recorded'} • ${event.type || 'Activity'}`, 
       summaryHtml,
       tableHtml: `<table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows}</tbody></table>`
     }));
@@ -359,29 +378,53 @@
       : 'No membership profiles have been registered yet.';
   }
 
+  function semesterAttendanceSignal(semester) {
+    const events = activityEvents(semester);
+    const completedIds = new Set(events.map((event) => event.id));
+    const records = getAttendance().filter((record) => completedIds.has(record.eventId) && record.status);
+    const counts = statusCounts(records);
+    return { semester, events, records, counts, rate: rateFromCounts(counts) };
+  }
+
+  function renderDutyDashboard() {
+    const container = el('dashboardDutyOverview');
+    const caption = el('dashboardDutySummary');
+    if (!container || !caption) return;
+    const api = window.LSODutyHours;
+    if (!api?.getDashboardSummary) {
+      container.innerHTML = '<div class="dashboard-empty-state"><span>◷</span><strong>Duty Hours is ready</strong><small>Open the module to set commitments and rendered time.</small></div>';
+      caption.textContent = 'Waiting for duty-hour records';
+      return;
+    }
+    const first = api.getDashboardSummary('First Semester');
+    const second = api.getDashboardSummary('Second Semester');
+    caption.textContent = `${first.tracked + second.tracked} semester roster records • exact hour-and-minute accounting`;
+    container.innerHTML = `<div class="dashboard-semester-signal-grid">${[first, second].map((item) => `<button class="dashboard-semester-signal" data-dashboard-duty-semester="${safeText(item.semester)}" type="button"><span>${safeText(item.semester.replace(' Semester', ''))}</span><strong>${safeText(item.remainingLabel)}</strong><small>${item.tracked} tracked • ${item.completed} complete</small><div class="mini-progress"><i style="width:${item.progress}%"></i></div></button>`).join('')}</div>`;
+  }
+
   function renderFuturisticDashboardSignals() {
     const members = getMembers();
     const events = getEvents();
-    const attendance = getAttendance();
-    const completedIds = new Set(events.filter(eventIsPastOrToday).map((event) => event.id));
-    const records = attendance.filter((record) => completedIds.has(record.eventId) && record.status);
-    const counts = statusCounts(records);
-    const rate = rateFromCounts(counts);
+    const first = semesterAttendanceSignal('First Semester');
+    const second = semesterAttendanceSignal('Second Semester');
     const upcoming = events.filter((event) => event.date >= today()).length;
     const membership = members.filter((member) => member.periodGroup === 'Membership Period').length;
-    const review = members.filter((member) => member.reviewStatus !== 'Current' || Number(member.recordQuality || 0) < 80).length;
     if (el('dashboardHeroStatus')) {
       el('dashboardHeroStatus').innerHTML = [
-        ['Attendance Signal', rate === null ? 'No data' : `${rate}%`],
+        ['1st Sem Attendance', first.rate === null ? 'No data' : `${first.rate}%`],
+        ['2nd Sem Attendance', second.rate === null ? 'No data' : `${second.rate}%`],
         ['Upcoming Schedule', `${upcoming} event${upcoming === 1 ? '' : 's'}`],
-        ['Official Members', membership],
-        ['Profiles to Review', review]
+        ['Official Members', membership]
       ].map(([label, value]) => `<div class="hero-status-chip"><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('');
     }
+    if (el('dashboardAttendanceSummary')) {
+      el('dashboardAttendanceSummary').textContent = `Separated semester signals • 1st: ${first.rate === null ? 'No data' : `${first.rate}%`} • 2nd: ${second.rate === null ? 'No data' : `${second.rate}%`}`;
+    }
     if (el('dashboardGreetingMeta')) {
-      el('dashboardGreetingMeta').textContent = 'One live workspace for membership progression, attendance intelligence, printable records, and operational follow-through.';
+      el('dashboardGreetingMeta').textContent = 'Semester-separated attendance, exact duty-hour compliance, membership progression, and printable operational records in one live workspace.';
     }
     renderMembershipFlow();
+    renderDutyDashboard();
   }
 
   function setEntryStage(stage) {
@@ -404,7 +447,15 @@
     ['traineeStartDate', 'probationaryStartDate', 'regularMemberDate'].forEach((id) => el(id)?.dispatchEvent(new Event('change', { bubbles: true })));
   }
 
+  function syncAttendanceSemesterControls() {
+    if (el('attendanceSemesterLabel')) el('attendanceSemesterLabel').textContent = activeSemester();
+    qsa('[data-attendance-semester]', el('attendanceSemesterToggle')).forEach((button) => {
+      button.classList.toggle('active', button.dataset.attendanceSemester === activeSemester());
+    });
+  }
+
   function renderEverything() {
+    syncAttendanceSemesterControls();
     populateIndividualSelect();
     renderOverallAttendance();
     renderIndividualAttendance();
@@ -427,6 +478,15 @@
     el('printIndividualAttendance')?.addEventListener('click', printIndividualAttendance);
     el('printOverallAttendance')?.addEventListener('click', printOverallAttendance);
     el('printEventAttendance')?.addEventListener('click', printSelectedEventAttendance);
+    el('attendanceSemesterToggle')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-attendance-semester]');
+      if (!button) return;
+      window.LSOAttendanceSemester = normalizeSemester(button.dataset.attendanceSemester);
+      qsa('[data-attendance-semester]', el('attendanceSemesterToggle')).forEach((item) => item.classList.toggle('active', item === button));
+      if (el('attendanceSemesterLabel')) el('attendanceSemesterLabel').textContent = window.LSOAttendanceSemester;
+      window.LSOOperations?.setAttendanceSemester?.(window.LSOAttendanceSemester);
+      renderEverything();
+    });
     el('calendarPreviousMonth')?.addEventListener('click', () => { calendarCursor.setMonth(calendarCursor.getMonth() - 1); renderCalendar(); });
     el('calendarNextMonth')?.addEventListener('click', () => { calendarCursor.setMonth(calendarCursor.getMonth() + 1); renderCalendar(); });
     el('calendarToday')?.addEventListener('click', () => selectCalendarDate(today(), false));
@@ -450,9 +510,16 @@
       if (action) window.LSOApp?.setView?.('lookupView');
       const membersAction = event.target.closest('[data-dashboard-action="members"]');
       if (membersAction) window.LSOApp?.setView?.('membersView');
+      const dutyAction = event.target.closest('[data-dashboard-action="duty-hours"]');
+      if (dutyAction) window.LSOApp?.setView?.('dutyHoursView');
+      const dutySemester = event.target.closest('[data-dashboard-duty-semester]');
+      if (dutySemester) {
+        window.LSOApp?.setView?.('dutyHoursView');
+        window.LSODutyHours?.setSemester?.(dutySemester.dataset.dashboardDutySemester);
+      }
     }, true);
 
-    ['lso:members-changed', 'lso:operations-changed', 'lso:cloud-state-changed', 'lso:auth-changed'].forEach((name) => {
+    ['lso:members-changed', 'lso:operations-changed', 'lso:duty-hours-changed', 'lso:attendance-semester-changed', 'lso:cloud-state-changed', 'lso:auth-changed'].forEach((name) => {
       window.addEventListener(name, () => setTimeout(renderEverything, 30));
     });
 
@@ -465,6 +532,8 @@
   }
 
   function initialize() {
+    if (el('attendanceSemesterLabel')) el('attendanceSemesterLabel').textContent = activeSemester();
+    qsa('[data-attendance-semester]', el('attendanceSemesterToggle')).forEach((button) => button.classList.toggle('active', button.dataset.attendanceSemester === activeSemester()));
     removeRetiredInventoryFromUI();
     wireEvents();
     renderEverything();

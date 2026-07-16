@@ -8,6 +8,7 @@
   const SETTINGS_KEY = 'lso_system_settings_v2';
   const MEMBERS_KEY = 'lso_member_database_v1';
   const DUTY_HOURS_KEY = 'lso_duty_hours_v1';
+  const ATTENDANCE_SEMESTERS = ['First Semester', 'Second Semester'];
 
   const DEFAULT_SETTINGS = {
     traineeDays: '',
@@ -200,9 +201,22 @@
   }
 
   // Attendance and events
+  function normalizeSemester(value) {
+    return ATTENDANCE_SEMESTERS.includes(value) ? value : 'First Semester';
+  }
+
+  function activeAttendanceSemester() {
+    return normalizeSemester(window.LSOAttendanceSemester);
+  }
+
+  function eventsForActiveSemester() {
+    const semester = activeAttendanceSemester();
+    return events.filter((event) => normalizeSemester(event.semester) === semester);
+  }
+
   function sortedEvents() {
     const now = today();
-    return [...events].sort((a, b) => {
+    return [...eventsForActiveSemester()].sort((a, b) => {
       const aUpcoming = a.date >= now ? 0 : 1;
       const bUpcoming = b.date >= now ? 0 : 1;
       if (aUpcoming !== bUpcoming) return aUpcoming - bUpcoming;
@@ -212,15 +226,16 @@
 
   function eventMeta(event) {
     const times = [timeLabel(event.startTime), timeLabel(event.endTime)].filter(Boolean).join('–');
-    return [dateLabel(event.date, true), times, event.venue].filter(Boolean).join(' • ');
+    return [normalizeSemester(event.semester), dateLabel(event.date, true), times, event.venue].filter(Boolean).join(' • ');
   }
 
   function renderEventList() {
     const list = el('eventList');
     if (!list) return;
     const search = normalize(el('eventSearch')?.value);
-    const filtered = sortedEvents().filter((event) => !search || normalize([event.title, event.type, event.date, event.venue].join(' ')).includes(search));
-    el('eventCountLabel').textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
+    const semesterEvents = sortedEvents();
+    const filtered = semesterEvents.filter((event) => !search || normalize([event.title, event.type, event.date, event.venue, event.semester].join(' ')).includes(search));
+    el('eventCountLabel').textContent = `${semesterEvents.length} ${activeAttendanceSemester().toLowerCase()} event${semesterEvents.length === 1 ? '' : 's'}`;
     list.innerHTML = filtered.length ? filtered.map((event) => {
       const records = attendance.filter((item) => item.eventId === event.id && item.status);
       const present = records.filter((item) => item.status === 'Present' || item.status === 'Late').length;
@@ -228,7 +243,7 @@
         <span class="event-date-box"><strong>${safeText(String(event.date || '').slice(8, 10) || '—')}</strong><small>${safeText(new Date(`${event.date}T00:00:00`).toLocaleDateString('en-PH', { month: 'short' }))}</small></span>
         <span class="event-copy"><strong>${safeText(event.title)}</strong><small>${safeText(eventMeta(event))}</small><em>${records.length ? `${present}/${records.length} attended` : 'Attendance not recorded'}</em></span>
       </button>`;
-    }).join('') : '<div class="empty-state compact-empty"><div class="empty-icon">♫</div><h4>No events found</h4><p>Create a rehearsal, performance, or meeting.</p></div>';
+    }).join('') : '<div class="empty-state compact-empty"><div class="empty-icon">♫</div><h4>No semester events found</h4><p>Create a rehearsal, performance, or meeting for the selected semester.</p></div>';
   }
 
   function openEventModal(event = null) {
@@ -238,6 +253,7 @@
     el('eventModalTitle').textContent = event ? 'Edit Event' : 'Create Event';
     el('eventTitle').value = event?.title || '';
     el('eventType').value = event?.type || 'Rehearsal';
+    if (el('eventSemester')) el('eventSemester').value = normalizeSemester(event?.semester || activeAttendanceSemester());
     el('eventDate').value = event?.date || today();
     el('eventStartTime').value = event?.startTime || '';
     el('eventEndTime').value = event?.endTime || '';
@@ -264,6 +280,7 @@
       id,
       title: el('eventTitle').value.trim(),
       type: el('eventType').value,
+      semester: normalizeSemester(el('eventSemester')?.value || activeAttendanceSemester()),
       date: el('eventDate').value,
       startTime: el('eventStartTime').value,
       endTime: el('eventEndTime').value,
@@ -272,8 +289,8 @@
       createdAt: existing?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    if (!record.title || !record.date) {
-      formMessage('eventFormMessage', 'Event Title and Date are required.');
+    if (!record.title || !record.date || !ATTENDANCE_SEMESTERS.includes(record.semester)) {
+      formMessage('eventFormMessage', 'Event Title, Semester, and Date are required.');
       return;
     }
     if (record.startTime && record.endTime && record.endTime <= record.startTime) {
@@ -350,8 +367,9 @@
   }
 
   function renderAttendance() {
-    if (selectedEventId && !events.some((event) => event.id === selectedEventId)) selectedEventId = events[0]?.id || null;
-    if (!selectedEventId && events.length) selectedEventId = sortedEvents()[0]?.id || null;
+    const semesterEvents = sortedEvents();
+    if (selectedEventId && !semesterEvents.some((event) => event.id === selectedEventId)) selectedEventId = semesterEvents[0]?.id || null;
+    if (!selectedEventId && semesterEvents.length) selectedEventId = semesterEvents[0]?.id || null;
     renderEventList();
     renderAttendanceWorkspace();
   }
@@ -934,6 +952,7 @@
 
   function refreshView(viewId) {
     if (viewId === 'attendanceView') renderAttendance();
+    if (viewId === 'dutyHoursView') window.LSODutyHours?.refresh?.();
     if (viewId === 'instrumentsView') renderInstruments();
     if (viewId === 'alertsView') renderAlerts();
     if (viewId === 'accountsView') renderAccounts();
@@ -1043,6 +1062,10 @@
       instruments = loadArray(INSTRUMENTS_KEY);
       refreshAll();
     });
+    window.addEventListener('lso:attendance-semester-changed', () => {
+      selectedEventId = sortedEvents()[0]?.id || null;
+      renderAttendance();
+    });
 
     window.addEventListener('lso:auth-changed', () => {
       setTimeout(() => {
@@ -1057,6 +1080,11 @@
     refreshAll,
     getEvents: () => events.map((event) => ({ ...event })),
     getAttendance: () => attendance.map((entry) => ({ ...entry })),
+    getAttendanceSemester: activeAttendanceSemester,
+    setAttendanceSemester: (semester) => {
+      window.LSOAttendanceSemester = normalizeSemester(semester);
+      window.dispatchEvent(new CustomEvent('lso:attendance-semester-changed', { detail: { semester: window.LSOAttendanceSemester } }));
+    },
     getInstruments: () => instruments.map((item) => ({ ...item })),
     buildAlerts
   };

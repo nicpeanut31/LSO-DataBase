@@ -289,6 +289,7 @@
       membersView: 'Members',
       lookupView: 'Member Lookup',
       attendanceView: 'Attendance',
+      dutyHoursView: 'Duty Hours',
       alertsView: 'Action Center',
       accountsView: 'Account Management',
       dataView: 'Data & Backup'

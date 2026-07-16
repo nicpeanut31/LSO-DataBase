@@ -280,12 +280,14 @@
   }
 
   function openEvent(eventId) {
+    const event = getEvents().find((item) => item.id === eventId);
+    if (event) window.LSOOperations?.setAttendanceSemester?.(event.semester || 'First Semester');
     showView('attendanceView');
     setTimeout(() => {
       const card = document.querySelector(`[data-event-id="${cssEscape(eventId)}"]`);
       card?.click();
       card?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }, 40);
+    }, 60);
   }
 
   function openInstrument(instrumentId) {
@@ -337,17 +339,15 @@
   function renderHeroStatus(notifications = buildNotifications()) {
     const container = el('dashboardHeroStatus');
     if (!container) return;
-    const alerts = getAlerts();
-    const urgent = alerts.filter((alert) => alert.severity === 'high').length;
-    const nextEvent = getEvents().filter((event) => event.date && event.date >= today()).sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.startTime || '').localeCompare(String(b.startTime || '')))[0];
-    const maintenance = getInstruments().filter((item) => instrumentStatus(item) === 'Maintenance').length;
+    const first = getAttendanceSnapshot('First Semester');
+    const second = getAttendanceSnapshot('Second Semester');
+    const upcoming = getEvents().filter((event) => event.date && event.date >= today()).length;
     const unread = notifications.filter((notification) => !notification.read).length;
-
     const items = [
-      { label: 'Urgent alerts', value: urgent, action: 'alerts' },
-      { label: 'Unread updates', value: unread, action: 'notifications' },
-      { label: 'Next event', value: nextEvent ? relativeDateLabel(nextEvent.date) : 'None', action: 'attendance' },
-      { label: 'Maintenance', value: maintenance, action: 'inventory' }
+      { label: '1st Sem Attendance', value: first.rate === null ? 'No data' : `${first.rate}%`, action: 'attendance' },
+      { label: '2nd Sem Attendance', value: second.rate === null ? 'No data' : `${second.rate}%`, action: 'attendance' },
+      { label: 'Upcoming Schedule', value: upcoming, action: 'attendance' },
+      { label: 'Unread Updates', value: unread, action: 'notifications' }
     ];
     container.innerHTML = items.map((item) => `<button class="hero-status-chip" data-dashboard-action="${safeText(item.action)}" type="button"><small>${safeText(item.label)}</small><strong>${safeText(item.value)}</strong></button>`).join('');
   }
@@ -374,28 +374,27 @@
       const schedule = [timeLabel(event.startTime), event.venue || 'Venue not set'].filter(Boolean).join(' • ');
       return `<button class="dashboard-event-item" data-dashboard-event="${safeText(event.id)}" type="button">
         <span class="dashboard-event-date"><strong>${safeText(String(date.getDate()).padStart(2, '0'))}</strong><small>${safeText(new Intl.DateTimeFormat('en-PH', { month: 'short' }).format(date))}</small></span>
-        <span class="dashboard-event-copy"><strong>${safeText(event.title || 'Untitled event')}</strong><small>${safeText([event.type, schedule].filter(Boolean).join(' • '))}</small></span>
+        <span class="dashboard-event-copy"><strong>${safeText(event.title || 'Untitled event')}</strong><small>${safeText([event.semester || 'First Semester', event.type, schedule].filter(Boolean).join(' • '))}</small></span>
         <span class="badge ${daysBetween(today(), event.date) === 0 ? 'badge-red' : 'badge-blue'}">${safeText(relativeDateLabel(event.date))}</span>
       </button>`;
     }).join('') : `<div class="dashboard-empty-state"><span>▣</span><strong>No upcoming events</strong><small>Create a rehearsal, performance, meeting, or audition.</small><button class="small-button" data-dashboard-action="new-event" type="button">Create Event</button></div>`;
   }
 
-  function getAttendanceSnapshot() {
+  function getAttendanceSnapshot(semester) {
     const events = getEvents();
     const attendance = getAttendance();
-    const candidates = [...events]
-      .filter((event) => event.date && event.date <= today())
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.startTime || '').localeCompare(String(a.startTime || '')));
-    const event = candidates.find((item) => attendance.some((entry) => entry.eventId === item.id && entry.status)) || candidates[0] || null;
-    if (!event) return null;
-    const records = attendance.filter((entry) => entry.eventId === event.id && entry.status);
+    const normalizedSemester = semester === 'Second Semester' ? 'Second Semester' : 'First Semester';
+    const semesterEvents = events.filter((event) => (event.semester || 'First Semester') === normalizedSemester && event.date && event.date <= today());
+    const eventIds = new Set(semesterEvents.map((event) => event.id));
+    const records = attendance.filter((entry) => eventIds.has(entry.eventId) && entry.status);
     const count = (status) => records.filter((entry) => entry.status === status).length;
     const present = count('Present');
     const late = count('Late');
     const absent = count('Absent');
     const counted = present + late + absent;
     return {
-      event,
+      semester: normalizedSemester,
+      activities: semesterEvents.length,
       records: records.length,
       present,
       late,
@@ -409,24 +408,10 @@
     const container = el('dashboardAttendancePulse');
     const summary = el('dashboardAttendanceSummary');
     if (!container || !summary) return;
-    const snapshot = getAttendanceSnapshot();
-    if (!snapshot) {
-      summary.textContent = 'No completed events are available yet.';
-      container.innerHTML = `<div class="dashboard-empty-state"><span>✓</span><strong>No attendance history</strong><small>Create an event and save its attendance roster to begin tracking participation.</small><button class="small-button" data-dashboard-action="new-event" type="button">Create Event</button></div>`;
-      return;
-    }
-
-    summary.textContent = `${snapshot.event.title || 'Latest event'} • ${dateLabel(snapshot.event.date, { short: true })}`;
-    const settings = loadObject(SETTINGS_KEY);
-    const threshold = Number(settings.attendanceThreshold) || 75;
-    const rate = snapshot.rate;
-    const status = rate === null ? 'Not enough counted records' : rate >= threshold ? 'Meeting the attendance target' : 'Below the attendance target';
-    container.innerHTML = `<div class="attendance-pulse-layout">
-      <div class="attendance-ring" style="--attendance-progress:${rate ?? 0}"><div><strong>${rate === null ? '—' : `${rate}%`}</strong><small>Attendance</small></div></div>
-      <div class="attendance-pulse-copy"><strong>${safeText(status)}</strong><small>${safeText(snapshot.records)} roster entr${snapshot.records === 1 ? 'y' : 'ies'} saved for this event.</small>
-        <div class="attendance-mini-grid"><span><strong>${snapshot.present}</strong><small>Present</small></span><span><strong>${snapshot.late}</strong><small>Late</small></span><span><strong>${snapshot.absent}</strong><small>Absent</small></span><span><strong>${snapshot.excused}</strong><small>Excused</small></span></div>
-      </div>
-    </div>`;
+    const first = getAttendanceSnapshot('First Semester');
+    const second = getAttendanceSnapshot('Second Semester');
+    summary.textContent = 'Independent semester calculations — totals are never automatically combined.';
+    container.innerHTML = `<div class="dashboard-semester-attendance-grid">${[first, second].map((item) => `<button class="dashboard-semester-attendance-card" data-dashboard-attendance-semester="${safeText(item.semester)}" type="button"><div class="attendance-ring compact-ring" style="--attendance-progress:${item.rate ?? 0}"><div><strong>${item.rate === null ? '—' : `${item.rate}%`}</strong><small>Rate</small></div></div><div><span>${safeText(item.semester)}</span><strong>${item.activities} activit${item.activities === 1 ? 'y' : 'ies'}</strong><small>${item.present} present • ${item.late} late • ${item.absent} absent • ${item.excused} excused</small></div></button>`).join('')}</div>`;
   }
 
   function instrumentStatus(item) {
@@ -460,14 +445,13 @@
     const container = el('dashboardRecentActivity');
     if (!container) return;
     const activity = loadArray(ACTIVITY_KEY).slice(0, 6);
-    container.innerHTML = activity.length ? activity.map((item) => `<div class="dashboard-activity-item"><span class="activity-dot"></span><div><strong>${safeText(item.action || 'System activity')}</strong><small>${safeText(item.details || item.category || '')}</small><em>${safeText(item.account || 'Local user')} • ${safeText(relativeTimeLabel(item.timestamp))}</em></div></div>`).join('') : `<div class="dashboard-empty-state compact-dashboard-empty"><span>↻</span><strong>No recorded activity</strong><small>Member, attendance, inventory, account, and backup actions will appear here.</small></div>`;
+    container.innerHTML = activity.length ? activity.map((item) => `<div class="dashboard-activity-item"><span class="activity-dot"></span><div><strong>${safeText(item.action || 'System activity')}</strong><small>${safeText(item.details || item.category || '')}</small><em>${safeText(item.account || 'Local user')} • ${safeText(relativeTimeLabel(item.timestamp))}</em></div></div>`).join('') : `<div class="dashboard-empty-state compact-dashboard-empty"><span>↻</span><strong>No recorded activity</strong><small>Member, attendance, duty-hour, account, and backup actions will appear here.</small></div>`;
   }
 
   function renderDashboardModules() {
     renderGreeting();
     renderUpcomingEvents();
     renderAttendancePulse();
-    renderInventorySnapshot();
     renderRecentActivity();
     renderNotifications();
   }
@@ -487,6 +471,10 @@
     }
     if (action === 'attendance') {
       showView('attendanceView');
+      return;
+    }
+    if (action === 'duty-hours') {
+      showView('dutyHoursView');
       return;
     }
     if (action === 'inventory') {
@@ -528,6 +516,11 @@
       if (actionButton) performDashboardAction(actionButton.dataset.dashboardAction);
       const eventButton = event.target.closest('[data-dashboard-event]');
       if (eventButton) openEvent(eventButton.dataset.dashboardEvent);
+      const semesterAttendance = event.target.closest('[data-dashboard-attendance-semester]');
+      if (semesterAttendance) {
+        window.LSOOperations?.setAttendanceSemester?.(semesterAttendance.dataset.dashboardAttendanceSemester);
+        showView('attendanceView');
+      }
       if (!event.target.closest('#notificationCenter')) toggleNotificationPopover(false);
     });
 
@@ -539,7 +532,7 @@
       if (button.dataset.view === 'dashboardView') setTimeout(renderDashboardModules, 20);
     }));
 
-    ['lso:members-changed', 'lso:operations-changed', 'lso:accounts-changed', 'lso:auth-changed', 'lso:cloud-state-changed'].forEach((eventName) => {
+    ['lso:members-changed', 'lso:operations-changed', 'lso:duty-hours-changed', 'lso:accounts-changed', 'lso:auth-changed', 'lso:cloud-state-changed'].forEach((eventName) => {
       window.addEventListener(eventName, () => setTimeout(renderDashboardModules, 0));
     });
 
