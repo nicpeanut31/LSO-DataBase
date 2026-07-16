@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#0b3b2e" name="theme-color"/>
+<meta content="light" name="color-scheme"/>
+<meta content="Lasallian Symphony Orchestra membership, recruitment, attendance, reporting, and administration system" name="description"/>
+<title>LSO Orchestra Management System</title>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
+<div aria-hidden="true" class="auth-decoration auth-decoration-one"></div>
+<div aria-hidden="true" class="auth-decoration auth-decoration-two"></div>
+<div class="auth-brand-panel">
+<div aria-hidden="true" class="auth-brand-mark">LSO</div>
+<p class="eyebrow auth-eyebrow">Lasallian Symphony Orchestra</p>
+<h1 id="authTitle">Orchestra Management Portal</h1>
+<p>Manage recruitment, member profiles, rehearsal attendance, printable reports, alerts, accounts, and complete backups from one organized workspace.</p>
+<div class="auth-feature-list">
+<span>✓ Automatic recruitment-stage and period transitions</span>
+<span>✓ Calendar attendance, individual history, and printable reports</span>
+<span>✓ Action Center, roles, audit log, and complete backups</span>
+</div>
+<small>Accounts and operational records are stored in one shared online database for authorized devices.</small>
+</div>
+<div class="auth-card">
+<div aria-label="Account access" class="auth-tabs" role="tablist">
+<button aria-selected="true" class="auth-tab active" id="loginTab" role="tab" type="button">Login</button>
+<button aria-selected="false" class="auth-tab" id="registerTab" role="tab" type="button">Register Account</button>
+</div>
+<form class="auth-form" id="loginForm">
+<div class="auth-heading">
+<p class="eyebrow">Welcome back</p>
+<h2>Log in to LSO</h2>
+<p>Enter your registered username and password.</p>
+</div>
+<label class="field">
+<span>Username</span>
+<input autocomplete="username" id="loginUsername" maxlength="30" minlength="4" placeholder="Enter username" required="" type="text" value="SNA1161"/>
+</label>
+<label class="field">
+<span>Password</span>
+<div class="password-field">
+<input autocomplete="current-password" id="loginPassword" placeholder="Enter password" required="" type="password" value="SNA1161"/>
+<button aria-label="Show password" class="password-toggle" data-password-target="loginPassword" type="button">Show</button>
+</div>
+</label>
+<div class="auth-message hidden" id="loginMessage"></div>
+<button class="button button-primary auth-submit" type="submit">Login to Database</button>
+<p class="default-account-note"><strong>Default administrator:</strong> Username: SNA1161 &nbsp;•&nbsp; Password: SNA1161</p>
+</form>
+<form class="auth-form hidden" id="registerForm">
+<div class="auth-heading">
+<p class="eyebrow">New account</p>
+<h2>Register an account</h2>
+<p>Submit a registration request. An administrator must approve it before the account can log in.</p>
+</div>
+<label class="field">
+<span>Display Name *</span>
+<input id="registerDisplayName" maxlength="60" placeholder="e.g., LSO Secretary" required=""/>
+</label>
+<label class="field">
+<span>Email Address <small>(optional)</small></span>
+<input autocomplete="email" id="registerEmail" inputmode="email" placeholder="Optional contact email" type="email"/>
+</label>
+<label class="field">
+<span>Username *</span>
+<input autocomplete="username" id="registerUsername" maxlength="30" minlength="4" placeholder="At least 4 characters" required=""/>
+</label>
+<label class="field">
+<span>Password *</span>
+<div class="password-field">
+<input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="At least 6 characters" required="" type="password"/>
+<button aria-label="Show password" class="password-toggle" data-password-target="registerPassword" type="button">Show</button>
+</div>
+</label>
+<label class="field">
+<span>Confirm Password *</span>
+<div class="password-field">
+<input autocomplete="new-password" id="registerConfirmPassword" minlength="6" placeholder="Repeat password" required="" type="password"/>
+<button aria-label="Show password" class="password-toggle" data-password-target="registerConfirmPassword" type="button">Show</button>
+</div>
+</label>
+<div class="auth-message hidden" id="registerMessage"></div>
+<button class="button button-primary auth-submit" type="submit">Submit for Approval</button>
+</form>
+</div>
+</section>
+<div class="app-shell hidden" id="appShell">
+<aside aria-label="Primary navigation" class="sidebar" id="sidebar">
+<button aria-label="Close navigation" class="sidebar-close" id="sidebarCloseButton" type="button">×</button>
+<div class="brand">
+<div aria-hidden="true" class="brand-mark">LSO</div>
+<div>
+<h1>Lasallian Symphony Orchestra</h1>
+<p>Orchestra Management System</p>
+</div>
+</div>
+<nav aria-label="Main navigation" class="nav-list">
+<button class="nav-item active" data-view="dashboardView">Dashboard</button>
+<button class="nav-item" data-view="membersView">Members</button>
+<button class="nav-item" data-view="lookupView">Member Lookup</button>
+<button class="nav-item" data-view="attendanceView">Attendance</button>
+
+<button class="nav-item" data-view="alertsView">Action Center</button>
+<button class="nav-item admin-only" data-view="accountsView">Accounts <span class="nav-count hidden" id="pendingAccountCount">0</span></button>
+<button class="nav-item" data-view="dataView">Data &amp; Backup</button>
+</nav>
+<div class="sidebar-footer">
+<div class="account-panel">
+<div class="account-avatar" id="accountAvatar">A</div>
+<div class="account-copy">
+<strong id="currentAccountName">Administrator</strong>
+<small id="currentAccountUsername">@account</small>
+<small id="currentAccountRole">Administrator</small>
+</div>
+</div>
+<button class="logout-button" id="logoutButton" type="button">Log Out</button>
+<p>One Symphony, One Spirit,<br/>One Lasallian Legacy.</p>
+<small>Shared online database</small>
+</div>
+</aside>
+<button aria-label="Close navigation" class="sidebar-overlay" id="sidebarOverlay" type="button"></button>
+<main class="main-content">
+<header class="topbar">
+<button aria-label="Open menu" class="icon-button mobile-menu" id="mobileMenuButton">☰</button>
+<div>
+<p class="eyebrow">Orchestra Operations Database</p>
+<h2 id="pageTitle">Dashboard</h2>
+</div>
+<div class="topbar-actions">
+<div aria-label="System status" class="topbar-status">
+<span class="status-indicator" aria-hidden="true"></span>
+<div><strong id="systemStatusText">Connecting to shared database…</strong><small id="currentDateLabel">Loading date…</small></div>
+</div>
+<div class="notification-center" id="notificationCenter">
+<button aria-expanded="false" aria-label="Open notifications" class="notification-button" id="notificationButton" type="button">
+<svg aria-hidden="true" class="notification-bell-icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+<span class="notification-badge hidden" id="notificationBadge">0</span>
+</button>
+<section aria-label="Notifications" class="notification-popover hidden" id="notificationPopover">
+<header class="notification-header">
+<div><p class="eyebrow">Notification Center</p><h3>Updates requiring attention</h3></div>
+<button class="notification-close" id="notificationCloseButton" aria-label="Close notifications" type="button">×</button>
+</header>
+<div class="notification-toolbar"><span id="notificationSummary">No unread notifications</span><button class="text-button" id="markAllNotificationsRead" type="button">Mark all read</button></div>
+<div class="notification-list" id="notificationList"></div>
+<footer class="notification-footer"><button class="text-button" id="openActionCenterFromNotifications" type="button">Open Action Center →</button></footer>
+</section>
+</div>
+<button class="button button-secondary" id="exportCsvTop">Export CSV</button>
+<button class="button button-primary" id="addMemberTop">+ Add Member</button>
+</div>
+</header>
+<section class="view active" id="dashboardView">
+<div class="hero-card dashboard-hero">
+<div class="dashboard-hero-copy">
+<p class="eyebrow">Orchestra Command Center</p>
+<h3 id="dashboardGreeting">Welcome to the LSO workspace</h3>
+<p id="dashboardGreetingMeta">Live operational information will appear here.</p>
+<div class="hero-status-row" id="dashboardHeroStatus"></div>
+</div>
+<div class="hero-actions">
+<button class="button button-light" data-dashboard-action="add-member" id="addMemberHero" type="button">+ Register Member</button>
+<button class="button hero-ghost-button" data-dashboard-action="new-event" type="button">Create Event</button>
+</div>
+</div>
+
+<article class="panel quick-actions-panel">
+<div class="panel-header compact-panel-header">
+<div><p class="eyebrow">Shortcuts</p><h3>Quick Actions</h3><p class="panel-subtitle">Jump directly to the tools used most often.</p></div>
+</div>
+<div class="quick-action-grid">
+<button class="quick-action-card" data-dashboard-action="add-member" type="button"><span class="quick-action-icon">+</span><strong>Add Member</strong><small>Create a validated member record</small></button>
+<button class="quick-action-card" data-dashboard-action="new-event" type="button"><span class="quick-action-icon">▣</span><strong>New Event</strong><small>Schedule a rehearsal or activity</small></button>
+<button class="quick-action-card" data-dashboard-action="attendance" type="button"><span class="quick-action-icon">✓</span><strong>Take Attendance</strong><small>Open the current event roster</small></button>
+<button class="quick-action-card" data-dashboard-action="member-lookup" type="button"><span class="quick-action-icon">ID</span><strong>Member Record</strong><small>Search and print an official profile</small></button>
+<button class="quick-action-card" data-dashboard-action="alerts" type="button"><span class="quick-action-icon">!</span><strong>Review Alerts</strong><small>Resolve urgent action items</small></button>
+<button class="quick-action-card" data-dashboard-action="data" type="button"><span class="quick-action-icon">↓</span><strong>Data &amp; Backup</strong><small>Export or protect system records</small></button>
+</div>
+</article>
+
+<div class="metric-grid" id="metricGrid"></div>
+
+<div class="dashboard-operations-grid">
+<article class="panel dashboard-module upcoming-module">
+<div class="panel-header"><div><p class="eyebrow">Schedule</p><h3>Upcoming Events</h3><p class="panel-subtitle" id="dashboardUpcomingSummary">Loading schedule…</p></div><button class="text-button" data-dashboard-action="attendance" type="button">Open attendance →</button></div>
+<div class="dashboard-event-list" id="dashboardUpcomingEvents"></div>
+</article>
+
+<article class="panel dashboard-module attendance-module">
+<div class="panel-header"><div><p class="eyebrow">Participation</p><h3>Attendance Pulse</h3><p class="panel-subtitle" id="dashboardAttendanceSummary">Loading attendance…</p></div></div>
+<div id="dashboardAttendancePulse"></div>
+</article>
+
+<article class="panel dashboard-module membership-flow-module">
+<div class="panel-header"><div><p class="eyebrow">Membership Flow</p><h3>Recruitment Pipeline</h3><p class="panel-subtitle" id="dashboardMembershipFlowSummary">Loading membership stages…</p></div><button class="text-button" data-dashboard-action="members" type="button">Open directory →</button></div>
+<div id="dashboardMembershipFlow"></div>
+<div class="hidden" id="dashboardInventorySummary"></div><div class="hidden" id="dashboardInventorySnapshot"></div>
+</article>
+
+<article class="panel dashboard-module activity-module">
+<div class="panel-header"><div><p class="eyebrow">Audit Trail</p><h3>Recent Activity</h3><p class="panel-subtitle">Latest changes recorded by the system.</p></div><button class="text-button" data-dashboard-action="data" type="button">View log →</button></div>
+<div class="dashboard-activity-list" id="dashboardRecentActivity"></div>
+</article>
+</div>
+
+<div class="dashboard-grid">
+<article class="panel">
+<div class="panel-header"><div><p class="eyebrow">Membership</p><h3>Status Overview</h3></div></div>
+<div class="bar-list" id="statusBars"></div>
+</article>
+<article class="panel">
+<div class="panel-header"><div><p class="eyebrow">Orchestra</p><h3>Section Distribution</h3></div></div>
+<div class="bar-list" id="sectionBars"></div>
+</article>
+<article class="panel wide-panel">
+<div class="panel-header"><div><p class="eyebrow">Recruitment Pipeline</p><h3>Stage and Period Groups</h3></div></div>
+<div class="bar-list compact-bars" id="stageBars"></div>
+</article>
+<article class="panel wide-panel priority-panel">
+<div class="panel-header"><div><p class="eyebrow">Action Center</p><h3>Items Requiring Attention</h3></div><button class="text-button" data-dashboard-action="alerts" type="button">Open action center →</button></div>
+<div class="alert-preview-grid" id="dashboardAlertPreview"></div>
+</article>
+<article class="panel wide-panel">
+<div class="panel-header"><div><p class="eyebrow">Records</p><h3>Recently Updated Members</h3></div><button class="text-button" data-jump="membersView">View all members →</button></div>
+<div class="recent-list" id="recentMembers"></div>
+</article>
+</div>
+</section>
+<section class="view" id="membersView">
+<article class="panel">
+<div class="panel-header stack-mobile">
+<div>
+<p class="eyebrow">Member Directory</p>
+<h3 id="memberDirectoryTitle">Membership Period</h3>
+<p class="panel-subtitle" id="memberCountLabel">0 records</p>
+</div>
+<div class="inline-actions">
+<button class="button button-secondary" id="clearFilters">Clear Filters</button>
+<button class="button button-primary" id="addMemberMembers">+ Add Member</button>
+</div>
+</div>
+<div class="directory-toolbar membership-stage-toolbar">
+<div aria-label="Membership stage" class="segmented-control stage-segmented-control">
+<button class="segment-button active" id="memberListMode" type="button">Membership Period <span id="membershipTabCount">0</span></button>
+<button class="segment-button" id="probationaryTab" type="button">Probationary Period <span id="probationaryTabCount">0</span></button>
+<button class="segment-button" id="traineeTab" type="button">Trainee Period <span id="traineeTabCount">0</span></button>
+<button class="segment-button hidden" id="periodGroupMode" type="button">Legacy Period View</button>
+</div>
+<p id="directoryModeHelp">Only members who reached the Membership Period appear in this list.</p>
+</div>
+<div class="filter-grid membership-filter-grid">
+<label class="field search-field"><span>Search</span><input id="memberSearch" placeholder="Name, student number, instrument, ID..." type="search"/></label>
+<label class="field"><span>Member Status</span><select id="statusFilter"><option value="">All statuses</option><option>Active</option><option>Nonactive</option><option>LOA</option></select></label>
+<label class="field"><span>Orchestra Section</span><select id="sectionFilter"><option value="">All sections</option><option>Piano</option><option>String</option><option>Woodwinds</option><option>Brass</option><option>Percussion</option></select></label>
+<label class="field"><span>Position</span><select id="positionFilter"><option value="">All positions</option><option>Executive Board</option><option>Member</option></select></label>
+<select class="hidden" id="stageFilter"><option value=""></option></select>
+<select class="hidden" id="periodGroupFilter"><option value="Membership Period" selected>Membership Period</option><option>Probationary Period</option><option>Trainee Period</option></select>
+</div>
+<div id="memberListContainer">
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Membership ID</th>
+<th>Member</th>
+<th>Student No.</th>
+<th>Orchestra Section</th>
+<th>Instrument</th>
+<th>Organization</th>
+<th>Stage / Period</th>
+<th>Status</th>
+<th>Record</th>
+<th class="actions-column">Actions</th>
+</tr>
+</thead>
+<tbody id="membersTableBody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="membersEmpty">
+<div class="empty-icon">♫</div>
+<h4>No members found</h4>
+<p id="membersEmptyText">Adjust the filters or register a new member.</p>
+</div>
+</div>
+<div class="period-groups hidden" id="periodGroupsContainer"></div>
+</article>
+</section>
+<section class="view" id="lookupView">
+<div class="lookup-layout">
+<article class="panel lookup-search-panel">
+<div class="panel-header">
+<div>
+<p class="eyebrow">Fast Search</p>
+<h3>Member Lookup</h3>
+</div>
+</div>
+<label class="field">
+<span>Search by full name, Membership ID, or Student Number</span>
+<input autocomplete="off" id="lookupSearch" placeholder="Start typing..." type="search"/>
+</label>
+<div class="lookup-results" id="lookupResults"></div>
+</article>
+<article class="panel member-record-panel" id="memberRecordPanel">
+<div class="record-placeholder" id="recordPlaceholder">
+<div class="empty-icon">♪</div>
+<h3>Select a member</h3>
+<p>The selected member’s complete record will appear here.</p>
+</div>
+<div class="member-record hidden" id="memberRecord">
+<div class="record-header">
+<div>
+<p class="eyebrow">Official Member Record</p>
+<h3 id="recordName"></h3>
+<p id="recordIdentity"></p>
+</div>
+<div class="record-actions no-print">
+<button class="button button-secondary" id="editRecordButton">Edit</button>
+<button class="button button-primary" id="printRecordButton">Print Record</button>
+</div>
+</div>
+<div class="record-badges" id="recordBadges"></div>
+<div class="record-grid" id="recordGrid"></div>
+<div class="record-notes">
+<h4>Remarks / Notes</h4>
+<p id="recordRemarks"></p>
+</div>
+<div class="signature-grid">
+<div><span></span><p>Member Signature</p></div>
+<div><span></span><p>Authorized Officer</p></div>
+</div>
+</div>
+</article>
+</div>
+</section>
+
+<section class="view" id="attendanceView">
+<div class="attendance-command-header">
+<div><p class="eyebrow">Attendance &amp; Duty Intelligence</p><h3>Calendar, Analytics, Duty Hours &amp; Reports</h3><p>Manage rehearsal attendance, monitor Trainee and Probationary duty-hour requirements, and generate print-ready records.</p></div>
+<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Overall Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
+</div>
+<div class="attendance-overview-grid">
+<article class="panel attendance-overall-panel">
+<div class="panel-header"><div><p class="eyebrow">Organization Summary</p><h3>Overall Attendance</h3><p class="panel-subtitle" id="overallAttendanceCaption">Across all recorded activities</p></div></div>
+<div class="attendance-kpi-grid" id="overallAttendanceMetrics"></div>
+<div class="table-wrap compact-report-table"><table><thead><tr><th>Member</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Attendance Rate</th></tr></thead><tbody id="attendanceOverallTableBody"></tbody></table></div>
+</article>
+<article class="panel individual-attendance-panel">
+<div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Member Attendance Record</h3><p class="panel-subtitle">Search a name to see their total rehearsals and attendance history.</p></div></div>
+<label class="field"><span>Select Member</span><select id="attendanceIndividualSelect"><option value="">Choose a member…</option></select></label>
+<div class="individual-attendance-summary" id="individualAttendanceSummary"><div class="dashboard-empty-state"><span>⌕</span><strong>Select a member</strong><small>Their rehearsal totals and printable history will appear here.</small></div></div>
+<div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-primary" id="printIndividualAttendance" type="button">Print Individual Report</button></div>
+<div class="individual-attendance-history" id="individualAttendanceHistory"></div>
+</article>
+</div>
+
+<div class="duty-hours-layout">
+<article class="panel duty-hours-individual-panel">
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Training Compliance</p><h3>Duty Hours Lookup</h3><p class="panel-subtitle">Review Trainee and Probationary commitments, rendered hours, incentives, and combined balance.</p></div>
+<div class="inline-actions"><button class="button button-secondary" id="printDutyHoursIndividual" type="button" disabled>Print Individual</button></div>
+</div>
+<div class="duty-member-picker">
+<label class="field"><span>Search Name</span><input id="dutyMemberSearch" type="search" placeholder="Type a member name, ID, or student number..." autocomplete="off"/></label>
+<label class="field"><span>Select Member</span><select id="dutyMemberSelect"><option value="">Choose a member…</option></select></label>
+</div>
+<div class="duty-hours-summary" id="dutyHoursSummary"><div class="dashboard-empty-state"><span>◷</span><strong>Select a member</strong><small>Their Trainee, Probationary, and combined duty-hour totals will appear here.</small></div></div>
+<div class="duty-hours-admin-grid admin-only hidden" id="dutyHoursAdminControls">
+<form class="duty-commitment-card" id="dutyCommitmentForm">
+<div class="duty-card-heading"><div><p class="eyebrow">Required Hours</p><h4>Committed Hours</h4></div><span class="duty-card-icon">◎</span></div>
+<p class="duty-form-help">Set the required hours the selected member must render for each period.</p>
+<div class="form-grid two-columns">
+<label class="field"><span>Trainee Period Hours</span><input id="dutyTraineeCommitted" type="number" min="0" step="0.25" placeholder="0"/></label>
+<label class="field"><span>Probationary Period Hours</span><input id="dutyProbationaryCommitted" type="number" min="0" step="0.25" placeholder="0"/></label>
+</div>
+<button class="button button-primary" type="submit">Save Committed Hours</button>
+</form>
+<form class="duty-entry-card" id="dutyEntryForm">
+<div class="duty-card-heading"><div><p class="eyebrow">Duty Ledger</p><h4>Add Rendered Hours or Incentive</h4></div><span class="duty-card-icon">＋</span></div>
+<div class="form-grid duty-entry-fields">
+<label class="field"><span>Period</span><select id="dutyEntryPeriod" required><option>Trainee Period</option><option>Probationary Period</option></select></label>
+<label class="field"><span>Entry Type</span><select id="dutyEntryType" required><option value="Duty">Rendered Duty Hours</option><option value="Incentive">Incentive / Adjustment</option></select></label>
+<label class="field"><span>Date</span><input id="dutyEntryDate" type="date" required/></label>
+<label class="field"><span>Hours</span><input id="dutyEntryHours" type="number" step="0.25" placeholder="e.g., 3 or -1" required/></label>
+<label class="field duty-description-field"><span>Description / Basis</span><input id="dutyEntryDescription" maxlength="160" placeholder="Duty assignment, incentive reason, or correction..."/></label>
+</div>
+<p class="duty-form-help" id="dutyEntryHelp">Rendered duty hours must be positive. Incentives may be positive to reduce the remaining requirement or negative to add hours back.</p>
+<button class="button button-primary" type="submit">Add to Duty Ledger</button>
+</form>
+</div>
+<div class="duty-ledger-section hidden" id="dutyLedgerSection">
+<div class="individual-history-header"><strong>Duty Hours Ledger</strong><span id="dutyLedgerCaption">0 entries</span></div>
+<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Period</th><th>Type</th><th>Hours</th><th>Effect</th><th>Description</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
+</div>
+</article>
+
+<article class="panel duty-hours-overall-panel">
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Organization Totals</p><h3>Overall Duty Hours</h3><p class="panel-subtitle" id="dutyOverallCaption">Across Trainee and Probationary periods</p></div>
+<button class="button button-secondary" id="printDutyHoursOverall" type="button">Print Overall</button>
+</div>
+<div class="attendance-kpi-grid duty-overall-metrics" id="dutyOverallMetrics"></div>
+<div class="table-wrap compact-report-table duty-overall-table"><table><thead><tr><th>Member</th><th>Trainee Required</th><th>Trainee Credited</th><th>Trainee Balance</th><th>Probationary Required</th><th>Probationary Credited</th><th>Probationary Balance</th><th>Combined Balance</th></tr></thead><tbody id="dutyOverallTableBody"></tbody></table></div>
+</article>
+</div>
+
+<article class="panel attendance-calendar-panel">
+<div class="calendar-header-row">
+<div><p class="eyebrow">Monthly Schedule</p><h3 id="attendanceCalendarMonth">Attendance Calendar</h3><p class="panel-subtitle">Click a date to open its rehearsal or create a new one.</p></div>
+<div class="calendar-controls"><button class="icon-button" id="calendarPreviousMonth" type="button" aria-label="Previous month">‹</button><button class="button button-secondary" id="calendarToday" type="button">Today</button><button class="icon-button" id="calendarNextMonth" type="button" aria-label="Next month">›</button></div>
+</div>
+<div class="attendance-calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+<div class="attendance-calendar-grid" id="attendanceCalendarGrid"></div>
+<div class="calendar-selected-date-bar"><div><strong id="calendarSelectedDateLabel">Select a date</strong><small id="calendarSelectedDateMeta">Events for the selected date will appear below.</small></div><button class="button button-primary" id="createEventOnSelectedDate" type="button">+ Create on Selected Date</button></div>
+</article>
+<div class="management-layout attendance-management-layout">
+<article class="panel management-sidebar-panel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Event List</p><h3>Rehearsals &amp; Activities</h3><p class="panel-subtitle" id="eventCountLabel">0 events</p></div></div>
+<label class="field"><span>Search events</span><input id="eventSearch" type="search" placeholder="Title, venue, or date..."/></label>
+<div class="event-list" id="eventList"></div>
+</article>
+<article class="panel attendance-roster-panel">
+<div class="record-placeholder" id="attendancePlaceholder"><div class="empty-icon">✓</div><h3>Select or create an event</h3><p>Choose an activity to record attendance for active members.</p></div>
+<div class="hidden" id="attendanceWorkspace">
+<div class="panel-header stack-mobile"><div><p class="eyebrow" id="attendanceEventType">Rehearsal</p><h3 id="attendanceEventTitle"></h3><p class="panel-subtitle" id="attendanceEventMeta"></p></div><div class="inline-actions"><button class="button button-secondary" id="printEventAttendance" type="button">Print Roster</button><button class="button button-secondary" id="editEventButton">Edit</button><button class="button button-danger" id="deleteEventButton">Delete</button></div></div>
+<div class="attendance-summary" id="attendanceSummary"></div>
+<div class="attendance-toolbar"><label class="field search-field"><span>Search roster</span><input id="attendanceMemberSearch" type="search" placeholder="Member name, stage, section..."/></label><div class="inline-actions"><button class="button button-secondary" id="markAllPresent">Mark All Present</button><button class="button button-primary" id="saveAttendanceButton">Save Attendance</button></div></div>
+<div class="table-wrap"><table class="attendance-table"><thead><tr><th>Member</th><th>Stage / Period</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody id="attendanceRosterBody"></tbody></table></div>
+</div>
+</article>
+</div>
+</section>
+
+<section class="view hidden retired-module" id="instrumentsView" aria-hidden="true">
+<article class="panel">
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Property Accountability</p><h3>Instrument Inventory</h3><p class="panel-subtitle" id="instrumentCountLabel">0 instruments</p></div>
+<div class="inline-actions"><button class="button button-secondary" id="exportInstrumentCsv">Export CSV</button><button class="button button-primary" id="addInstrumentButton">+ Add Instrument</button></div>
+</div>
+<div class="inventory-metrics" id="inventoryMetrics"></div>
+<div class="filter-grid inventory-filters">
+<label class="field search-field"><span>Search</span><input id="instrumentSearch" type="search" placeholder="Asset code, instrument, serial number..."/></label>
+<label class="field"><span>Status</span><select id="instrumentStatusFilter"><option value="">All statuses</option><option>Available</option><option>Issued</option><option>Maintenance</option><option>Retired</option></select></label>
+<label class="field"><span>Condition</span><select id="instrumentConditionFilter"><option value="">All conditions</option><option>Excellent</option><option>Good</option><option>Fair</option><option>Needs Repair</option><option>Unserviceable</option></select></label>
+<label class="field"><span>Category</span><select id="instrumentCategoryFilter"><option value="">All categories</option><option>String</option><option>Woodwinds</option><option>Brass</option><option>Percussion</option><option>Keyboard</option><option>Accessory</option><option>Other</option></select></label>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Asset Code</th><th>Instrument</th><th>Category</th><th>Condition</th><th>Assigned To</th><th>Return Date</th><th>Status</th><th class="actions-column">Actions</th></tr></thead><tbody id="instrumentTableBody"></tbody></table></div>
+<div class="empty-state hidden" id="instrumentEmpty"><div class="empty-icon">♬</div><h4>No instruments found</h4><p>Add an instrument or adjust the filters.</p></div>
+</article>
+</section>
+
+<section class="view" id="alertsView">
+<div class="alerts-header">
+<div><p class="eyebrow">Automated Monitoring</p><h3>Action Center</h3><p>Prioritized items generated from membership timelines, profile quality, safety contacts, and attendance records.</p></div>
+<button class="button button-secondary" id="refreshAlertsButton">Refresh Alerts</button>
+</div>
+<div class="alert-summary-grid" id="alertSummaryGrid"></div>
+<div class="alert-sections" id="alertSections"></div>
+</section>
+
+<section class="view" id="accountsView">
+<article class="panel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Only</p><h3>Account Management</h3><p class="panel-subtitle">Validate new registrations, assign roles, approve or reject access, and disable approved accounts.</p></div></div>
+<div class="account-security-note"><strong>Cloud security:</strong> Passwords are hashed in PostgreSQL, sessions use private tokens, and direct public table access is blocked. Pending or disabled users cannot open shared records.</div>
+<div class="table-wrap"><table><thead><tr><th>Account</th><th>Username / Optional Email</th><th>Role</th><th>Requested</th><th>Access Status</th><th>Approved</th><th class="actions-column">Actions</th></tr></thead><tbody id="accountsTableBody"></tbody></table></div>
+</article>
+</section>
+
+<section class="view" id="dataView">
+<div class="data-grid">
+<article class="panel action-card featured-action-card">
+<div class="action-icon">ALL</div>
+<h3>Complete System Backup</h3>
+<p>Download members, attendance, duty hours, events, settings, and the activity log in one JSON file.</p>
+<button class="button button-primary" id="backupCompleteSystem">Download Complete Backup</button>
+</article>
+<article class="panel action-card featured-action-card">
+<div class="action-icon">↺</div>
+<h3>Restore Complete System</h3>
+<p>Restore a complete backup created by this upgraded version. Administrator access is required.</p>
+<label class="button button-primary file-button admin-only">Restore Complete Backup<input accept=".json,application/json" id="restoreCompleteSystem" type="file"/></label>
+</article>
+<article class="panel action-card">
+<div class="action-icon">CSV</div>
+<h3>Export Member List</h3>
+<p>Download all member records as a CSV file for Excel or Google Sheets.</p>
+<button class="button button-primary" id="exportCsvData">Export CSV</button>
+</article>
+<article class="panel action-card">
+<div class="action-icon">JSON</div>
+<h3>Backup Database</h3>
+<p>Create a full JSON backup that preserves all fields and timestamps.</p>
+<button class="button button-primary" id="backupJson">Download Backup</button>
+</article>
+<article class="panel action-card">
+<div class="action-icon">↥</div>
+<h3>Import CSV</h3>
+<p>Import member records using the downloadable CSV template.</p>
+<div class="button-row">
+<button class="button button-secondary" id="downloadTemplate">Get Template</button>
+<label class="button button-primary file-button">Import CSV<input accept=".csv,text/csv" id="csvImport" type="file"/></label>
+</div>
+</article>
+<article class="panel action-card">
+<div class="action-icon">↺</div>
+<h3>Restore Backup</h3>
+<p>Restore records from a JSON backup created by this website.</p>
+<label class="button button-primary file-button">Restore JSON<input accept=".json,application/json" id="jsonRestore" type="file"/></label>
+</article>
+<article class="panel action-card danger-card">
+<div class="action-icon">!</div>
+<h3>Clear Shared Member Database</h3>
+<p>Remove all member records from the shared database. Export a backup first.</p>
+<button class="button button-danger" id="clearDatabase">Clear Shared Member Records</button>
+</article>
+<article class="panel settings-card">
+<p class="eyebrow">Automation Settings</p>
+<h3>Recruitment &amp; Monitoring Rules</h3>
+<p>Set your official durations. Blank duration fields mean dates remain manually entered.</p>
+<div class="settings-grid">
+<label class="field"><span>Trainee Duration (days)</span><input id="settingTraineeDays" min="1" type="number" placeholder="Not configured"/></label>
+<label class="field"><span>Probationary Duration (days)</span><input id="settingProbationaryDays" min="1" type="number" placeholder="Not configured"/></label>
+<input class="hidden" id="settingRegular1Days" type="number" value=""/>
+<label class="field"><span>Upcoming Alert Window (days)</span><input id="settingAlertDays" min="1" max="365" type="number" value="30"/></label>
+<label class="field"><span>Low Attendance Threshold (%)</span><input id="settingAttendanceThreshold" min="1" max="100" type="number" value="75"/></label>
+</div>
+<button class="button button-primary admin-only" id="saveSystemSettings">Save Settings</button>
+</article>
+<article class="panel activity-card">
+<div class="panel-header"><div><p class="eyebrow">Accountability</p><h3>Recent Activity Log</h3></div><button class="text-button admin-only" id="clearActivityLog">Clear log</button></div>
+<div class="activity-list" id="activityList"></div>
+</article>
+<article class="panel storage-card">
+<p class="eyebrow">Storage Information</p>
+<h3>Shared Online Storage</h3>
+<p>Changes are synchronized through Supabase so approved users see the same records across devices. A local cache keeps the interface responsive while changes are being saved.</p>
+<div class="storage-meter"><span id="storageMeter"></span></div>
+<small id="storageLabel">0 records stored</small>
+</article>
+</div>
+</section>
+</main>
+</div>
+<div aria-labelledby="modalTitle" aria-modal="true" class="modal-backdrop hidden" id="memberModal" role="dialog">
+<div class="modal-card">
+<div class="modal-header">
+<div>
+<p class="eyebrow">Member Profile</p>
+<h2 id="modalTitle">Register New Member</h2>
+</div>
+<button aria-label="Close" class="icon-button" id="closeMemberModal">×</button>
+</div>
+<form id="memberForm" novalidate="">
+<input id="editingId" type="hidden"/>
+<div class="form-section">
+<div class="section-heading">
+<span>01</span>
+<div><h3>Personal Information</h3><p>Basic identity and contact details</p></div>
+</div>
+<div class="form-grid three-columns">
+<label class="field span-2"><span>Full Name *</span><input id="fullName" required=""/></label>
+<label class="field"><span>Age</span><input id="age" max="100" min="1" type="number"/></label>
+<label class="field"><span>Birthdate</span><input id="birthdate" type="date"/></label>
+<label class="field"><span>Sex</span><select id="sex"><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></label>
+<label class="field"><span>Contact Number</span><input id="contactNumber" inputmode="tel"/></label>
+<label class="field"><span>Student Number *</span><input id="studentNumber" required=""/></label>
+<label class="field span-2"><span>DLSUD Outlook *</span><input id="outlook" placeholder="name@dlsud.edu.ph" required="" type="email"/></label>
+<label class="field span-3"><span>Home Address</span><textarea id="homeAddress" placeholder="Complete home address" rows="2"></textarea></label>
+<label class="field span-2"><span>Emergency Contact Name *</span><input id="emergencyContactName" placeholder="Parent, guardian, or trusted contact" required=""/></label>
+<label class="field"><span>Relationship *</span><input id="emergencyContactRelationship" placeholder="e.g., Mother" required=""/></label>
+<label class="field span-2"><span>Emergency Contact Number *</span><input id="emergencyContactNumber" inputmode="tel" placeholder="09XX XXX XXXX" required=""/></label>
+<label class="field"><span>Alternative Contact</span><input id="alternativeContactNumber" inputmode="tel" placeholder="Optional"/></label>
+</div>
+</div>
+<div class="form-section">
+<div class="section-heading">
+<span>02</span>
+<div><h3>Academic Information</h3><p>College, program, and current academic status</p></div>
+</div>
+<div class="form-grid three-columns">
+<label class="field"><span>College</span><input id="college"/></label>
+<label class="field"><span>Course</span><input id="course"/></label>
+<label class="field"><span>Year Level</span><select id="yearLevel"><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option><option>Graduate</option></select></label>
+<label class="field"><span>Section</span><input id="academicSection"/></label>
+<label class="field"><span>CYS</span><input id="cys" placeholder="Auto-generated when possible"/></label>
+<label class="field"><span>Academic Status</span><select id="academicStatus"><option value="">Select</option><option>Regular</option><option>Irregular</option><option>Graduating</option><option>Alumni</option><option>On Leave</option></select></label>
+</div>
+</div>
+<div class="form-section">
+<div class="section-heading">
+<span>03</span>
+<div><h3>Organization Information</h3><p>Membership, orchestra section, and role assignment</p></div>
+</div>
+<div class="form-grid three-columns">
+<label class="field"><span>Position in Organization *</span><select id="organizationPosition" required=""><option value="">Select</option><option>Executive Board</option><option>Member</option></select></label>
+<label class="field"><span>Specific Organization Role</span><input id="organizationRole" placeholder="e.g., President, Section Leader"/></label>
+<label class="field"><span>Member Status *</span><select id="memberStatus" required=""><option value="">Select</option><option>Active</option><option>Nonactive</option><option>LOA</option></select></label>
+<input id="membershipStage" type="hidden" value="Trainee"/>
+<div class="field span-3"><span>Register Under *</span><div class="stage-entry-toggle" id="stageEntryToggle"><button class="stage-entry-option active" data-entry-stage="Trainee Period" type="button">Trainee Period</button><button class="stage-entry-option" data-entry-stage="Probationary Period" type="button">Probationary Period</button><button class="stage-entry-option" data-entry-stage="Membership Period" type="button">Membership Period</button></div></div>
+<div aria-live="polite" class="auto-stage-panel span-3"><div><span class="auto-stage-label">Automatic Current Period</span><strong id="automaticStagePreview">Trainee Period</strong></div><p id="automaticStageHelp">The record moves automatically when its next period start date arrives.</p></div>
+<label class="field"><span>Trainee Period Start *</span><input id="traineeStartDate" required="" type="date"/></label>
+<label class="field"><span>Probationary Period Start</span><input id="probationaryStartDate" type="date"/></label>
+<label class="field"><span>Membership Period Start</span><input id="regularMemberDate" type="date"/></label>
+<input id="regularPeriod2StartDate" type="hidden" value=""/>
+<div class="stage-timeline-note span-3"><strong>Automatic transition:</strong> Trainee Period → Probationary Period → Membership Period. Once the Membership Period start date arrives, the person automatically appears in the Members list.</div>
+<div class="timeline-tools span-3">
+<button class="button button-secondary" id="applyTimelineDefaults" type="button">Calculate Dates from Timeline Settings</button>
+<small id="timelineDefaultsHelp">Configure Trainee and Probationary durations in Data &amp; Backup to calculate the next period dates.</small>
+</div>
+
+
+<label class="field"><span>Orchestra Section *</span><select id="orchestraSection" required=""><option value="">Select</option><option>Piano</option><option>String</option><option>Woodwinds</option><option>Brass</option><option>Percussion</option></select></label>
+<label class="field span-2"><span>Primary Instrument *</span><input id="primaryInstrument" required=""/></label>
+<label class="field span-3"><span>Recruitment / Evaluation Notes</span><textarea id="stageNotes" placeholder="Audition result, mentor, requirements, evaluation notes, or promotion recommendation" rows="2"></textarea></label>
+</div>
+</div>
+
+<div class="form-section">
+<div class="section-heading">
+<span>04</span>
+<div><h3>Record Management</h3><p>Registration, review date, and internal notes</p></div>
+</div>
+<div class="form-grid three-columns">
+<label class="field"><span>Date Registered *</span><input id="dateRegistered" required="" type="date"/></label>
+<label class="field"><span>Last Profile Review</span><input id="lastProfileReview" type="date"/></label>
+<label class="field"><span>Profile Review Status</span><select id="reviewStatus"><option value="">Auto-calculate</option><option>Current</option><option>For Review</option><option>Overdue</option></select></label>
+<label class="field span-3"><span>Remarks / Notes</span><textarea id="remarks" rows="4"></textarea></label>
+</div>
+</div>
+<div class="form-message hidden" id="formMessage"></div>
+<div class="modal-footer">
+<button class="button button-secondary" id="cancelMemberForm" type="button">Cancel</button>
+<button class="button button-primary" type="submit">Save Member Record</button>
+</div>
+</form>
+</div>
+</div>
+<div aria-labelledby="eventModalTitle" aria-modal="true" class="modal-backdrop hidden" id="eventModal" role="dialog">
+<div class="modal-card compact-modal">
+<div class="modal-header"><div><p class="eyebrow">Orchestra Activity</p><h2 id="eventModalTitle">Create Event</h2></div><button aria-label="Close" class="icon-button" id="closeEventModal">×</button></div>
+<form id="eventForm">
+<input id="editingEventId" type="hidden"/>
+<div class="form-grid two-columns">
+<label class="field span-2"><span>Event Title *</span><input id="eventTitle" required="" placeholder="e.g., Saturday Full Orchestra Rehearsal"/></label>
+<label class="field"><span>Type *</span><select id="eventType" required=""><option>Rehearsal</option><option>Sectional</option><option>Performance</option><option>Audition</option><option>Meeting</option><option>Other</option></select></label>
+<label class="field"><span>Date *</span><input id="eventDate" required="" type="date"/></label>
+<label class="field"><span>Start Time</span><input id="eventStartTime" type="time"/></label>
+<label class="field"><span>End Time</span><input id="eventEndTime" type="time"/></label>
+<label class="field span-2"><span>Venue</span><input id="eventVenue" placeholder="Room, building, or performance venue"/></label>
+<label class="field span-2"><span>Notes</span><textarea id="eventNotes" rows="3"></textarea></label>
+</div>
+<div class="form-message hidden" id="eventFormMessage"></div>
+<div class="modal-footer"><button class="button button-secondary" id="cancelEventForm" type="button">Cancel</button><button class="button button-primary" type="submit">Save Event</button></div>
+</form>
+</div>
+</div>
+
+<div aria-labelledby="instrumentModalTitle" aria-modal="true" class="modal-backdrop hidden retired-module" id="instrumentModal" role="dialog">
+<div class="modal-card compact-modal">
+<div class="modal-header"><div><p class="eyebrow">Instrument Property Record</p><h2 id="instrumentModalTitle">Add Instrument</h2></div><button aria-label="Close" class="icon-button" id="closeInstrumentModal">×</button></div>
+<form id="instrumentForm">
+<input id="editingInstrumentId" type="hidden"/>
+<div class="form-grid two-columns">
+<label class="field"><span>Asset Code *</span><input id="instrumentAssetCode" required="" placeholder="e.g., LSO-STR-001"/></label>
+<label class="field"><span>Instrument Name *</span><input id="instrumentName" required="" placeholder="e.g., Violin"/></label>
+<label class="field"><span>Category *</span><select id="instrumentCategory" required=""><option value="">Select</option><option>String</option><option>Woodwinds</option><option>Brass</option><option>Percussion</option><option>Keyboard</option><option>Accessory</option><option>Other</option></select></label>
+<label class="field"><span>Condition *</span><select id="instrumentCondition" required=""><option>Excellent</option><option>Good</option><option>Fair</option><option>Needs Repair</option><option>Unserviceable</option></select></label>
+<label class="field"><span>Brand / Maker</span><input id="instrumentBrand"/></label>
+<label class="field"><span>Model</span><input id="instrumentModel"/></label>
+<label class="field span-2"><span>Serial Number</span><input id="instrumentSerialNumber"/></label>
+<label class="field span-2"><span>Assigned Member</span><select id="instrumentAssignedMember"><option value="">Unassigned / Available</option></select></label>
+<label class="field"><span>Date Issued</span><input id="instrumentDateIssued" type="date"/></label>
+<label class="field"><span>Expected Return</span><input id="instrumentExpectedReturn" type="date"/></label>
+<label class="field"><span>Manual Status</span><select id="instrumentManualStatus"><option value="">Automatic</option><option>Available</option><option>Issued</option><option>Maintenance</option><option>Retired</option></select></label>
+<label class="field"><span>Storage Location</span><input id="instrumentLocation" placeholder="Cabinet, room, shelf..."/></label>
+<label class="field span-2"><span>Notes</span><textarea id="instrumentNotes" rows="3"></textarea></label>
+</div>
+<div class="form-message hidden" id="instrumentFormMessage"></div>
+<div class="modal-footer"><button class="button button-secondary" id="cancelInstrumentForm" type="button">Cancel</button><button class="button button-primary" type="submit">Save Instrument</button></div>
+</form>
+</div>
+</div>
+
+<div aria-live="polite" class="toast-region" id="toastRegion"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="cloud.js"></script>
+<script src="app.js"></script>
+<script src="auth.js"></script>
+<script src="management.js"></script>
+<script src="ui-enhancements.js"></script>
+<script src="dashboard-enhancements.js"></script>
+<script src="workflow-upgrades.js"></script>
+<script src="duty-hours.js"></script>
+</body>
+</html>

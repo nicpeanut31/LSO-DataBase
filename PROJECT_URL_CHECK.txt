@@ -1,0 +1,9 @@
+CONFIGURED SUPABASE PROJECT
+===========================
+
+Project URL:
+https://alvimpdslvoqylehhind.supabase.co
+
+The public publishable key is already configured in supabase-config.js.
+Before deployment, confirm this is the same Supabase project where you run the
+updated supabase-setup.sql.

@@ -1,0 +1,19 @@
+LSO DUTY HOURS ONLINE — VALIDATION RESULTS
+==========================================
+
+PASS — JavaScript syntax checked for every .js file.
+PASS — No duplicate HTML element IDs.
+PASS — All local CSS and JavaScript references exist.
+PASS — Duty Hours calculation test:
+       Credited = Rendered + Incentive
+       Balance = Committed - Credited
+       Positive and negative incentive adjustments verified.
+PASS — Supabase SQL contains:
+       duty_hours column creation/upgrade
+       shared-state read support
+       shared-state update support
+       complete-state restore/migration support
+PASS — Complete Backup includes dutyHours and restores older backups safely.
+
+Live cross-device saving requires the updated supabase-setup.sql to be run in
+the configured Supabase project before the GitHub files are deployed.
