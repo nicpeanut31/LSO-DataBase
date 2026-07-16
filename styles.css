@@ -2314,3 +2314,151 @@ body::before {
     flex: 1 0 100%;
   }
 }
+
+/* ================================================================
+   Duty Hours Archive + Visibility Fix
+   ================================================================ */
+.duty-roster-tools {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 10px;
+  justify-items: stretch;
+}
+.duty-roster-tools .duty-global-search { width: 100%; }
+.duty-record-mode-toggle {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.duty-record-mode-toggle .segment-button { min-width: 0; }
+.duty-archive-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin: 0 0 15px;
+  padding: 13px 15px;
+  border: 1px solid #d9c9ef;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #faf7ff, #ffffff);
+}
+.duty-archive-notice > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #efe6fb;
+  color: #65428f;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.duty-archive-notice strong,
+.duty-archive-notice small { display: block; }
+.duty-archive-notice strong { color: var(--ink); font-size: 13px; }
+.duty-archive-notice small { margin-top: 4px; color: var(--muted); line-height: 1.45; }
+.duty-record-state {
+  display: inline-flex !important;
+  width: fit-content;
+  margin-top: 6px !important;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 8px !important;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+.duty-record-state.active { color: #0d6c49; background: #dff7e9; }
+.duty-record-state.archived { color: #5f5273; background: #f0ebf7; }
+.duty-record-state.skipped { color: #8a5d0a; background: #fff1c4; }
+.duty-roster-person.archived-record {
+  border-style: dashed;
+  background: linear-gradient(145deg, #fbfafc, #ffffff);
+}
+.duty-roster-person.skipped-record { border-color: #e7ce8e; }
+.duty-roster-person.archived-record .member-avatar { filter: saturate(.65); opacity: .88; }
+.duty-selected-archive-banner {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 13px;
+  padding: 12px 14px;
+  border: 1px solid #d9c9ef;
+  border-radius: 14px;
+  background: #faf7ff;
+}
+.duty-selected-archive-banner.skipped { border-color: #e7ce8e; background: #fffaf0; }
+.duty-selected-archive-banner span {
+  color: #65428f;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.duty-selected-archive-banner.skipped span { color: #8a5d0a; }
+.duty-selected-archive-banner strong { color: var(--ink); font-size: 12px; line-height: 1.45; }
+
+.skip-probationary-control {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid #ead59b;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fffdf6, #fffaf0);
+  cursor: pointer;
+}
+.skip-probationary-control input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 1px;
+  accent-color: var(--green-700);
+}
+.skip-probationary-control span,
+.skip-probationary-control strong,
+.skip-probationary-control small { display: block; }
+.skip-probationary-control strong { color: var(--ink); font-size: 13px; }
+.skip-probationary-control small { margin-top: 4px; color: var(--muted); line-height: 1.45; }
+input:disabled {
+  cursor: not-allowed;
+  color: #81918b;
+  background: #eef3f0;
+}
+
+/* Keep every Duty Hours control visible and comfortably sized. */
+.duty-hours-individual-panel,
+.duty-hours-overall-panel { overflow: visible; }
+.duty-hours-summary,
+.duty-ledger-section,
+.duty-form-card { min-width: 0; }
+.duty-forms-grid {
+  grid-template-columns: minmax(240px, .75fr) minmax(360px, 1.25fr);
+  align-items: stretch;
+}
+.duty-incentive-card { grid-column: 1 / -1; }
+.duty-hours-admin-grid:not(.hidden) { display: grid; }
+.duty-form-card input,
+.duty-form-card select,
+.duty-form-card button { min-height: 44px; }
+.duty-roster-list { max-height: 430px; }
+.duty-overall-table table { min-width: 1220px; }
+
+@media (max-width: 1050px) {
+  .duty-forms-grid { grid-template-columns: 1fr; }
+  .duty-incentive-card { grid-column: auto; }
+}
+@media (max-width: 760px) {
+  .duty-roster-tools { width: 100%; }
+  .duty-record-mode-toggle { grid-template-columns: 1fr; }
+  .duty-archive-notice { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .skip-probationary-control { padding: 12px; }
+  .duty-record-state { white-space: normal !important; }
+}

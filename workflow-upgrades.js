@@ -503,21 +503,29 @@
 
   function setEntryStage(stage) {
     const dateRegistered = el('dateRegistered')?.value || today();
+    const skipControl = el('probationarySkipped');
     if (stage === 'Trainee Period') {
+      if (skipControl) skipControl.checked = false;
       el('traineeStartDate').value = el('traineeStartDate').value || dateRegistered;
+      el('probationaryStartDate').disabled = false;
       el('probationaryStartDate').value = '';
       el('regularMemberDate').value = '';
     } else if (stage === 'Probationary Period') {
+      if (skipControl) skipControl.checked = false;
       const probationary = today();
       el('traineeStartDate').value = el('traineeStartDate').value && el('traineeStartDate').value < probationary ? el('traineeStartDate').value : addDays(probationary, -1);
+      el('probationaryStartDate').disabled = false;
       el('probationaryStartDate').value = probationary;
       el('regularMemberDate').value = '';
     } else {
       const membership = today();
-      el('traineeStartDate').value = el('traineeStartDate').value && el('traineeStartDate').value < membership ? el('traineeStartDate').value : addDays(membership, -2);
-      el('probationaryStartDate').value = el('probationaryStartDate').value && el('probationaryStartDate').value < membership ? el('probationaryStartDate').value : addDays(membership, -1);
+      const skipped = Boolean(skipControl?.checked);
+      el('traineeStartDate').value = el('traineeStartDate').value && el('traineeStartDate').value < membership ? el('traineeStartDate').value : addDays(membership, skipped ? -1 : -2);
+      el('probationaryStartDate').disabled = skipped;
+      el('probationaryStartDate').value = skipped ? '' : (el('probationaryStartDate').value && el('probationaryStartDate').value < membership ? el('probationaryStartDate').value : addDays(membership, -1));
       el('regularMemberDate').value = membership;
     }
+    if (skipControl) skipControl.dispatchEvent(new Event('change', { bubbles: true }));
     ['traineeStartDate', 'probationaryStartDate', 'regularMemberDate'].forEach((id) => el(id)?.dispatchEvent(new Event('change', { bubbles: true })));
   }
 

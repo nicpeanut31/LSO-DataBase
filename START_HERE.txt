@@ -103,3 +103,8 @@ ATTENDANCE REPORT UPDATE
 No additional SQL change is required for the Semester and Monthly report buttons.
 After uploading all updated files to GitHub, hard-refresh the live website.
 Monthly reports use the month currently displayed in the Attendance Calendar.
+
+DUTY HOURS ARCHIVE UPDATE
+-------------------------
+This package adds Active Records and Duty Archive views. Duty records remain accessible after a member progresses, and skipped Probationary records are marked Skipped • Archived while remaining included in totals. No new Supabase SQL is required when the current Semester Duty Hours setup is already installed.
+

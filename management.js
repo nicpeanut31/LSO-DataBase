@@ -866,13 +866,15 @@
       if (showMessage) toast('Enter the Trainee Start Date first.', true);
       return false;
     }
+    const skipped = Boolean(el('probationarySkipped')?.checked);
     const probationary = addDays(start, Number(settings.traineeDays));
-    const regular1 = addDays(probationary, Number(settings.probationaryDays));
-    el('probationaryStartDate').value = probationary;
+    const regular1 = skipped ? probationary : addDays(probationary, Number(settings.probationaryDays));
+    el('probationaryStartDate').disabled = skipped;
+    el('probationaryStartDate').value = skipped ? '' : probationary;
     el('regularMemberDate').value = regular1;
     if (el('regularPeriod2StartDate')) el('regularPeriod2StartDate').value = '';
     ['probationaryStartDate', 'regularMemberDate'].forEach((id) => el(id).dispatchEvent(new Event('change', { bubbles: true })));
-    if (showMessage) toast('Recruitment timeline dates calculated.');
+    if (showMessage) toast(skipped ? 'Direct Trainee-to-Membership dates calculated. Probationary duty remains archived.' : 'Recruitment timeline dates calculated.');
     return true;
   }
 

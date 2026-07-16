@@ -30,6 +30,7 @@
     ['membershipStage', 'Membership Stage'],
     ['traineeStartDate', 'Trainee Start Date'],
     ['probationaryStartDate', 'Probationary Start Date'],
+    ['probationarySkipped', 'Probationary Period Skipped'],
     ['regularMemberDate', 'Membership Period Start Date'],
     ['periodGroup', 'Current Period Group'],
     ['stageNotes', 'Trainee / Probationary Notes'],
@@ -228,6 +229,12 @@
       return `Trainee Period starts in ${days} day${days === 1 ? '' : 's'}`;
     }
     if (stage === 'Trainee') {
+      if (member.probationarySkipped && validDate(member.regularMemberDate)) {
+        const days = daysBetween(referenceDate, member.regularMemberDate);
+        if (days === 0) return 'Moves directly to Membership Period today';
+        if (days === 1) return 'Direct Membership Period starts tomorrow';
+        return `Direct Membership Period starts in ${days} days • Probationary skipped`;
+      }
       if (!validDate(member.probationaryStartDate)) return 'Trainee Period • next date not set';
       const days = daysBetween(referenceDate, member.probationaryStartDate);
       if (days === 0) return 'Moves to Probationary Period today';
@@ -248,6 +255,8 @@
 
   function enrichMember(member) {
     const enriched = migrateLegacyStageDates(member);
+    const skipValue = String(enriched.probationarySkipped ?? '').trim().toLowerCase();
+    enriched.probationarySkipped = enriched.probationarySkipped === true || ['true', '1', 'yes', 'y', 'skipped'].includes(skipValue) || Boolean(enriched.regularMemberDate && !enriched.probationaryStartDate);
     enriched.membershipStage = calculateMembershipStage(enriched);
     enriched.periodGroup = calculatePeriodGroup(enriched);
     if (!enriched.age && enriched.birthdate) enriched.age = ageFromBirthdate(enriched.birthdate);
@@ -512,7 +521,7 @@
       recordField('Section', member.section), recordField('CYS', member.cys), recordField('Academic Status', member.academicStatus),
       recordField('Position in Organization', member.organizationPosition), recordField('Specific Organization Role', member.organizationRole), recordField('Member Status', member.memberStatus),
       recordField('Current Membership Period', member.periodGroup), recordField('Trainee Period Start', toDateLabel(member.traineeStartDate)),
-      recordField('Probationary Period Start', toDateLabel(member.probationaryStartDate)), recordField('Membership Period Start', toDateLabel(member.regularMemberDate)),
+      recordField('Probationary Period Start', member.probationarySkipped ? 'Skipped' : toDateLabel(member.probationaryStartDate)), recordField('Membership Period Start', toDateLabel(member.regularMemberDate)),
       recordField('Stage Timeline Status', member.stagePeriodStatus), recordField('Orchestra Section', member.orchestraSection),
       recordField('Primary Instrument', member.primaryInstrument),
       recordField('Date Registered', toDateLabel(member.dateRegistered)), recordField('Last Profile Review', toDateLabel(member.lastProfileReview)), recordField('Record Quality', `${member.recordQuality}%`)
@@ -531,7 +540,7 @@
       ['Contact Number', member.contactNumber], ['DLSUD Outlook', member.outlook], ['College / Course', [member.college, member.course].filter(Boolean).join(' — ')],
       ['Year / Section', [member.yearLevel, member.section].filter(Boolean).join(' — ')], ['Emergency Contact', member.emergencyContactName],
       ['Emergency Number', member.emergencyContactNumber], ['Trainee Period Start', toDateLabel(member.traineeStartDate)],
-      ['Probationary Period Start', toDateLabel(member.probationaryStartDate)], ['Membership Period Start', toDateLabel(member.regularMemberDate)],
+      ['Probationary Period Start', member.probationarySkipped ? 'Skipped — duty record archived' : toDateLabel(member.probationaryStartDate)], ['Membership Period Start', toDateLabel(member.regularMemberDate)],
       ['Date Registered', toDateLabel(member.dateRegistered)], ['Profile Review', member.reviewStatus], ['Record Quality', `${member.recordQuality}%`]
     ];
     const popup = window.open('', '_blank', 'width=980,height=760');
@@ -580,6 +589,11 @@
       orchestraSection: 'orchestraSection', primaryInstrument: 'primaryInstrument', dateRegistered: 'dateRegistered', lastProfileReview: 'lastProfileReview', reviewStatus: 'reviewStatus', remarks: 'remarks'
     };
     if (member) Object.entries(fieldMap).forEach(([key, id]) => { el(id).value = member[key] ?? ''; });
+    if (el('probationarySkipped')) el('probationarySkipped').checked = Boolean(member?.probationarySkipped || (member?.regularMemberDate && !member?.probationaryStartDate));
+    if (el('probationaryStartDate')) el('probationaryStartDate').disabled = Boolean(el('probationarySkipped')?.checked);
+    if (el('stageTimelineNote')) el('stageTimelineNote').innerHTML = el('probationarySkipped')?.checked
+      ? '<strong>Direct transition:</strong> Trainee Period → Membership Period. The Probationary duty ledger remains available in the archive and is included in combined totals.'
+      : '<strong>Automatic transition:</strong> Trainee Period → Probationary Period → Membership Period. Once the Membership Period start date arrives, the person automatically appears in the Members list.';
     updateAutomaticStagePreview();
     el('memberModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -621,7 +635,8 @@
       memberStatus: el('memberStatus').value,
       membershipStage: el('membershipStage').value,
       traineeStartDate: el('traineeStartDate').value || dateRegistered,
-      probationaryStartDate: el('probationaryStartDate').value,
+      probationaryStartDate: el('probationarySkipped')?.checked ? '' : el('probationaryStartDate').value,
+      probationarySkipped: Boolean(el('probationarySkipped')?.checked),
       regularMemberDate: el('regularMemberDate').value,
       regularPeriod2StartDate: el('regularPeriod2StartDate').value,
       stageNotes: el('stageNotes').value.trim(),
@@ -654,9 +669,12 @@
     ];
     const missing = required.filter(([key]) => !String(member[key] || '').trim()).map(([, label]) => label);
     if (missing.length) return `Please complete: ${missing.join(', ')}.`;
+    if (member.probationarySkipped && !member.regularMemberDate) return 'Set the Membership Period Start when the Probationary Period is skipped.';
+    if (member.probationarySkipped && member.probationaryStartDate) return 'Clear the Probationary Period Start or turn off Skip Probationary Period.';
     if (member.probationaryStartDate && member.probationaryStartDate <= member.traineeStartDate) return 'Probationary Start Date must be later than the Trainee Start Date.';
-    if (member.regularMemberDate && !member.probationaryStartDate) return 'Set the Probationary Period Start before the Membership Period Start.';
-    if (member.regularMemberDate && member.regularMemberDate <= member.probationaryStartDate) return 'Membership Period Start must be later than the Probationary Period Start.';
+    if (member.regularMemberDate && !member.probationaryStartDate && !member.probationarySkipped) return 'Set the Probationary Period Start or select Skip the Probationary Period.';
+    if (member.regularMemberDate && member.probationarySkipped && member.regularMemberDate <= member.traineeStartDate) return 'Membership Period Start must be later than the Trainee Start Date.';
+    if (member.regularMemberDate && member.probationaryStartDate && member.regularMemberDate <= member.probationaryStartDate) return 'Membership Period Start must be later than the Probationary Period Start.';
 
     const duplicateStudent = members.find((item) => item.id !== member.id && normalize(item.studentNumber) === normalize(member.studentNumber));
     if (duplicateStudent) return `Student Number already belongs to ${duplicateStudent.fullName}.`;
@@ -853,7 +871,8 @@
     const draft = {
       membershipStage: el('membershipStage').value || 'Trainee',
       traineeStartDate: el('traineeStartDate').value,
-      probationaryStartDate: el('probationaryStartDate').value,
+      probationaryStartDate: el('probationarySkipped')?.checked ? '' : el('probationaryStartDate').value,
+      probationarySkipped: Boolean(el('probationarySkipped')?.checked),
       regularMemberDate: el('regularMemberDate').value
     };
     const stage = calculateMembershipStage(draft);
@@ -906,6 +925,15 @@
     }));
     el('birthdate').addEventListener('change', () => { if (!el('age').value) el('age').value = ageFromBirthdate(el('birthdate').value); });
     ['traineeStartDate', 'probationaryStartDate', 'regularMemberDate'].forEach((id) => el(id).addEventListener('change', updateAutomaticStagePreview));
+    el('probationarySkipped')?.addEventListener('change', () => {
+      const skipped = el('probationarySkipped').checked;
+      if (skipped) el('probationaryStartDate').value = '';
+      el('probationaryStartDate').disabled = skipped;
+      if (el('stageTimelineNote')) el('stageTimelineNote').innerHTML = skipped
+        ? '<strong>Direct transition:</strong> Trainee Period → Membership Period. The Probationary duty ledger remains available in the archive and is included in combined totals.'
+        : '<strong>Automatic transition:</strong> Trainee Period → Probationary Period → Membership Period. Once the Membership Period start date arrives, the person automatically appears in the Members list.';
+      updateAutomaticStagePreview();
+    });
     el('dateRegistered').addEventListener('change', () => {
       if (!el('traineeStartDate').value) el('traineeStartDate').value = el('dateRegistered').value;
       updateAutomaticStagePreview();

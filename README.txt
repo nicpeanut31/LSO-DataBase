@@ -74,3 +74,12 @@ Attendance now provides separate print-ready Semester and Monthly reports.
 The Monthly report follows the month displayed in the Attendance Calendar and
 never mixes records from the other semester. Individual member reports are also
 available for both the full selected semester and the displayed calendar month.
+
+DUTY HOURS ARCHIVE BEHAVIOR
+---------------------------
+- Active Duty Records and Duty Archive are separate views.
+- Progression never deletes duty-hour information.
+- Membership Period members keep archived Trainee and Probationary ledgers.
+- Direct Trainee-to-Membership registrations may mark Probationary as skipped.
+- Skipped Probationary records remain editable, printable, and included in combined calculations.
+

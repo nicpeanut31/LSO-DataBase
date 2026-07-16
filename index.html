@@ -414,7 +414,17 @@
 </div>
 
 <div class="panel duty-roster-command-panel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Separated Rosters</p><h3>Trainee and Probationary Lists</h3><p class="panel-subtitle">Choose a person from the correct period. Historical records remain available after progression.</p></div><label class="field duty-global-search"><span>Search both rosters</span><input id="dutyMemberSearch" type="search" placeholder="Name, membership ID, or student number..." autocomplete="off"/></label></div>
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Separated Rosters</p><h3>Trainee and Probationary Duty Records</h3><p class="panel-subtitle">Active records and completed-period archives are separated. No duty record is removed when a member progresses.</p></div>
+<div class="duty-roster-tools">
+<label class="field duty-global-search"><span>Search both rosters</span><input id="dutyMemberSearch" type="search" placeholder="Name, membership ID, or student number..." autocomplete="off"/></label>
+<div class="segmented-control duty-record-mode-toggle" id="dutyRecordModeToggle" aria-label="Duty record status">
+<button class="segment-button active" data-duty-record-mode="Active" type="button">Active Records</button>
+<button class="segment-button" data-duty-record-mode="Archive" type="button">Duty Archive</button>
+</div>
+</div>
+</div>
+<div class="duty-archive-notice hidden" id="dutyArchiveNotice"><span>Archive</span><div><strong>Completed and skipped periods remain available.</strong><small>Members in the Membership Period automatically keep both Trainee and Probationary duty ledgers here. A skipped Probationary Period is marked as archived but can still receive committed hours, render time, and incentive records.</small></div></div>
 <div class="duty-roster-grid">
 <article class="duty-roster-card trainee-roster-card">
 <header><div><span class="roster-orbit blue-orbit">01</span><div><p class="eyebrow">Training Stage</p><h4>Trainee Period</h4></div></div><strong id="dutyTraineeCount">0</strong></header>
@@ -493,7 +503,7 @@
 <div class="panel-header stack-mobile"><div><p class="eyebrow">Semester Roster Totals</p><h3>Overall Duty Hours</h3><p class="panel-subtitle" id="dutyOverallCaption">First Semester • Trainee Period</p></div>
 <div class="segmented-control compact-segmented" id="dutyOverallPeriodToggle"><button class="segment-button active" data-duty-period="Trainee Period" type="button">Trainees</button><button class="segment-button" data-duty-period="Probationary Period" type="button">Probationary</button></div></div>
 <div class="attendance-kpi-grid duty-overall-metrics" id="dutyOverallMetrics"></div>
-<div class="table-wrap compact-report-table duty-overall-table"><table><thead><tr><th>Member</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody id="dutyOverallTableBody"></tbody></table></div>
+<div class="table-wrap compact-report-table duty-overall-table"><table><thead><tr><th>Member</th><th>Record Status</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody id="dutyOverallTableBody"></tbody></table></div>
 </article>
 </section>
 
@@ -668,7 +678,8 @@
 <label class="field"><span>Probationary Period Start</span><input id="probationaryStartDate" type="date"/></label>
 <label class="field"><span>Membership Period Start</span><input id="regularMemberDate" type="date"/></label>
 <input id="regularPeriod2StartDate" type="hidden" value=""/>
-<div class="stage-timeline-note span-3"><strong>Automatic transition:</strong> Trainee Period → Probationary Period → Membership Period. Once the Membership Period start date arrives, the person automatically appears in the Members list.</div>
+<label class="skip-probationary-control span-3"><input id="probationarySkipped" type="checkbox"/><span><strong>Skip the Probationary Period</strong><small>Use this when the person moves directly from Trainee to Membership. The Probationary duty ledger will still exist in the Duty Archive and remains included in combined totals.</small></span></label>
+<div class="stage-timeline-note span-3" id="stageTimelineNote"><strong>Automatic transition:</strong> Trainee Period → Probationary Period → Membership Period. Once the Membership Period start date arrives, the person automatically appears in the Members list.</div>
 <div class="timeline-tools span-3">
 <button class="button button-secondary" id="applyTimelineDefaults" type="button">Calculate Dates from Timeline Settings</button>
 <small id="timelineDefaultsHelp">Configure Trainee and Probationary durations in Data &amp; Backup to calculate the next period dates.</small>

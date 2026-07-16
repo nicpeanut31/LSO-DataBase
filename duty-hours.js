@@ -13,6 +13,7 @@
   let selectedMemberId = '';
   let selectedPeriod = 'Trainee Period';
   let overallPeriod = 'Trainee Period';
+  let recordMode = 'Active';
   let searchTerm = '';
 
   function today() {
@@ -264,23 +265,65 @@
       data.entries.some((entry) => entry.memberId === memberId && entry.period === period);
   }
 
-  function rosterMembers(data, period, applySearch = true) {
+  function isMembershipPeriod(member) {
+    return member?.periodGroup === 'Membership Period' || member?.membershipStage === 'Regular Member';
+  }
+
+  function periodLifecycle(member, period, data) {
+    const normalizedPeriod = normalizePeriod(period);
+    const hasData = memberHasPeriodData(data, member.id, normalizedPeriod);
+    const isCurrent = member.periodGroup === normalizedPeriod;
+    const isMember = isMembershipPeriod(member);
+    const skippedProbationary = normalizedPeriod === 'Probationary Period' && Boolean(
+      member.probationarySkipped || (isMember && member.regularMemberDate && !member.probationaryStartDate)
+    );
+
+    if (normalizedPeriod === 'Trainee Period') {
+      const progressed = member.periodGroup === 'Probationary Period' || isMember;
+      const eligible = isCurrent || progressed || Boolean(member.traineeStartDate) || hasData;
+      const archived = eligible && !isCurrent && (progressed || hasData);
+      return { eligible, active: isCurrent, archived, skipped: false, label: isCurrent ? 'Active' : archived ? 'Archived' : 'Not started' };
+    }
+
+    const eligible = isCurrent || isMember || Boolean(member.probationaryStartDate) || skippedProbationary || hasData;
+    const archived = eligible && !isCurrent && (isMember || skippedProbationary || hasData);
+    return {
+      eligible,
+      active: isCurrent,
+      archived,
+      skipped: skippedProbationary,
+      label: isCurrent ? 'Active' : skippedProbationary ? 'Skipped • Archived' : archived ? 'Archived' : 'Not started'
+    };
+  }
+
+  function rosterMembers(data, period, applySearch = true, mode = recordMode) {
     const query = applySearch ? searchTerm.trim().toLowerCase() : '';
     return getMembers()
-      .filter((member) => member.periodGroup === period || memberHasPeriodData(data, member.id, period))
+      .filter((member) => {
+        const lifecycle = periodLifecycle(member, period, data);
+        if (!lifecycle.eligible) return false;
+        if (mode === 'Active') return lifecycle.active;
+        if (mode === 'Archive') return lifecycle.archived;
+        return lifecycle.active || lifecycle.archived;
+      })
       .filter((member) => !query || [member.fullName, member.membershipId, member.studentNumber]
         .some((value) => String(value || '').toLowerCase().includes(query)))
       .sort((a, b) => String(a.fullName).localeCompare(String(b.fullName)));
   }
 
+  function lifecycleBadge(lifecycle) {
+    const className = lifecycle.active ? 'active' : lifecycle.skipped ? 'skipped' : 'archived';
+    return `<span class="duty-record-state ${className}">${safeText(lifecycle.label)}</span>`;
+  }
+
   function rosterButton(member, period, data) {
     const summary = calculatePeriod(data, member.id, activeSemester, period);
-    const active = member.id === selectedMemberId && period === selectedPeriod;
+    const selected = member.id === selectedMemberId && period === selectedPeriod;
     const initials = String(member.fullName || 'M').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
-    const historical = member.periodGroup !== period;
-    return `<button class="duty-roster-person${active ? ' active' : ''}" data-duty-member="${safeText(member.id)}" data-duty-roster-period="${safeText(period)}" type="button">
+    const lifecycle = periodLifecycle(member, period, data);
+    return `<button class="duty-roster-person${selected ? ' active' : ''}${lifecycle.archived ? ' archived-record' : ''}${lifecycle.skipped ? ' skipped-record' : ''}" data-duty-member="${safeText(member.id)}" data-duty-roster-period="${safeText(period)}" type="button">
       <span class="member-avatar">${safeText(initials)}</span>
-      <span class="duty-roster-person-copy"><strong>${safeText(member.fullName)}</strong><small>${safeText(member.membershipId || member.studentNumber || 'No ID')}${historical ? ' • Historical record' : ''}</small></span>
+      <span class="duty-roster-person-copy"><strong>${safeText(member.fullName)}</strong><small>${safeText(member.membershipId || member.studentNumber || 'No ID')}</small>${lifecycleBadge(lifecycle)}</span>
       <span class="duty-roster-balance ${summary.balance <= 0 && summary.committed > 0 ? 'complete' : ''}">${safeText(balanceText(summary.balance, summary.committed, summary.credited))}</span>
     </button>`;
   }
@@ -289,14 +332,17 @@
     const data = loadData();
     const trainee = rosterMembers(data, 'Trainee Period');
     const probationary = rosterMembers(data, 'Probationary Period');
+    const modeLabel = recordMode === 'Archive' ? 'archived' : 'active';
     if (el('dutyTraineeCount')) el('dutyTraineeCount').textContent = trainee.length;
     if (el('dutyProbationaryCount')) el('dutyProbationaryCount').textContent = probationary.length;
+    if (el('dutyArchiveNotice')) el('dutyArchiveNotice').classList.toggle('hidden', recordMode !== 'Archive');
+    document.querySelectorAll('[data-duty-record-mode]').forEach((button) => button.classList.toggle('active', button.dataset.dutyRecordMode === recordMode));
     if (el('dutyTraineeRoster')) el('dutyTraineeRoster').innerHTML = trainee.length
       ? trainee.map((member) => rosterButton(member, 'Trainee Period', data)).join('')
-      : '<div class="roster-empty"><strong>No trainees found</strong><small>Add a Trainee member or clear the search.</small></div>';
+      : `<div class="roster-empty"><strong>No ${modeLabel} Trainee records</strong><small>${recordMode === 'Archive' ? 'Trainee records move here after progression.' : 'Current Trainee members will appear here.'}</small></div>`;
     if (el('dutyProbationaryRoster')) el('dutyProbationaryRoster').innerHTML = probationary.length
       ? probationary.map((member) => rosterButton(member, 'Probationary Period', data)).join('')
-      : '<div class="roster-empty"><strong>No probationary members found</strong><small>Add a Probationary member or clear the search.</small></div>';
+      : `<div class="roster-empty"><strong>No ${modeLabel} Probationary records</strong><small>${recordMode === 'Archive' ? 'Completed or skipped Probationary records move here.' : 'Current Probationary members will appear here.'}</small></div>`;
   }
 
   function summaryStat(label, value, helper = '') {
@@ -340,14 +386,15 @@
     const focus = calculatePeriod(data, member.id, activeSemester, selectedPeriod);
     const semester = calculateSemester(data, member.id, activeSemester);
     const semesterCombined = semester.combined;
+    const lifecycle = periodLifecycle(member, selectedPeriod, data);
     if (el('dutySelectedTitle')) el('dutySelectedTitle').textContent = member.fullName;
-    if (el('dutySelectedContext')) el('dutySelectedContext').textContent = `${member.membershipId || member.studentNumber || 'No ID'} • ${activeSemester} • ${selectedPeriod}`;
+    if (el('dutySelectedContext')) el('dutySelectedContext').textContent = `${member.membershipId || member.studentNumber || 'No ID'} • ${activeSemester} • ${selectedPeriod} • ${lifecycle.label}`;
     if (el('dutySelectedBadge')) {
-      el('dutySelectedBadge').textContent = selectedPeriod;
-      el('dutySelectedBadge').className = `badge ${selectedPeriod === 'Trainee Period' ? 'badge-blue' : 'badge-gold'}`;
+      el('dutySelectedBadge').textContent = lifecycle.label;
+      el('dutySelectedBadge').className = `badge ${lifecycle.active ? (selectedPeriod === 'Trainee Period' ? 'badge-blue' : 'badge-gold') : lifecycle.skipped ? 'badge-purple' : 'badge-gray'}`;
     }
 
-    summaryContainer.innerHTML = `<div class="duty-profile-snapshot">
+    summaryContainer.innerHTML = `${lifecycle.archived ? `<div class="duty-selected-archive-banner${lifecycle.skipped ? ' skipped' : ''}"><span>${lifecycle.skipped ? 'Skipped period archive' : 'Completed period archive'}</span><strong>${safeText(selectedPeriod)} records remain editable and included in all semester and academic-year totals.</strong></div>` : ''}<div class="duty-profile-snapshot">
       ${progressCard(focus)}
       <article class="duty-semester-total-card"><p class="eyebrow">Semester Total</p><h4>${safeText(activeSemester)}</h4><div class="duty-focus-stats">
         ${summaryStat('Both Periods Committed', durationLabel(semesterCombined.committed))}
@@ -411,34 +458,36 @@
 
   function renderOverall() {
     const data = loadData();
-    const members = rosterMembers(data, overallPeriod, false);
+    const members = rosterMembers(data, overallPeriod, false, 'All');
     const metrics = el('dutyOverallMetrics');
     const body = el('dutyOverallTableBody');
     const caption = el('dutyOverallCaption');
     if (!metrics || !body || !caption) return;
-    const summaries = members.map((member) => ({ member, summary: calculatePeriod(data, member.id, activeSemester, overallPeriod) }));
+    const summaries = members.map((member) => ({ member, summary: calculatePeriod(data, member.id, activeSemester, overallPeriod), lifecycle: periodLifecycle(member, overallPeriod, data) }));
     const totals = combineSummaries(summaries.map((item) => item.summary));
     const completed = summaries.filter((item) => item.summary.committed > 0 && item.summary.balance <= 0).length;
+    const archived = summaries.filter((item) => item.lifecycle.archived).length;
     const outstanding = summaries.reduce((sum, item) => sum + Math.max(0, item.summary.balance), 0);
 
     metrics.innerHTML = [
-      ['Roster Members', members.length, overallPeriod],
+      ['Tracked Records', members.length, `${overallPeriod} active + archive`],
+      ['Archived', archived, 'Completed or skipped periods'],
       ['Committed', durationLabel(totals.committed), activeSemester],
       ['Rendered', durationLabel(totals.rendered), 'Actual service'],
-      ['Net Incentives', durationLabel(totals.incentives, true), 'Credits minus deductions'],
       ['Completed', completed, 'Met required time'],
       ['Outstanding', durationLabel(outstanding), 'Still to render']
     ].map(([label, value, helper]) => `<div class="attendance-kpi"><span>${safeText(label)}</span><strong>${safeText(value)}</strong><small>${safeText(helper)}</small></div>`).join('');
-    caption.textContent = `${activeSemester} • ${overallPeriod} • ${members.length} tracked member${members.length === 1 ? '' : 's'}`;
-    body.innerHTML = summaries.length ? summaries.map(({ member, summary }) => `<tr>
+    caption.textContent = `${activeSemester} • ${overallPeriod} • active and archived records`;
+    body.innerHTML = summaries.length ? summaries.map(({ member, summary, lifecycle }) => `<tr>
       <td><strong>${safeText(member.fullName)}</strong><small class="table-subtext">${safeText(member.membershipId || member.studentNumber || 'No ID')}</small></td>
+      <td>${lifecycleBadge(lifecycle)}</td>
       <td>${safeText(durationLabel(summary.committed))}</td>
       <td>${safeText(durationLabel(summary.rendered))}</td>
       <td><span class="${summary.incentives < 0 ? 'negative-value' : ''}">${safeText(durationLabel(summary.incentives, true))}</span></td>
       <td>${safeText(durationLabel(summary.credited))}</td>
       <td>${balanceBadge(summary)}</td>
       <td><div class="table-progress"><span style="width:${summary.progress}%"></span></div><small>${summary.progress}%</small></td>
-    </tr>`).join('') : '<tr><td colspan="7"><div class="empty-state compact-empty"><h4>No roster records</h4><p>No members or historical duty records match this semester and period.</p></div></td></tr>';
+    </tr>`).join('') : '<tr><td colspan="8"><div class="empty-state compact-empty"><h4>No duty records</h4><p>No active or archived records match this semester and period.</p></div></td></tr>';
   }
 
   function parseTimeInputs(hoursId, minutesId) {
@@ -646,6 +695,7 @@
     const member = selectedMember();
     if (!member) return;
     const focus = calculatePeriod(data, member.id, activeSemester, selectedPeriod);
+    const lifecycle = periodLifecycle(member, selectedPeriod, data);
     const year = calculateMember(data, member.id);
     const yearRows = [
       ['First Semester', year.first.combined], ['Second Semester', year.second.combined], ['Whole Academic Year', year.academicYear]
@@ -653,7 +703,7 @@
     const entries = entriesFor(data, member.id, activeSemester, selectedPeriod).sort((a, b) => String(a.date).localeCompare(String(b.date)));
     const ledgerRows = entries.map((entry, index) => `<tr><td>${index + 1}</td><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(entry.entryType === 'Duty' ? clockRangeLabel(entry) : '—')}</td><td>${safeText(entry.entryType === 'Duty' ? 'Rendered Duty' : 'Incentive Adjustment')}</td><td class="${entry.minutes < 0 ? 'negative' : 'positive'}">${safeText(durationLabel(entry.minutes, entry.entryType === 'Incentive'))}</td><td>${safeText(entry.description || '—')}</td><td>${safeText(entry.createdBy || '—')}</td></tr>`).join('');
     const html = `<!doctype html><html><head><title>${safeText(member.fullName)} — Duty Hours</title><style>${printStyles('landscape')}</style></head><body>
-      <div class="header"><div><div class="org">Lasallian Symphony Orchestra</div><h1>Individual Duty Hours Report</h1><div class="sub">${safeText(member.fullName)} • ${safeText(activeSemester)} • ${safeText(selectedPeriod)}</div></div><div class="sub">Generated ${safeText(dateLabel(today()))}</div></div>
+      <div class="header"><div><div class="org">Lasallian Symphony Orchestra</div><h1>Individual Duty Hours Report</h1><div class="sub">${safeText(member.fullName)} • ${safeText(activeSemester)} • ${safeText(selectedPeriod)} • ${safeText(lifecycle.label)}</div></div><div class="sub">Generated ${safeText(dateLabel(today()))}</div></div>
       <div class="summary">${[
         ['Committed', durationLabel(focus.committed)], ['Rendered', durationLabel(focus.rendered)], ['Net Incentives', durationLabel(focus.incentives, true)], ['Credited', durationLabel(focus.credited)], ['Remaining / Excess', balanceText(focus.balance, focus.committed, focus.credited)], ['Ledger Entries', entries.length]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
@@ -665,17 +715,17 @@
 
   function printOverall() {
     const data = loadData();
-    const members = rosterMembers(data, overallPeriod, false);
-    const summaries = members.map((member) => ({ member, summary: calculatePeriod(data, member.id, activeSemester, overallPeriod) }));
+    const members = rosterMembers(data, overallPeriod, false, 'All');
+    const summaries = members.map((member) => ({ member, summary: calculatePeriod(data, member.id, activeSemester, overallPeriod), lifecycle: periodLifecycle(member, overallPeriod, data) }));
     const totals = combineSummaries(summaries.map((item) => item.summary));
     const outstanding = summaries.reduce((sum, item) => sum + Math.max(0, item.summary.balance), 0);
-    const rows = summaries.map(({ member, summary }, index) => `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(durationLabel(summary.committed))}</td><td>${safeText(durationLabel(summary.rendered))}</td><td>${safeText(durationLabel(summary.incentives, true))}</td><td>${safeText(durationLabel(summary.credited))}</td><td>${safeText(balanceText(summary.balance, summary.committed, summary.credited))}</td><td>${summary.progress}%</td></tr>`).join('');
+    const rows = summaries.map(({ member, summary, lifecycle }, index) => `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(lifecycle.label)}</td><td>${safeText(durationLabel(summary.committed))}</td><td>${safeText(durationLabel(summary.rendered))}</td><td>${safeText(durationLabel(summary.incentives, true))}</td><td>${safeText(durationLabel(summary.credited))}</td><td>${safeText(balanceText(summary.balance, summary.committed, summary.credited))}</td><td>${summary.progress}%</td></tr>`).join('');
     const html = `<!doctype html><html><head><title>${safeText(activeSemester)} Duty Hours</title><style>${printStyles('landscape')}</style></head><body>
       <div class="header"><div><div class="org">Lasallian Symphony Orchestra</div><h1>${safeText(activeSemester)} Duty Hours Report</h1><div class="sub">${safeText(overallPeriod)} roster</div></div><div class="sub">Generated ${safeText(dateLabel(today()))}</div></div>
       <div class="summary">${[
         ['Roster', members.length], ['Committed', durationLabel(totals.committed)], ['Rendered', durationLabel(totals.rendered)], ['Net Incentives', durationLabel(totals.incentives, true)], ['Credited', durationLabel(totals.credited)], ['Outstanding', durationLabel(outstanding)]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
-      <table><thead><tr><th>#</th><th>Member</th><th>ID</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No duty-hour records.</td></tr>'}</tbody></table>
+      <table><thead><tr><th>#</th><th>Member</th><th>ID</th><th>Record Status</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No duty-hour records.</td></tr>'}</tbody></table>
       <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div><script>window.onload=()=>window.print()<\/script></body></html>`;
     openPrint(html);
   }
@@ -683,7 +733,7 @@
   function getDashboardSummary(semester) {
     const data = loadData();
     const trackedMap = new Map();
-    PERIODS.forEach((period) => rosterMembers(data, period, false).forEach((member) => trackedMap.set(`${member.id}:${period}`, { member, period })));
+    PERIODS.forEach((period) => rosterMembers(data, period, false, 'All').forEach((member) => trackedMap.set(`${member.id}:${period}`, { member, period })));
     const rows = [...trackedMap.values()].map(({ member, period }) => calculatePeriod(data, member.id, normalizeSemester(semester), period));
     const totals = combineSummaries(rows);
     const remaining = rows.reduce((sum, item) => sum + Math.max(0, item.balance), 0);
@@ -709,6 +759,12 @@
     el('dutyOverallPeriodToggle')?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-duty-period]');
       if (button) setOverallPeriod(button.dataset.dutyPeriod);
+    });
+    el('dutyRecordModeToggle')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-duty-record-mode]');
+      if (!button) return;
+      recordMode = button.dataset.dutyRecordMode === 'Archive' ? 'Archive' : 'Active';
+      renderRosters();
     });
     el('dutyMemberSearch')?.addEventListener('input', (event) => { searchTerm = event.target.value; renderRosters(); });
     ['dutyTraineeRoster', 'dutyProbationaryRoster'].forEach((id) => el(id)?.addEventListener('click', (event) => {
@@ -754,7 +810,14 @@
     calculateClockDuration,
     formatClockTime,
     getDashboardSummary,
+    getPeriodLifecycle: (memberId, period) => {
+      const data = loadData();
+      const member = getMembers().find((item) => item.id === memberId);
+      return member ? periodLifecycle(member, period, data) : null;
+    },
+    getRosterMembers: (period, mode = 'All') => rosterMembers(loadData(), period, false, mode).map((member) => member.id),
     setSemester,
+    setRecordMode: (mode) => { recordMode = mode === 'Archive' ? 'Archive' : 'Active'; renderAll(); },
     refresh: renderAll
   };
 

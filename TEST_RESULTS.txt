@@ -1,21 +1,23 @@
-LSO ATTENDANCE REPORT UPGRADE — VALIDATION RESULTS
-==================================================
+LSO DUTY HOURS ARCHIVE FIX — VALIDATION RESULTS
+===============================================
 
-PASS — All JavaScript files pass Node syntax validation.
-PASS — Semester Report button exists and remains connected to the selected semester.
-PASS — Monthly Report button exists in the Attendance command header.
-PASS — Print This Month button exists beside the Attendance Calendar controls.
-PASS — Individual Member Monthly Report button appears after selecting a member.
-PASS — Monthly filtering uses the month currently displayed in the calendar.
-PASS — Monthly filtering also respects the selected First or Second Semester.
-PASS — Semester and Monthly reports include activity-by-activity breakdowns.
-PASS — Semester and Monthly reports include member totals and percentages.
-PASS — Attendance rate remains Present + Late divided by Present + Late + Absent.
-PASS — Excused records remain excluded from the rate denominator.
-PASS — Existing clock-based Duty Hours and Supabase configuration remain unchanged.
-PASS — No new Supabase SQL is required for this print-report-only upgrade.
+PASSED
+------
+- JavaScript syntax validation for every project .js file.
+- HTML duplicate-ID validation: no duplicate IDs found.
+- HTML local script and stylesheet reference validation: no missing files.
+- Active Trainee roster lifecycle test.
+- Active Probationary roster lifecycle test.
+- Trainee archive after progression to Probationary.
+- Trainee and Probationary archive after progression to Membership Period.
+- Skipped Probationary record classified as "Skipped • Archived".
+- Skipped Probationary committed time remains included in totals.
+- Skipped Probationary incentives remain included in totals.
+- Combined semester calculation includes both Trainee and skipped Probationary records.
+- Existing 12:00 PM to 5:00 PM clock calculation remains 300 minutes / 5 hours.
+- Legacy Membership records with a Membership Start date and no Probationary Start date are automatically recognized as skipped Probationary records.
+- Supabase Project URL and publishable key remain configured.
 
-Representative calculation checked:
-Present 1 + Late 1 = 2 attended
-Present 1 + Late 1 + Absent 1 = 3 counted
-2 / 3 × 100 = 66.67%, displayed as 67%
+DATABASE MIGRATION
+------------------
+No new SQL migration is required. Archive status is derived from each member's current membership period and timeline, while the original duty data remains unchanged.

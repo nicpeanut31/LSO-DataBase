@@ -1,0 +1,29 @@
+LSO DUTY HOURS — ARCHIVE AND WORKFLOW FIX
+=========================================
+
+WHAT WAS FIXED
+--------------
+1. Duty Hours now separates Active Records and the Duty Archive.
+2. Trainee records move to the archive when the member enters Probationary or Membership Period.
+3. Probationary records move to the archive when the member enters Membership Period.
+4. Archived records remain searchable, editable, printable, and included in all totals.
+5. Members who skip Probationary Period receive a "Skipped • Archived" Probationary duty ledger.
+6. Committed time, rendered clock entries, incentives, semester totals, and academic-year totals continue to include skipped or archived ledgers.
+7. Member Registration now includes a Skip the Probationary Period checkbox.
+8. The Duty Hours layout was widened and reorganized so forms, tables, and action buttons are not clipped.
+9. Overall Duty Hours reports now show whether each record is Active, Archived, or Skipped • Archived.
+
+ARCHIVE RULES
+-------------
+- Current Trainee: Trainee record is Active.
+- Current Probationary: Probationary record is Active; Trainee record is Archived.
+- Membership Period: Trainee and Probationary records are Archived.
+- Membership Period with Probationary skipped: Trainee record is Archived and the Probationary ledger is marked Skipped • Archived.
+
+IMPORTANT
+---------
+Archive means the record is categorized as historical. The data is not moved to a separate database table and is never deleted. This keeps all previous duty calculations intact and avoids migration/data-loss risks.
+
+SUPABASE
+--------
+No new Supabase SQL is required for this update because the existing member and duty_hours JSON structures already support these fields. Upload all updated website files to GitHub and force-refresh the deployed page.
