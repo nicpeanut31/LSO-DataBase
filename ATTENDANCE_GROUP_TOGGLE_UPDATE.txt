@@ -1,0 +1,37 @@
+LSO ATTENDANCE GROUP TOGGLE UPDATE
+==================================
+
+NEW ATTENDANCE ROSTERS
+----------------------
+Attendance now has three independent membership-group toggles:
+1. Official Members — Membership Period
+2. Trainees — Trainee Period
+3. Probationary Members — Probationary Period
+
+SEPARATE COMPUTATION
+--------------------
+- Overall totals, individual lookup, event roster, semester reports, monthly
+  reports, and selected-event printouts use only the selected group.
+- A member's attendance group is determined from the membership-stage dates
+  on the event date. This keeps earlier Trainee and Probationary attendance
+  separate after the member progresses to the Membership Period.
+- Existing attendance records are preserved. No database records are deleted.
+
+PRINT OPTIONS
+-------------
+- Print Current Official Members / Trainees / Probationary Members
+- Print selected group's Semester Attendance Report
+- Print selected group's Monthly Attendance Report
+- Print selected event's selected-group roster
+- Individual semester and monthly printouts remain available
+
+INSTALLATION
+------------
+1. Extract the ZIP.
+2. Replace the existing GitHub website files with all files in the folder.
+3. Commit the changes and wait for GitHub Pages deployment.
+4. Open the website and press Ctrl + F5.
+
+No new Supabase SQL is required. Attendance is already stored in the shared
+system state; this update changes grouping, filtering, calculation, and print
+behavior only.

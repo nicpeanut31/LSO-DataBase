@@ -11,7 +11,7 @@
 <link rel="icon" href="favicon.ico?v=20260717-logos" sizes="any"/>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260717-logos"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260717-logos"/>
-<link href="styles.css?v=20260717-1605" rel="stylesheet"/>
+<link href="styles.css?v=20260717-attendance-current-archive-v2" rel="stylesheet"/>
 <link href="duty-roster-layout.css?v=20260717-1605" rel="stylesheet"/>
 <link href="access-control.css?v=20260717-1605" rel="stylesheet"/>
 <link href="branding.css?v=20260717-logos" rel="stylesheet"/>
@@ -354,7 +354,7 @@
 <section class="view" id="attendanceView">
 <div class="attendance-command-header futuristic-command-header">
 <div><p class="eyebrow">Attendance Intelligence</p><h3>Semester Attendance Command Center</h3><p>Record rehearsals, review individual performance, and generate reports without mixing First and Second Semester data.</p></div>
-<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Semester Report</button><button class="button button-secondary" id="printMonthlyAttendance" type="button">Print Monthly Report</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
+<div class="inline-actions"><button class="button button-secondary" id="printOverallAttendance" type="button">Print Official Members Semester</button><button class="button button-secondary" id="printMonthlyAttendance" type="button">Print Official Members Monthly</button><button class="button button-primary" id="addEventButton" type="button">+ New Rehearsal</button></div>
 </div>
 <div class="semester-control-panel panel">
 <div><p class="eyebrow">Academic Term</p><h4>Choose the attendance semester</h4><small>Calendar events, totals, percentages, individual history, and printouts use only the selected semester.</small></div>
@@ -364,14 +364,31 @@
 </div>
 <div class="semester-live-label"><span>Viewing</span><strong id="attendanceSemesterLabel">First Semester</strong></div>
 </div>
+<div class="attendance-group-control-panel panel">
+<div class="attendance-group-control-copy"><p class="eyebrow">Separate Attendance Rosters</p><h4>Choose the membership attendance group</h4><small>Official Member, Trainee, and Probationary attendance are recorded, calculated, and printed independently. Current rosters use each member’s current period; archived records use the member’s historical stage dates.</small></div>
+<div class="segmented-control attendance-group-toggle" id="attendanceGroupToggle" aria-label="Attendance membership group">
+<button class="segment-button active" data-attendance-group="Official Members" type="button"><span>Official</span><small>Membership Period</small></button>
+<button class="segment-button" data-attendance-group="Trainee Members" type="button"><span>Trainees</span><small>Training Period</small></button>
+<button class="segment-button" data-attendance-group="Probationary Members" type="button"><span>Probationary</span><small>Evaluation Period</small></button>
+</div>
+<div class="attendance-group-actions">
+<div class="segmented-control attendance-roster-mode-toggle" id="attendanceRosterModeToggle" aria-label="Attendance roster mode">
+<button class="segment-button active" data-attendance-roster-mode="Current" type="button"><span>Current Roster</span><small>Active members only</small></button>
+<button class="segment-button" data-attendance-roster-mode="Archive" type="button"><span>Attendance Archive</span><small>Completed stage records</small></button>
+</div>
+<div class="semester-live-label attendance-group-live-label"><span id="attendanceRosterModeLabel">Current roster</span><strong id="attendanceGroupLabel">Official Members</strong></div>
+<button class="button button-primary attendance-group-print-button" id="attendanceGroupPrintButton" type="button">Print Current Roster</button>
+</div>
+</div>
+<div class="attendance-archive-notice hidden" id="attendanceArchiveNotice"><span>Archive</span><div><strong>Historical stage attendance is kept separate.</strong><small>Completed Trainee and Probationary stage records—and inactive Official Member records—appear here without affecting current roster totals.</small></div></div>
 <div class="attendance-overview-grid">
 <article class="panel attendance-overall-panel">
-<div class="panel-header"><div><p class="eyebrow">Organization Summary</p><h3>Overall Attendance</h3><p class="panel-subtitle" id="overallAttendanceCaption">First Semester records only</p></div></div>
+<div class="panel-header"><div><p class="eyebrow">Separated Group Summary</p><h3><span id="attendanceGroupHeading">Official Members</span> Attendance</h3><p class="panel-subtitle" id="overallAttendanceCaption">First Semester records only</p></div></div>
 <div class="attendance-kpi-grid" id="overallAttendanceMetrics"></div>
 <div class="table-wrap compact-report-table"><table><thead><tr><th>Member</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Attendance Rate</th></tr></thead><tbody id="attendanceOverallTableBody"></tbody></table></div>
 </article>
 <article class="panel individual-attendance-panel">
-<div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Member Attendance Record</h3><p class="panel-subtitle">The selected semester is calculated independently.</p></div></div>
+<div class="panel-header"><div><p class="eyebrow">Individual Search</p><h3>Selected Group Member Record</h3><p class="panel-subtitle">Only names from the selected attendance group and semester are listed.</p></div></div>
 <label class="field"><span>Select Member</span><select id="attendanceIndividualSelect"><option value="">Choose a member…</option></select></label>
 <div class="individual-attendance-summary" id="individualAttendanceSummary"><div class="dashboard-empty-state"><span>⌕</span><strong>Select a member</strong><small>Their semester rehearsal totals and printable history will appear here.</small></div></div>
 <div class="individual-report-actions hidden" id="individualReportActions"><button class="button button-secondary" id="printIndividualMonthlyAttendance" type="button">Print Member Monthly Report</button><button class="button button-primary" id="printIndividualAttendance" type="button">Print Member Semester Report</button></div>
@@ -396,7 +413,7 @@
 <article class="panel attendance-roster-panel">
 <div class="record-placeholder" id="attendancePlaceholder"><div class="empty-icon">✓</div><h3>Select or create an event</h3><p>Choose an activity in the selected semester to record attendance.</p></div>
 <div class="hidden" id="attendanceWorkspace">
-<div class="panel-header stack-mobile"><div><p class="eyebrow" id="attendanceEventType">Rehearsal</p><h3 id="attendanceEventTitle"></h3><p class="panel-subtitle" id="attendanceEventMeta"></p></div><div class="inline-actions"><button class="button button-secondary" id="printEventAttendance" type="button">Print Roster</button><button class="button button-secondary" id="editEventButton">Edit</button><button class="button button-danger" id="deleteEventButton">Delete</button></div></div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow" id="attendanceEventType">Rehearsal</p><h3 id="attendanceEventTitle"></h3><p class="panel-subtitle" id="attendanceEventMeta"></p><span class="attendance-roster-group-badge">Roster: <strong id="attendanceRosterGroupLabel">Official Members</strong></span></div><div class="inline-actions"><button class="button button-secondary" id="printEventAttendance" type="button">Print Selected Group Roster</button><button class="button button-secondary" id="editEventButton">Edit</button><button class="button button-danger" id="deleteEventButton">Delete</button></div></div>
 <div class="attendance-summary" id="attendanceSummary"></div>
 <div class="attendance-toolbar"><label class="field search-field"><span>Search roster</span><input id="attendanceMemberSearch" type="search" placeholder="Member name, stage, section..."/></label><div class="inline-actions"><button class="button button-secondary" id="markAllPresent">Mark All Present</button><button class="button button-primary" id="saveAttendanceButton">Save Attendance</button></div></div>
 <div class="table-wrap"><table class="attendance-table"><thead><tr><th>Member</th><th>Stage / Period</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody id="attendanceRosterBody"></tbody></table></div>
@@ -799,10 +816,10 @@
 <script src="cloud.js?v=20260717-1605"></script>
 <script src="app.js?v=20260717-print-fix"></script>
 <script src="auth.js?v=20260717-1605"></script>
-<script src="management.js?v=20260717-1605"></script>
+<script src="management.js?v=20260717-attendance-current-archive-v2"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
-<script src="workflow-upgrades.js?v=20260717-simplified-columns-v1"></script>
+<script src="workflow-upgrades.js?v=20260717-attendance-current-archive-v2"></script>
 <script src="duty-hours.js?v=20260717-simplified-columns-v1"></script>
 <script src="permissions.js?v=20260717-1605"></script>
 </body>

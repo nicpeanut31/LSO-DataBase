@@ -9,6 +9,8 @@
   const MEMBERS_KEY = 'lso_member_database_v1';
   const DUTY_HOURS_KEY = 'lso_duty_hours_v1';
   const ATTENDANCE_SEMESTERS = ['First Semester', 'Second Semester'];
+  const ATTENDANCE_GROUPS = ['Official Members', 'Trainee Members', 'Probationary Members'];
+  const ATTENDANCE_ROSTER_MODES = ['Current', 'Archive'];
 
   const DEFAULT_SETTINGS = {
     traineeDays: '',
@@ -210,6 +212,132 @@
     return normalizeSemester(window.LSOAttendanceSemester);
   }
 
+  function normalizeAttendanceGroup(value) {
+    return ATTENDANCE_GROUPS.includes(value) ? value : 'Official Members';
+  }
+
+  function activeAttendanceGroup() {
+    return normalizeAttendanceGroup(window.LSOAttendanceGroup);
+  }
+
+  function normalizeAttendanceRosterMode(value) {
+    return ATTENDANCE_ROSTER_MODES.includes(value) ? value : 'Current';
+  }
+
+  function activeAttendanceRosterMode() {
+    return normalizeAttendanceRosterMode(window.LSOAttendanceRosterMode);
+  }
+
+  function attendanceGroupShortLabel(group = activeAttendanceGroup()) {
+    return ({
+      'Official Members': 'Official Members',
+      'Trainee Members': 'Trainees',
+      'Probationary Members': 'Probationary Members'
+    })[normalizeAttendanceGroup(group)];
+  }
+
+  function attendanceRosterModeLabel(mode = activeAttendanceRosterMode()) {
+    return normalizeAttendanceRosterMode(mode) === 'Archive' ? 'Attendance Archive' : 'Current Roster';
+  }
+
+  function currentMemberAttendanceGroup(member) {
+    if (!member) return 'Official Members';
+    const period = normalize(member.periodGroup);
+    const stage = normalize(member.membershipStage);
+
+    // The calculated periodGroup is authoritative. membershipStage is only a
+    // fallback for older records that do not yet have a periodGroup value.
+    if (period === 'trainee period') return 'Trainee Members';
+    if (period === 'probationary period') return 'Probationary Members';
+    if (period === 'membership period') return 'Official Members';
+    if (stage === 'trainee') return 'Trainee Members';
+    if (stage === 'probationary') return 'Probationary Members';
+    if (stage === 'regular member') return 'Official Members';
+
+    // Fallback for older/imported profiles whose calculated period label is missing.
+    const referenceDate = today();
+    const membershipStart = String(member.regularMemberDate || '').slice(0, 10);
+    const probationaryStart = String(member.probationaryStartDate || '').slice(0, 10);
+    if (membershipStart && referenceDate >= membershipStart) return 'Official Members';
+    if (!member.probationarySkipped && probationaryStart && referenceDate >= probationaryStart) return 'Probationary Members';
+    return 'Trainee Members';
+  }
+
+  function memberIsCurrentlyActive(member) {
+    const status = normalize(member?.memberStatus);
+    // Older/imported records sometimes have no status. Treat them as active unless
+    // they are explicitly marked Nonactive or LOA.
+    return !['nonactive', 'loa'].includes(status);
+  }
+
+  function memberAttendanceGroupOnDate(member, dateValue) {
+    if (!member) return '';
+    const date = String(dateValue || today()).slice(0, 10);
+    const traineeStart = String(member.traineeStartDate || member.dateRegistered || '').slice(0, 10);
+    const probationaryStart = String(member.probationaryStartDate || '').slice(0, 10);
+    const membershipStart = String(member.regularMemberDate || '').slice(0, 10);
+    const skipped = Boolean(member.probationarySkipped);
+    const currentGroup = currentMemberAttendanceGroup(member);
+    if (membershipStart && date >= membershipStart) return 'Official Members';
+    if (!membershipStart && currentGroup === 'Official Members') return 'Official Members';
+    if (!skipped && probationaryStart && date >= probationaryStart) return 'Probationary Members';
+    if (!probationaryStart && currentGroup === 'Probationary Members') return 'Probationary Members';
+    if (!traineeStart || date >= traineeStart) return 'Trainee Members';
+    return currentMemberAttendanceGroup(member);
+  }
+
+  function memberHasAttendanceGroupHistory(member, group = activeAttendanceGroup()) {
+    const normalizedGroup = normalizeAttendanceGroup(group);
+    const currentGroup = currentMemberAttendanceGroup(member);
+    if (normalizedGroup === 'Trainee Members') {
+      return currentGroup !== 'Trainee Members' && Boolean(member?.traineeStartDate || member?.dateRegistered);
+    }
+    if (normalizedGroup === 'Probationary Members') {
+      return currentGroup === 'Official Members' && Boolean(member?.probationaryStartDate || member?.probationarySkipped);
+    }
+    return currentGroup === 'Official Members' && !memberIsCurrentlyActive(member);
+  }
+
+  function memberMatchesAttendanceRosterMode(member, group = activeAttendanceGroup(), mode = activeAttendanceRosterMode()) {
+    if (!member) return false;
+    const normalizedGroup = normalizeAttendanceGroup(group);
+    if (normalizeAttendanceRosterMode(mode) === 'Current') {
+      return memberIsCurrentlyActive(member) && currentMemberAttendanceGroup(member) === normalizedGroup;
+    }
+    return memberHasAttendanceGroupHistory(member, normalizedGroup);
+  }
+
+  function attendanceRecordGroup(record, event, member) {
+    if (ATTENDANCE_GROUPS.includes(record?.attendanceGroup)) return record.attendanceGroup;
+    return memberAttendanceGroupOnDate(member, event?.date);
+  }
+
+  function memberEligibleForAttendanceEvent(member, event) {
+    if (!memberMatchesAttendanceRosterMode(member) || !event) return false;
+
+    // Current rosters must always show every person who is currently assigned to
+    // the selected membership group. The event date must not hide their name.
+    // The saved attendanceGroup field keeps Official, Trainee, and Probationary
+    // attendance completely separate even when they use the same event.
+    if (activeAttendanceRosterMode() === 'Current') return true;
+
+    // Archive mode remains historical: show a former-stage member when the event
+    // occurred during that stage or when a stored record already exists.
+    const hasStoredRecord = attendance.some((record) =>
+      record.eventId === event.id &&
+      record.memberId === member.id &&
+      attendanceRecordGroup(record, event, member) === activeAttendanceGroup()
+    );
+    return hasStoredRecord || memberAttendanceGroupOnDate(member, event.date) === activeAttendanceGroup();
+  }
+
+  function membersForEventAttendanceGroup(event) {
+    if (!event) return [];
+    return getMembers()
+      .filter((member) => memberEligibleForAttendanceEvent(member, event))
+      .sort((a, b) => String(a.fullName).localeCompare(String(b.fullName)));
+  }
+
   function eventsForActiveSemester() {
     const semester = activeAttendanceSemester();
     return events.filter((event) => normalizeSemester(event.semester) === semester);
@@ -238,11 +366,17 @@
     const filtered = semesterEvents.filter((event) => !search || normalize([event.title, event.type, event.date, event.venue, event.semester].join(' ')).includes(search));
     el('eventCountLabel').textContent = `${semesterEvents.length} ${activeAttendanceSemester().toLowerCase()} event${semesterEvents.length === 1 ? '' : 's'}`;
     list.innerHTML = filtered.length ? filtered.map((event) => {
-      const records = attendance.filter((item) => item.eventId === event.id && item.status);
+      const rosterMembers = membersForEventAttendanceGroup(event);
+      const memberMap = new Map(rosterMembers.map((member) => [member.id, member]));
+      const records = attendance.filter((item) => {
+        const member = memberMap.get(item.memberId);
+        return item.eventId === event.id && item.status && member && attendanceRecordGroup(item, event, member) === activeAttendanceGroup();
+      });
       const present = records.filter((item) => item.status === 'Present' || item.status === 'Late').length;
+      const recordLabel = records.length ? `${present}/${records.length} attended` : `${rosterMembers.length} ${attendanceGroupShortLabel().toLowerCase()} in roster`;
       return `<button class="event-card ${selectedEventId === event.id ? 'active' : ''}" data-event-id="${safeText(event.id)}">
         <span class="event-date-box"><strong>${safeText(String(event.date || '').slice(8, 10) || '—')}</strong><small>${safeText(new Date(`${event.date}T00:00:00`).toLocaleDateString('en-PH', { month: 'short' }))}</small></span>
-        <span class="event-copy"><strong>${safeText(event.title)}</strong><small>${safeText(eventMeta(event))}</small><em>${records.length ? `${present}/${records.length} attended` : 'Attendance not recorded'}</em></span>
+        <span class="event-copy"><strong>${safeText(event.title)}</strong><small>${safeText(eventMeta(event))}</small><em>${safeText(recordLabel)}</em></span>
       </button>`;
     }).join('') : '<div class="empty-state compact-empty"><div class="empty-icon">♫</div><h4>No semester events found</h4><p>Create a rehearsal, performance, or meeting for the selected semester.</p></div>';
   }
@@ -306,11 +440,23 @@
   }
 
   function getAttendanceEntry(eventId, memberId) {
-    return attendance.find((entry) => entry.eventId === eventId && entry.memberId === memberId) || null;
+    const event = events.find((item) => item.id === eventId);
+    const member = getMembers().find((item) => item.id === memberId);
+    return attendance.find((entry) =>
+      entry.eventId === eventId &&
+      entry.memberId === memberId &&
+      attendanceRecordGroup(entry, event, member) === activeAttendanceGroup()
+    ) || null;
   }
 
   function attendanceStats(eventId) {
-    const records = attendance.filter((entry) => entry.eventId === eventId && entry.status);
+    const event = events.find((item) => item.id === eventId);
+    const members = membersForEventAttendanceGroup(event);
+    const memberMap = new Map(members.map((member) => [member.id, member]));
+    const records = attendance.filter((entry) => {
+      const member = memberMap.get(entry.memberId);
+      return entry.eventId === eventId && entry.status && member && attendanceRecordGroup(entry, event, member) === activeAttendanceGroup();
+    });
     const count = (status) => records.filter((entry) => entry.status === status).length;
     return {
       total: records.length,
@@ -326,16 +472,15 @@
     const body = el('attendanceRosterBody');
     if (!body || !selectedEventId) return;
     const search = normalize(el('attendanceMemberSearch')?.value);
-    const members = getMembers()
-      .filter((member) => member.memberStatus === 'Active')
-      .filter((member) => !search || normalize([member.fullName, member.membershipId, member.orchestraSection, member.primaryInstrument, member.periodGroup].join(' ')).includes(search))
-      .sort((a, b) => String(a.fullName).localeCompare(String(b.fullName)));
+    const selectedEvent = events.find((item) => item.id === selectedEventId);
+    const members = membersForEventAttendanceGroup(selectedEvent)
+      .filter((member) => !search || normalize([member.fullName, member.membershipId, member.orchestraSection, member.primaryInstrument, member.periodGroup].join(' ')).includes(search));
 
     body.innerHTML = members.length ? members.map((member) => {
       const entry = getAttendanceEntry(selectedEventId, member.id) || {};
       return `<tr data-attendance-member="${safeText(member.id)}">
         <td><div class="member-cell"><div class="member-avatar">${safeText(String(member.fullName || 'M').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase())}</div><div><strong>${safeText(member.fullName)}</strong><small>${safeText(member.membershipId)} • ${safeText(member.primaryInstrument || 'No instrument')}</small></div></div></td>
-        <td><span class="badge badge-blue">${safeText(member.periodGroup || member.membershipStage || '—')}</span></td>
+        <td><span class="badge ${activeAttendanceRosterMode() === 'Archive' ? 'badge-gray' : 'badge-blue'}">${safeText(activeAttendanceRosterMode() === 'Archive' ? `${attendanceGroupShortLabel()} Archive` : (member.periodGroup || member.membershipStage || '—'))}</span></td>
         <td>${safeText(member.orchestraSection || '—')}</td>
         <td><select class="attendance-status" aria-label="Attendance status for ${safeText(member.fullName)}">
           <option value="" ${!entry.status ? 'selected' : ''}>Not marked</option>
@@ -343,7 +488,7 @@
         </select></td>
         <td><input class="attendance-remarks" value="${safeText(entry.remarks || '')}" placeholder="Optional note"/></td>
       </tr>`;
-    }).join('') : '<tr><td colspan="5"><div class="empty-state compact-empty"><h4>No active members found</h4><p>Add or activate member records first.</p></div></td></tr>';
+    }).join('') : `<tr><td colspan="5"><div class="empty-state compact-empty"><h4>No ${safeText(attendanceRosterModeLabel())} ${safeText(attendanceGroupShortLabel())} found</h4><p>${activeAttendanceRosterMode() === 'Archive' ? 'Completed-stage records for this event will appear here.' : 'Only members currently assigned to this stage appear here.'}</p></div></td></tr>`;
   }
 
   function renderAttendanceSummary() {
@@ -363,7 +508,8 @@
     if (!event) return;
     el('attendanceEventType').textContent = event.type || 'Activity';
     el('attendanceEventTitle').textContent = event.title;
-    el('attendanceEventMeta').textContent = `${eventMeta(event)}${event.notes ? ` • ${event.notes}` : ''}`;
+    el('attendanceEventMeta').textContent = `${attendanceRosterModeLabel()} • ${activeAttendanceGroup()} • ${eventMeta(event)}${event.notes ? ` • ${event.notes}` : ''}`;
+    if (el('attendanceRosterGroupLabel')) el('attendanceRosterGroupLabel').textContent = `${attendanceRosterModeLabel()}: ${attendanceGroupShortLabel()}`;
     renderAttendanceSummary();
     renderAttendanceRoster();
   }
@@ -385,18 +531,32 @@
       const memberId = row.dataset.attendanceMember;
       const status = row.querySelector('.attendance-status').value;
       const remarks = row.querySelector('.attendance-remarks').value.trim();
-      const index = attendance.findIndex((entry) => entry.eventId === selectedEventId && entry.memberId === memberId);
+      const selectedEvent = events.find((item) => item.id === selectedEventId);
+      const member = getMembers().find((item) => item.id === memberId);
+      const index = attendance.findIndex((entry) =>
+        entry.eventId === selectedEventId &&
+        entry.memberId === memberId &&
+        attendanceRecordGroup(entry, selectedEvent, member) === activeAttendanceGroup()
+      );
       if (!status && !remarks) {
         if (index >= 0) attendance.splice(index, 1);
         return;
       }
-      const record = { eventId: selectedEventId, memberId, status, remarks, updatedAt: now };
+      const record = {
+        eventId: selectedEventId,
+        memberId,
+        status,
+        remarks,
+        attendanceGroup: activeAttendanceGroup(),
+        rosterModeAtEdit: activeAttendanceRosterMode(),
+        updatedAt: now
+      };
       if (index >= 0) attendance[index] = record;
       else attendance.push(record);
     });
     saveArray(ATTENDANCE_KEY, attendance);
     const event = events.find((item) => item.id === selectedEventId);
-    logActivity('Saved attendance', 'Attendance', `${event?.title || 'Event'} • ${rows.length} roster rows`);
+    logActivity('Saved attendance', 'Attendance', `${event?.title || 'Event'} • ${attendanceRosterModeLabel()} • ${attendanceGroupShortLabel()} • ${rows.length} roster rows`);
     renderAttendance();
     renderAlerts();
     toast('Attendance saved.');
@@ -419,8 +579,14 @@
   }
 
   function getMemberAttendance(memberId) {
-    const validEventIds = new Set(events.map((event) => event.id));
-    const records = attendance.filter((entry) => entry.memberId === memberId && validEventIds.has(entry.eventId));
+    const member = getMembers().find((item) => item.id === memberId);
+    if (!member) return { sessions: 0, attended: 0, rate: null };
+    const targetGroup = currentMemberAttendanceGroup(member);
+    const eventMap = new Map(events.map((event) => [event.id, event]));
+    const records = attendance.filter((entry) => {
+      const event = eventMap.get(entry.eventId);
+      return entry.memberId === memberId && event && attendanceRecordGroup(entry, event, member) === targetGroup;
+    });
     const counted = records.filter((entry) => ['Present', 'Late', 'Absent'].includes(entry.status));
     const attended = counted.filter((entry) => ['Present', 'Late'].includes(entry.status)).length;
     return {
@@ -1072,6 +1238,14 @@
       renderAttendance();
     });
 
+    window.addEventListener('lso:attendance-group-changed', () => {
+      renderAttendance();
+    });
+
+    window.addEventListener('lso:attendance-roster-mode-changed', () => {
+      renderAttendance();
+    });
+
     window.addEventListener('lso:auth-changed', () => {
       setTimeout(() => {
         document.querySelectorAll('.admin-only').forEach((node) => node.classList.toggle('hidden', !isAdmin()));
@@ -1089,6 +1263,16 @@
     setAttendanceSemester: (semester) => {
       window.LSOAttendanceSemester = normalizeSemester(semester);
       window.dispatchEvent(new CustomEvent('lso:attendance-semester-changed', { detail: { semester: window.LSOAttendanceSemester } }));
+    },
+    getAttendanceGroup: activeAttendanceGroup,
+    setAttendanceGroup: (group) => {
+      window.LSOAttendanceGroup = normalizeAttendanceGroup(group);
+      window.dispatchEvent(new CustomEvent('lso:attendance-group-changed', { detail: { group: window.LSOAttendanceGroup } }));
+    },
+    getAttendanceRosterMode: activeAttendanceRosterMode,
+    setAttendanceRosterMode: (mode) => {
+      window.LSOAttendanceRosterMode = normalizeAttendanceRosterMode(mode);
+      window.dispatchEvent(new CustomEvent('lso:attendance-roster-mode-changed', { detail: { mode: window.LSOAttendanceRosterMode } }));
     },
     getInstruments: () => instruments.map((item) => ({ ...item })),
     buildAlerts

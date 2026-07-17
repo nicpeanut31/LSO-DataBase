@@ -1,0 +1,44 @@
+LSO ATTENDANCE — CURRENT/ARCHIVE SEPARATION FIX
+================================================
+
+WHAT WAS FIXED
+--------------
+1. The long attendance print button no longer overflows its container.
+   - The button now uses the shorter label "Print Current Roster" or
+     "Print Archived Roster".
+   - The roster controls use responsive columns and wrap safely on phones.
+
+2. Official Members, Trainees, and Probationary Members use separate
+   attendance records.
+   - Saving a Trainee record no longer overwrites the same person's Official
+     or Probationary attendance record for an activity.
+   - Older attendance records without a group are assigned using the member's
+     stage dates on the activity date.
+
+3. Attendance now has Current Roster and Attendance Archive modes.
+   - Current Trainees: only members currently in the Trainee Period.
+   - Current Probationary: only members currently in the Probationary Period.
+   - Current Official Members: only active Membership Period members.
+   - Trainee Archive: members who already progressed beyond Trainee.
+   - Probationary Archive: members who already progressed to Membership,
+     including skipped Probationary records when applicable.
+   - Official Archive: inactive/former Official Member attendance records.
+
+4. Archived stage records do not affect current roster totals, percentages,
+   member lookup lists, event rosters, or print reports.
+
+5. Semester, monthly, individual, current-roster, archive-roster, and selected
+   event printouts all respect the selected attendance group and roster mode.
+
+INSTALLATION
+------------
+1. Download a Complete Backup from the current website.
+2. Extract this package.
+3. Replace all existing GitHub website files with the files in this folder.
+4. Commit the files and wait for GitHub Pages to finish deploying.
+5. Open the live website and press Ctrl + F5.
+
+SUPABASE
+--------
+No new Supabase SQL is required because attendance remains inside the existing
+shared JSON system state. The configured Supabase connection is preserved.

@@ -1,0 +1,42 @@
+LSO ATTENDANCE ROSTER RECORDS FIX
+=================================
+
+PROBLEM FIXED
+-------------
+Current Trainee and Probationary names could disappear from an event roster
+when the event date did not match the member's calculated stage on that date.
+The roster also required the Member Status text to be exactly "Active".
+
+NEW CURRENT ROSTER RULE
+-----------------------
+- Current Official Members: currently in Membership Period.
+- Current Trainees: currently in Trainee Period.
+- Current Probationary Members: currently in Probationary Period.
+- The selected event date no longer hides current names.
+- Blank legacy Member Status values are treated as active unless explicitly
+  marked Nonactive or LOA.
+
+SEPARATE ATTENDANCE
+-------------------
+Attendance is saved with one of these independent groups:
+- Official Members
+- Trainee Members
+- Probationary Members
+
+Saving one group does not overwrite the same member/event record in another
+group.
+
+ARCHIVE
+-------
+- Moving from Trainee to Probationary removes the member from Current Trainees
+  and keeps former Trainee attendance in the Trainee Archive.
+- Moving to Membership removes the member from Current Probationary and keeps
+  former Probationary attendance in the Probationary Archive.
+- Skipped Probationary periods remain available in the Probationary Archive.
+
+INSTALLATION
+------------
+Replace the files in GitHub with the contents of this folder, wait for GitHub
+Pages deployment, and perform a hard refresh (Ctrl+F5).
+
+No Supabase SQL update is required.

@@ -1,0 +1,15 @@
+ATTENDANCE ROSTER RECORDS FIX — VALIDATION RESULTS
+==================================================
+
+Validated behaviors:
+- Current Trainee roster includes all current Trainee Period members even when the selected event date is earlier than the member's trainee start date.
+- Current Probationary roster includes all current Probationary Period members even when the selected event date belongs to an earlier stage.
+- Current Official, Trainee, and Probationary attendance records remain separate through the attendanceGroup field.
+- A member who progresses to Probationary is removed from Current Trainees and remains available in the Trainee Attendance Archive.
+- A member who progresses to Membership is removed from Current Probationary and remains available in the Probationary Attendance Archive.
+- A member who skips Probationary remains available in the Probationary Attendance Archive.
+- Older/imported profiles with blank Member Status are treated as active unless explicitly marked Nonactive or LOA.
+- The calculated periodGroup takes priority over stale legacy membershipStage values.
+- Event-list attendance totals are scoped to the selected attendance group and roster mode.
+- JavaScript syntax checks passed for management.js and workflow-upgrades.js.
+- No Supabase schema change is required.

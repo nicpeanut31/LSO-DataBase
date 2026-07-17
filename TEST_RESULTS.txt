@@ -1,13 +1,14 @@
-LSO PRINT COLUMN SIMPLIFICATION - VALIDATION RESULTS
-====================================================
+LSO ATTENDANCE GROUP TOGGLE — VALIDATION RESULTS
+================================================
 
-PASS - workflow-upgrades.js JavaScript syntax
-PASS - duty-hours.js JavaScript syntax
-PASS - branding.js JavaScript syntax
-PASS - No generated table headers remain for:
-       #, Period, Rehearsal, Rehearsals, Present, Late, Absent, Excused
-PASS - Individual attendance tables retain Date, Venue, Status, Remarks
-PASS - Semester/monthly member summaries retain Member and Attendance Rate
-PASS - Selected-event roster retains Member, Section, Status, Remarks
-PASS - Duty Hours print tables no longer include number columns
-PASS - Supabase configuration and database schema were not changed
+PASS — JavaScript syntax validated for every project .js file.
+PASS — Official, Trainee, and Probationary attendance toggle controls exist.
+PASS — Event rosters are filtered by membership stage on the event date.
+PASS — Overall and individual attendance calculations are group-isolated.
+PASS — Semester, monthly, current-roster, and event-roster print actions are group-isolated.
+PASS — Current group print button and dynamic print labels are connected.
+PASS — Existing attendance data structure remains compatible.
+PASS — All local files referenced by index.html are present.
+PASS — Responsive attendance-group layout is included.
+
+No Supabase SQL update is required.

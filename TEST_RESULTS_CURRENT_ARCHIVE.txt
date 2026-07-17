@@ -1,0 +1,17 @@
+LSO ATTENDANCE CURRENT/ARCHIVE FIX — VALIDATION RESULTS
+======================================================
+
+PASS — JavaScript syntax validation for every .js file.
+PASS — No duplicate HTML element IDs.
+PASS — No missing local scripts, stylesheets, icons, or images.
+PASS — Current Trainee roster contains only current Trainee Period members.
+PASS — Current Probationary roster contains only current Probationary members.
+PASS — Current Official roster contains only active Membership Period members.
+PASS — Progressed Trainee records move to the Trainee Attendance Archive.
+PASS — Progressed/Skipped Probationary records appear in the Probationary Archive.
+PASS — Archived attendance records do not leak into current roster totals.
+PASS — Official, Trainee, and Probationary records are keyed separately.
+PASS — Legacy records without attendanceGroup are inferred from stage dates.
+PASS — Print button has no horizontal or vertical overflow at 1500, 1100,
+       760, and 390 pixel viewport widths.
+PASS — Page-level horizontal overflow was not produced in layout tests.
