@@ -147,6 +147,7 @@
   }
 
   function logActivity(action, category = 'System', details = '') {
+    if (!isAdmin()) return;
     const account = currentAccount();
     const log = loadArray(ACTIVITY_KEY);
     log.unshift({
@@ -274,6 +275,7 @@
 
   function handleEventSubmit(event) {
     event.preventDefault();
+    if (!isAdmin()) { toast('Administrator access is required to create or edit events.', true); return; }
     const id = el('editingEventId').value || uid('event');
     const existing = events.find((item) => item.id === id);
     const record = {
@@ -375,6 +377,7 @@
   }
 
   function saveAttendanceRoster() {
+    if (!isAdmin()) { toast('Administrator access is required to record attendance.', true); return; }
     if (!selectedEventId) return;
     const rows = qsa('[data-attendance-member]', el('attendanceRosterBody'));
     const now = new Date().toISOString();
@@ -400,6 +403,7 @@
   }
 
   function deleteSelectedEvent() {
+    if (!isAdmin()) { toast('Administrator access is required to delete events.', true); return; }
     const event = events.find((item) => item.id === selectedEventId);
     if (!event) return;
     if (!window.confirm(`Delete “${event.title}” and all of its attendance records?`)) return;
@@ -516,6 +520,7 @@
 
   function handleInstrumentSubmit(event) {
     event.preventDefault();
+    if (!isAdmin()) { toast('Administrator access is required to modify inventory.', true); return; }
     const id = el('editingInstrumentId').value || uid('instrument');
     const existing = instruments.find((item) => item.id === id);
     const record = {
@@ -570,6 +575,7 @@
   }
 
   function deleteInstrument(id) {
+    if (!isAdmin()) { toast('Administrator access is required to delete inventory records.', true); return; }
     const item = instruments.find((instrument) => instrument.id === id);
     if (!item) return;
     if (!isAdmin()) {
@@ -820,10 +826,7 @@
   }
 
   function handleSaveSettings() {
-    if (!isAdmin()) {
-      toast('Administrator access is required to change system settings.', true);
-      return;
-    }
+    if (!isAdmin()) { toast('Administrator access is required to change system settings.', true); return; }
     const numberOrBlank = (id) => {
       const value = el(id).value;
       return value === '' ? '' : Math.max(1, Number(value) || 1);

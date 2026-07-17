@@ -1,15 +1,27 @@
-LSO CURRENT AND MONTHLY DUTY PRINT — VALIDATION RESULTS
-=======================================================
+LSO ADMINISTRATOR / STAFF READ-ONLY VALIDATION
+==================================================
 
-PASS — All JavaScript files pass Node syntax validation.
-PASS — index.html contains no duplicate IDs.
-PASS — Every local script and stylesheet referenced by index.html exists.
-PASS — Current Trainee report includes active Trainees and excludes archived records.
-PASS — Current Probationary report uses a separate active Probationary roster.
-PASS — Monthly report filters entries by selected YYYY-MM month.
-PASS — Monthly Trainee report does not include Probationary members.
-PASS — Monthly report excludes entries from other months.
-PASS — Monthly calculations preserve exact-minute rendered and incentive values.
-PASS — Report month defaults to the current month.
-PASS — Supabase configuration remains unchanged.
-PASS — No new Supabase SQL is required.
+PASS — JavaScript syntax: app.js
+PASS — JavaScript syntax: auth.js
+PASS — JavaScript syntax: cloud.js
+PASS — JavaScript syntax: dashboard-enhancements.js
+PASS — JavaScript syntax: duty-hours.js
+PASS — JavaScript syntax: management.js
+PASS — JavaScript syntax: permissions.js
+PASS — JavaScript syntax: supabase-config.js
+PASS — JavaScript syntax: ui-enhancements.js
+PASS — JavaScript syntax: workflow-upgrades.js
+PASS — HTML local asset references
+PASS — permissions.js loads last — permissions.js
+PASS — Administrator-only server write guard: supabase-setup.sql
+PASS — Administrator-only server write guard: ADMIN_READ_ONLY_SQL_UPDATE.sql
+PASS — Cloud permission marker: canWriteShared()
+PASS — Cloud permission marker: Staff Accounts have read-only access
+PASS — Cloud permission marker: !canWriteShared()
+PASS — Cloud permission marker: canWrite: canWriteShared
+PASS — UI permission marker: Staff Read-Only Access
+PASS — UI permission marker: MUTATION_FORM_IDS
+PASS — UI permission marker: attendance-status
+PASS — UI permission marker: lso:permission-denied
+PASS — UI permission marker: window.LSOPermissions
+PASS — Staff role labeled Read Only

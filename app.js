@@ -57,6 +57,16 @@
   const el = (id) => document.getElementById(id);
   const qsa = (selector) => [...document.querySelectorAll(selector)];
 
+  function isAdmin() {
+    return (window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount)?.role === 'Administrator';
+  }
+
+  function requireAdmin(message = 'Administrator access is required to modify member records.') {
+    if (isAdmin()) return true;
+    showToast(message, true);
+    return false;
+  }
+
   function loadMembers() {
     try {
       const parsed = JSON.parse(window.LSOStorage.getItem(STORAGE_KEY) || '[]');
@@ -67,9 +77,11 @@
   }
 
   function saveMembers() {
+    if (!requireAdmin()) return false;
     window.LSOStorage.setItem(STORAGE_KEY, JSON.stringify(members));
     renderAll();
     window.dispatchEvent(new CustomEvent('lso:members-changed', { detail: { count: members.length } }));
+    return true;
   }
 
   function safeText(value) {
@@ -377,8 +389,7 @@
   function memberActions(member) {
     return `<div class="table-actions">
       <button class="table-action" title="View" data-action="view" data-id="${safeText(member.id)}">◉</button>
-      <button class="table-action" title="Edit" data-action="edit" data-id="${safeText(member.id)}">✎</button>
-      <button class="table-action danger" title="Delete" data-action="delete" data-id="${safeText(member.id)}">⌫</button>
+      ${isAdmin() ? `<button class="table-action" title="Edit" data-action="edit" data-id="${safeText(member.id)}">✎</button><button class="table-action danger" title="Delete" data-action="delete" data-id="${safeText(member.id)}">⌫</button>` : ''}
     </div>`;
   }
 
@@ -572,6 +583,7 @@
   }
 
   function openMemberModal(member = null) {
+    if (!requireAdmin()) return;
     el('memberForm').reset();
     el('formMessage').classList.add('hidden');
     el('editingId').value = member?.id || '';
@@ -685,6 +697,7 @@
 
   function handleSubmit(event) {
     event.preventDefault();
+    if (!requireAdmin()) return;
     const member = collectFormData();
     const error = validateMember(member);
     if (error) {
@@ -703,6 +716,7 @@
   }
 
   function deleteMember(id) {
+    if (!requireAdmin()) return;
     const member = members.find((item) => item.id === id);
     if (!member) return;
     if (!window.confirm(`Delete the record of ${member.fullName}? This cannot be undone unless you have a backup.`)) return;
@@ -774,6 +788,7 @@
   }
 
   function importCsv(file) {
+    if (!requireAdmin('Administrator access is required to import member records.')) { if (el('csvImport')) el('csvImport').value = ''; return; }
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -817,6 +832,7 @@
   }
 
   function restoreJson(file) {
+    if (!requireAdmin('Administrator access is required to restore member records.')) { if (el('jsonRestore')) el('jsonRestore').value = ''; return; }
     if (window.LSOCurrentAccount?.role !== 'Administrator') { showToast('Administrator access is required to restore a database.', true); el('jsonRestore').value = ''; return; }
     const reader = new FileReader();
     reader.onload = () => {
@@ -888,7 +904,7 @@
     const before = JSON.stringify(members.map((member) => [member.membershipStage, member.periodGroup, member.traineeStartDate, member.probationaryStartDate, member.regularMemberDate]));
     members = members.map(enrichMember);
     const after = JSON.stringify(members.map((member) => [member.membershipStage, member.periodGroup, member.traineeStartDate, member.probationaryStartDate, member.regularMemberDate]));
-    if (before !== after) {
+    if (before !== after && isAdmin()) {
       window.LSOStorage.setItem(STORAGE_KEY, JSON.stringify(members));
       renderAll();
       if (showNotice) showToast('Membership stages were updated automatically.');

@@ -1,0 +1,32 @@
+LSO ACCOUNT PERMISSION UPDATE
+=============================
+
+ROLE RULES
+----------
+Administrator
+- Full access to create, edit, delete, approve, reject, disable, import, restore,
+  clear, and change settings.
+
+Staff Account
+- Can open and view all operational modules available in the navigation.
+- Can search, filter, switch semesters, open archives, export, and print reports.
+- Cannot add or edit members, events, attendance, duty hours, incentives,
+  commitments, settings, imports, restores, or deletions.
+- Attendance status and remarks remain visible but are disabled.
+- A read-only banner appears after login.
+
+SECURITY
+--------
+The restriction is enforced in three places:
+1. Read-only interface controls for Staff.
+2. Browser storage/synchronization blocks Staff writes.
+3. Supabase lso_update_state requires an Administrator session.
+
+INSTALLATION
+------------
+1. Back up the current live system.
+2. In Supabase SQL Editor, run ADMIN_READ_ONLY_SQL_UPDATE.sql.
+   Running the full updated supabase-setup.sql is also valid and keeps data.
+3. Upload all website files from this package to GitHub without renaming them.
+4. Wait for GitHub Pages deployment and force-refresh the website.
+5. Test one Administrator and one Staff Account.

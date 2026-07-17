@@ -63,6 +63,14 @@
     emit('lso:cloud-status', { kind, message });
   }
 
+  function canWriteShared() {
+    return sessionAccount?.role === 'Administrator';
+  }
+
+  function emitReadOnlyDenied() {
+    emit('lso:permission-denied', { message: 'Staff Accounts have read-only access. An Administrator is required to save changes.' });
+  }
+
   function safeParse(raw, fallback) {
     try {
       const parsed = JSON.parse(raw);
@@ -220,12 +228,17 @@
   }
 
   function markDirty(column) {
+    if (!canWriteShared()) {
+      emitReadOnlyDenied();
+      return;
+    }
     dirtyVersions.set(column, (dirtyVersions.get(column) || 0) + 1);
     persistDirtyMarkers();
     scheduleFlush();
   }
 
   async function flushDirty() {
+    if (!canWriteShared()) return;
     if (flushing || !sessionToken || !dirtyVersions.size) return;
     flushing = true;
     status('syncing', `Saving ${dirtyVersions.size} change${dirtyVersions.size === 1 ? '' : 's'}…`);
@@ -263,15 +276,23 @@
   }
 
   function storageSetItem(key, value) {
-    const saved = setLocal(key, value);
     const column = KEY_TO_COLUMN[key];
+    if (column && sessionToken && sessionAccount && !canWriteShared()) {
+      emitReadOnlyDenied();
+      return false;
+    }
+    const saved = setLocal(key, value);
     if (saved && column && sessionToken && loaded) markDirty(column);
     return saved;
   }
 
   function storageRemoveItem(key) {
-    const removed = removeLocal(key);
     const column = KEY_TO_COLUMN[key];
+    if (column && sessionToken && sessionAccount && !canWriteShared()) {
+      emitReadOnlyDenied();
+      return false;
+    }
+    const removed = removeLocal(key);
     if (removed && column && sessionToken && loaded) {
       setLocal(key, JSON.stringify(defaultForColumn(column)));
       markDirty(column);
@@ -357,7 +378,8 @@
     sessionAccount = account || null;
     if (sessionToken) {
       startPolling();
-      if (dirtyVersions.size) scheduleFlush(500);
+      if (canWriteShared() && dirtyVersions.size) scheduleFlush(500);
+      status('online', canWriteShared() ? 'Shared database connected' : 'Shared database connected • Staff read-only access');
     } else stopPolling();
   }
 
@@ -452,7 +474,8 @@
     deleteAccount,
     saveAccounts,
     flush: flushDirty,
-    pollNow: pollState
+    pollNow: pollState,
+    canWrite: canWriteShared
   };
 
   window.addEventListener('online', () => {

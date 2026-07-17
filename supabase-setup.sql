@@ -462,7 +462,7 @@ declare
   v_account_id uuid;
   v_state jsonb;
 begin
-  v_account_id := public.lso_session_account_id(p_token, false);
+  v_account_id := public.lso_session_account_id(p_token, true);
 
   if p_column in ('members', 'events', 'attendance', 'instruments', 'activity_log')
      and jsonb_typeof(p_value) <> 'array' then

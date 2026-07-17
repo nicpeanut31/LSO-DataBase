@@ -8,8 +8,9 @@
 <meta content="light" name="color-scheme"/>
 <meta content="Lasallian Symphony Orchestra membership, recruitment, attendance, reporting, and administration system" name="description"/>
 <title>LSO Orchestra Management System</title>
-<link href="styles.css?v=20260717-1555" rel="stylesheet"/>
-<link href="duty-roster-layout.css?v=20260717-1555" rel="stylesheet"/>
+<link href="styles.css?v=20260717-1605" rel="stylesheet"/>
+<link href="duty-roster-layout.css?v=20260717-1605" rel="stylesheet"/>
+<link href="access-control.css?v=20260717-1605" rel="stylesheet"/>
 </head>
 <body>
 <section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
@@ -563,8 +564,8 @@
 
 <section class="view" id="accountsView">
 <article class="panel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Only</p><h3>Account Management</h3><p class="panel-subtitle">Validate new registrations, assign roles, approve or reject access, and disable approved accounts.</p></div></div>
-<div class="account-security-note"><strong>Cloud security:</strong> Passwords are hashed in PostgreSQL, sessions use private tokens, and direct public table access is blocked. Pending or disabled users cannot open shared records.</div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Only</p><h3>Account Management</h3><p class="panel-subtitle">Validate registrations and assign access. Administrators have full editing rights; Staff Accounts are read-only across members, attendance, duty hours, settings, and backups.</p></div></div>
+<div class="account-security-note"><strong>Role permissions:</strong> Administrator = full create, edit, delete, approval, import, restore, and settings access. Staff Account = view, search, filter, export, and print only. Server-side checks block Staff from saving even if browser controls are bypassed.</div>
 <div class="table-wrap"><table><thead><tr><th>Account</th><th>Username / Optional Email</th><th>Role</th><th>Requested</th><th>Access Status</th><th>Approved</th><th class="actions-column">Actions</th></tr></thead><tbody id="accountsTableBody"></tbody></table></div>
 </article>
 </section>
@@ -789,14 +790,15 @@
 <div aria-live="polite" class="toast-region" id="toastRegion"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="cloud.js"></script>
-<script src="app.js"></script>
-<script src="auth.js"></script>
-<script src="management.js"></script>
-<script src="ui-enhancements.js"></script>
-<script src="dashboard-enhancements.js"></script>
-<script src="workflow-upgrades.js"></script>
-<script src="duty-hours.js"></script>
+<script src="supabase-config.js?v=20260717-1605"></script>
+<script src="cloud.js?v=20260717-1605"></script>
+<script src="app.js?v=20260717-1605"></script>
+<script src="auth.js?v=20260717-1605"></script>
+<script src="management.js?v=20260717-1605"></script>
+<script src="ui-enhancements.js?v=20260717-1605"></script>
+<script src="dashboard-enhancements.js?v=20260717-1605"></script>
+<script src="workflow-upgrades.js?v=20260717-1605"></script>
+<script src="duty-hours.js?v=20260717-1605"></script>
+<script src="permissions.js?v=20260717-1605"></script>
 </body>
 </html>

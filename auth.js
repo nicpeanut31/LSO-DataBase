@@ -114,15 +114,17 @@
     const normalized = normalizeAccount(account);
     window.LSOCurrentAccount = normalized;
     document.body.dataset.accountRole = normalized.role;
+    document.body.dataset.accessMode = normalized.role === 'Administrator' ? 'full' : 'read-only';
     document.body.dataset.storageMode = 'cloud';
     el('authScreen')?.classList.add('hidden');
     el('appShell')?.classList.remove('hidden');
     if (el('currentAccountName')) el('currentAccountName').textContent = normalized.displayName || normalized.username;
     if (el('currentAccountUsername')) el('currentAccountUsername').textContent = `@${normalized.username}`;
     if (el('accountAvatar')) el('accountAvatar').textContent = accountInitial(normalized);
-    if (el('currentAccountRole')) el('currentAccountRole').textContent = normalized.role;
+    if (el('currentAccountRole')) el('currentAccountRole').textContent = normalized.role === 'Administrator' ? 'Administrator • Full Access' : 'Staff Account • Read Only';
     document.querySelectorAll('.admin-only').forEach((node) => node.classList.toggle('hidden', normalized.role !== 'Administrator'));
     emit('lso:auth-changed', normalized);
+    window.LSOPermissions?.apply?.();
     document.title = 'LSO Orchestra Management System';
     startAccountRefresh();
   }
@@ -130,6 +132,7 @@
   function showLoginScreen({ preserveMessage = false } = {}) {
     window.LSOCurrentAccount = null;
     delete document.body.dataset.accountRole;
+    delete document.body.dataset.accessMode;
     document.body.dataset.storageMode = 'cloud';
     el('appShell')?.classList.add('hidden');
     el('authScreen')?.classList.remove('hidden');
