@@ -1,0 +1,27 @@
+DUTY ROSTER FINAL LAYOUT FIX
+============================
+
+WHY THE PREVIOUS DISPLAY LOOKED DIFFERENT
+-----------------------------------------
+The website loaded the new index.html structure but an older cached styles.css
+(or older generic button rules) still controlled the report buttons. The longer
+Probationary labels therefore wrapped into a second row while the shorter
+Trainee labels stayed side by side.
+
+WHAT THIS UPDATE DOES
+---------------------
+- Adds duty-roster-layout.css as a separate final stylesheet.
+- Uses two equal report-button columns for both roster cards.
+- Forces the button labels into a controlled two-line layout.
+- Gives both buttons identical height and width.
+- Keeps full period titles and descriptions readable.
+- Stacks both cards only when the screen is genuinely narrow.
+- Adds version numbers to the CSS links to bypass the browser/GitHub cache.
+
+UPLOAD BOTH OF THESE WITH THE REST OF THE PACKAGE
+-------------------------------------------------
+styles.css
+duty-roster-layout.css
+
+Also upload the included index.html because it loads the new stylesheet.
+After GitHub Pages finishes deploying, press Ctrl+F5 once.

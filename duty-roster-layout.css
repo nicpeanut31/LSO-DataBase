@@ -1,0 +1,214 @@
+/*
+ * Duty roster layout patch.
+ * Loaded after styles.css so the two period cards remain aligned even when
+ * older cached styles or generic button rules are present.
+ */
+
+.duty-roster-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+.duty-roster-card {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  min-height: 410px !important;
+  padding: 20px !important;
+  overflow: hidden !important;
+}
+
+.duty-roster-card > .duty-roster-card-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  gap: 16px !important;
+  min-height: 86px !important;
+  padding: 0 0 16px !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.duty-roster-identity {
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+}
+
+.duty-roster-title-copy {
+  min-width: 0 !important;
+}
+
+.duty-roster-title-copy .eyebrow {
+  margin: 0 0 4px !important;
+  line-height: 1.25 !important;
+}
+
+.duty-roster-card .duty-roster-title-copy h4 {
+  display: block !important;
+  margin: 0 !important;
+  max-width: none !important;
+  color: var(--ink) !important;
+  font-size: clamp(19px, 1.55vw, 23px) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.duty-roster-title-copy small {
+  display: block !important;
+  margin-top: 5px !important;
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+}
+
+.duty-roster-count {
+  width: 58px !important;
+  min-width: 58px !important;
+  height: 58px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  border-radius: 18px !important;
+  background: var(--green-50) !important;
+  color: var(--green-800) !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+.duty-roster-report-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 14px 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.duty-roster-report-actions .duty-period-print,
+.duty-roster-report-actions .button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 62px !important;
+  height: 62px !important;
+  margin: 0 !important;
+  padding: 9px 10px !important;
+  border-radius: 12px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  line-height: 1.15 !important;
+}
+
+.duty-roster-report-actions .duty-period-print span,
+.duty-roster-report-actions .duty-period-print strong {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  text-align: center !important;
+}
+
+.duty-roster-report-actions .duty-period-print span {
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .02em !important;
+  opacity: .78 !important;
+}
+
+.duty-roster-report-actions .duty-period-print strong {
+  font-size: clamp(11px, .85vw, 13px) !important;
+  font-weight: 850 !important;
+  line-height: 1.15 !important;
+}
+
+.duty-roster-report-actions .duty-period-print:disabled {
+  opacity: .62 !important;
+}
+
+.duty-roster-card > .duty-roster-list {
+  flex: 1 1 auto !important;
+  min-height: 230px !important;
+  max-height: 430px !important;
+  margin-top: 14px !important;
+  align-content: start !important;
+}
+
+.duty-roster-card > .duty-roster-list .roster-empty {
+  min-height: 220px !important;
+  display: grid !important;
+  place-content: center !important;
+  padding: 32px 18px !important;
+  text-align: center !important;
+}
+
+.duty-roster-person {
+  min-height: 84px !important;
+  padding: 12px 14px !important;
+}
+
+@media (max-width: 1180px) {
+  .duty-roster-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .duty-roster-card {
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .duty-roster-card {
+    padding: 16px !important;
+  }
+
+  .duty-roster-card > .duty-roster-card-header {
+    grid-template-columns: minmax(0, 1fr) 48px !important;
+    gap: 12px !important;
+    min-height: 76px !important;
+  }
+
+  .duty-roster-identity {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .duty-roster-count {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 19px !important;
+  }
+
+  .duty-roster-title-copy small {
+    display: none !important;
+  }
+
+  .duty-roster-report-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .duty-roster-report-actions .duty-period-print,
+  .duty-roster-report-actions .button {
+    min-height: 54px !important;
+    height: 54px !important;
+  }
+}
