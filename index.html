@@ -8,25 +8,30 @@
 <meta content="light" name="color-scheme"/>
 <meta content="Lasallian Symphony Orchestra membership, recruitment, attendance, reporting, and administration system" name="description"/>
 <title>LSO Orchestra Management System</title>
+<link rel="icon" href="favicon.ico?v=20260717-logos" sizes="any"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260717-logos"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260717-logos"/>
 <link href="styles.css?v=20260717-1605" rel="stylesheet"/>
 <link href="duty-roster-layout.css?v=20260717-1605" rel="stylesheet"/>
 <link href="access-control.css?v=20260717-1605" rel="stylesheet"/>
+<link href="branding.css?v=20260717-logos" rel="stylesheet"/>
+<link href="login-page.css?v=20260717-landing-v2" rel="stylesheet"/>
 </head>
 <body>
 <section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
 <div aria-hidden="true" class="auth-decoration auth-decoration-one"></div>
 <div aria-hidden="true" class="auth-decoration auth-decoration-two"></div>
 <div class="auth-brand-panel">
-<div aria-hidden="true" class="auth-brand-mark">LSO</div>
+<div class="auth-logo-card" aria-hidden="true">
+<img class="auth-brand-logo" src="lso-logo.png?v=20260717-login-polish" alt=""/>
+</div>
+<div class="auth-brand-copy">
 <p class="eyebrow auth-eyebrow">Lasallian Symphony Orchestra</p>
 <h1 id="authTitle">Orchestra Management Portal</h1>
-<p>Manage recruitment, member profiles, rehearsal attendance, printable reports, alerts, accounts, and complete backups from one organized workspace.</p>
-<div class="auth-feature-list">
-<span>✓ Automatic recruitment-stage and period transitions</span>
-<span>✓ Calendar attendance, individual history, and printable reports</span>
-<span>✓ Action Center, roles, audit log, and complete backups</span>
+<p class="auth-brand-summary">Secure access to the orchestra’s official membership, attendance, duty-hour, and administrative records.</p>
+<div class="auth-brand-rule" aria-hidden="true"></div>
+<p class="auth-motto">One Symphony. One Spirit. One Lasallian Legacy.</p>
 </div>
-<small>Accounts and operational records are stored in one shared online database for authorized devices.</small>
 </div>
 <div class="auth-card">
 <div aria-label="Account access" class="auth-tabs" role="tablist">
@@ -95,7 +100,7 @@
 <aside aria-label="Primary navigation" class="sidebar" id="sidebar">
 <button aria-label="Close navigation" class="sidebar-close" id="sidebarCloseButton" type="button">×</button>
 <div class="brand">
-<div aria-hidden="true" class="brand-mark">LSO</div>
+<img class="brand-logo" src="lso-mark.png?v=20260717-logos" alt="" aria-hidden="true"/>
 <div>
 <h1>Lasallian Symphony Orchestra</h1>
 <p>Orchestra Management System</p>
@@ -791,6 +796,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20260717-1605"></script>
+<script src="branding.js?v=20260717-logos"></script>
 <script src="cloud.js?v=20260717-1605"></script>
 <script src="app.js?v=20260717-1605"></script>
 <script src="auth.js?v=20260717-1605"></script>

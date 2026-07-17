@@ -13,3 +13,8 @@ START HERE — ADMINISTRATOR FULL ACCESS / STAFF READ ONLY
    write controls are hidden or disabled.
 
 The configured Supabase URL and publishable key are retained.
+
+
+LOGO BRANDING
+-------------
+The official LSO logo, browser icon, and print-document branding are included. Upload all image, CSS, and JavaScript files without renaming them.

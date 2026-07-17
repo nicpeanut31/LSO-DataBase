@@ -1,0 +1,20 @@
+LSO LOGIN PAGE POLISH
+=====================
+
+WHAT CHANGED
+------------
+- The official full-color logo is placed on a clean ivory logo tile so its dark-green lettering remains readable against the green background.
+- The left side is reduced to a concise brand introduction and motto.
+- The long list of website features and database-storage message were removed from the login landing page.
+- The logo, heading, login card, spacing, and mobile layout were reorganized.
+- Existing login, registration, Supabase, permissions, reports, and dashboard functions were not changed.
+
+FILES ADDED/UPDATED
+-------------------
+- index.html
+- login-page.css
+
+INSTALLATION
+------------
+Replace all files using the complete ZIP, or replace index.html and add login-page.css beside it.
+After GitHub Pages finishes deploying, hard-refresh the website with Ctrl+F5.

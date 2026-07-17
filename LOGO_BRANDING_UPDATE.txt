@@ -1,0 +1,24 @@
+LSO OFFICIAL LOGO AND DOCUMENT BRANDING UPDATE
+================================================
+
+WHAT WAS ADDED
+--------------
+- Official Lasallian Symphony Orchestra logo on the login page.
+- Compact official emblem in the sidebar.
+- Browser favicon and mobile home-screen icon.
+- Official logo header on generated member, attendance, semester, monthly,
+  duty-hours, roster, and individual printable reports.
+- New files: lso-logo.png, lso-mark.png, favicon.ico,
+  favicon-32x32.png, apple-touch-icon.png, android-chrome-192x192.png,
+  branding.css, and branding.js.
+
+INSTALLATION
+------------
+1. Upload every file from this folder to the same GitHub Pages directory.
+2. Do not rename the image, CSS, or JavaScript files.
+3. Commit the changes and wait for GitHub Pages deployment.
+4. Open the website and press Ctrl+F5 or use an Incognito window.
+
+SUPABASE
+--------
+No Supabase SQL change is required for this branding update.
