@@ -1,0 +1,17 @@
+LSO OFFICIAL PRINT - TABLE SPACING UPDATE
+=========================================
+
+CHANGES
+-------
+- Removed the redundant "Official LSO Document" line from generated reports.
+- Moved generated report content farther below the official template header.
+- Increased table-cell horizontal and vertical padding.
+- Increased line spacing and minimum row height for better readability.
+- Kept long reports automatically paginated onto additional official-template pages.
+- Kept A4 portrait as the default output.
+
+INSTALLATION
+------------
+Replace branding.js on the live website, or upload every file in this package.
+No Supabase SQL update is required.
+After GitHub Pages deploys, use Ctrl+F5 or a private window.

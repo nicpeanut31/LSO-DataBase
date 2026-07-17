@@ -1,0 +1,33 @@
+LSO OFFICIAL PRINT PREVIEW FIX
+==============================
+
+WHAT WAS FIXED
+--------------
+- The official template header no longer appears near the bottom of the page.
+- The footer remains locked to the bottom of every A4 page.
+- Empty or short reports no longer create an unnecessary second page.
+- Long tables are divided automatically into exact A4 portrait sheets.
+- The official PDF template is duplicated on every generated page.
+- Table headings repeat when a report continues onto another page.
+- Generated content stays inside the white safe area and does not overlap the
+  official header or contact footer.
+- Page numbers are placed inside the official document area.
+- Print generation waits for the template image and page layout before opening
+  the browser print dialog.
+
+FILES CHANGED
+-------------
+branding.js
+app.js
+duty-hours.js
+workflow-upgrades.js
+index.html
+
+BROWSER PRINT SETTING
+---------------------
+The date, page title, website URL/about:blank, and browser page number shown at
+an extreme top or bottom edge are browser-generated headers and footers, not
+part of the LSO document. In the print dialog open More settings and turn off
+"Headers and footers". Website JavaScript cannot force this browser setting.
+
+No Supabase SQL update is required.

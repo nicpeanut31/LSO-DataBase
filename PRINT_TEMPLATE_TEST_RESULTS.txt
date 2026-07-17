@@ -1,0 +1,13 @@
+OFFICIAL PRINT TEMPLATE VALIDATION
+==================================
+
+- Uploaded PDF inspected: 1 page, 612 x 792 points.
+- Exact PDF header and footer rendered from the uploaded page.
+- Multi-page portrait report generated successfully.
+- Verification report pages: 2
+- Official header repeated on each page: PASS
+- Official footer repeated on each page: PASS
+- Content kept between the official header and footer: PASS
+- Table headings repeated after page breaks: PASS
+- JavaScript syntax checks: PASS
+- No Supabase/database schema change required.

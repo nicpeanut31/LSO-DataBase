@@ -723,7 +723,7 @@
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <table class="period-table"><thead><tr><th>Academic Period</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Balance</th></tr></thead><tbody>${yearRows}</tbody></table>
       <table><thead><tr><th>#</th><th>Date</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th><th>Recorded By</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="7">No entries in the selected semester and period.</td></tr>'}</tbody></table>
-      <div class="sign"><div>Member Signature</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from Time In and Time Out and stored in exact minutes.</div><script>window.onload=()=>window.print()<\/script></body></html>`;
+      <div class="sign"><div>Member Signature</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
 
@@ -824,7 +824,7 @@
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <div class="report-note"><strong>Report scope:</strong> This report lists only members who are currently in the ${safeText(normalizedPeriod)}. It is separate from the selected-name Individual Duty Hours Report and excludes archived or completed-period records.</div>
       <table class="roster-detail-table"><thead><tr><th>#</th><th>Member / IDs</th><th>Academic Information</th><th>Contact</th><th>Current Stage</th><th>Duty Status</th><th>Period Start</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Balance</th><th>Entries</th><th>Progress</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div><script>window.onload=()=>window.print()<\/script></body></html>`;
+      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
 
@@ -880,7 +880,7 @@
       <table class="monthly-roster"><thead><tr><th>#</th><th>Member / IDs</th><th>Academic Information</th><th>Period Start</th><th>Duty Sessions</th><th>Monthly Rendered</th><th>Monthly Incentives</th><th>Monthly Credited</th><th>Semester Committed</th><th>Semester Credited to Date</th><th>Semester Balance</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="section-title page-break"><h2>Monthly Duty Ledger</h2><span>${ledgerRows ? `${records.reduce((sum, item) => sum + item.monthSummary.entries.length, 0)} entries` : 'No entries'}</span></div>
       <table><thead><tr><th>#</th><th>Date</th><th>Member</th><th>ID</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="8">No rendered-duty or incentive entries were recorded for this month.</td></tr>'}</tbody></table>
-      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">This monthly report is separate for the ${safeText(normalizedPeriod)} and does not combine Trainee and Probationary records.</div><script>window.onload=()=>window.print()<\/script></body></html>`;
+      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">This monthly report is separate for the ${safeText(normalizedPeriod)} and does not combine Trainee and Probationary records.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
 
@@ -897,7 +897,7 @@
         ['Roster', members.length], ['Committed', durationLabel(totals.committed)], ['Rendered', durationLabel(totals.rendered)], ['Net Incentives', durationLabel(totals.incentives, true)], ['Credited', durationLabel(totals.credited)], ['Outstanding', durationLabel(outstanding)]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <table><thead><tr><th>#</th><th>Member</th><th>ID</th><th>Record Status</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No duty-hour records.</td></tr>'}</tbody></table>
-      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div><script>window.onload=()=>window.print()<\/script></body></html>`;
+      <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
 

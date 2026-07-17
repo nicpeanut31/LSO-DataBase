@@ -1,0 +1,19 @@
+LSO OFFICIAL PRINT PREVIEW FIX - VALIDATION RESULTS
+===================================================
+
+PASS - branding.js JavaScript syntax
+PASS - app.js JavaScript syntax
+PASS - duty-hours.js JavaScript syntax
+PASS - workflow-upgrades.js JavaScript syntax
+PASS - Updated files are cache-busted in index.html
+PASS - Empty Duty Hours report generated as exactly 1 A4 portrait page
+PASS - 60-row Duty Hours report generated as exactly 2 A4 portrait pages
+PASS - Official header appears at the top of every page
+PASS - Official contact footer appears at the bottom of every page
+PASS - Table heading repeats on the continuation page
+PASS - Signatures move to the next page when needed
+PASS - No generated content overlaps the official template
+PASS - PDF rendered successfully with PDFium for visual verification
+
+Note: Browser-provided headers and footers must be disabled in the browser print
+settings because websites cannot control that browser preference.

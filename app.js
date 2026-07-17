@@ -562,7 +562,7 @@
       <div class="grid">${fields.map(([label,value])=>`<div class="field"><span>${safeText(label)}</span><strong>${safeText(value||'—')}</strong></div>`).join('')}</div>
       <div class="notes"><strong>Remarks / Evaluation Notes</strong><br><br>${safeText([member.stageNotes,member.remarks].filter(Boolean).join('\n\n')||'No remarks recorded.')}</div>
       <div class="sign"><div>Member Signature</div><div>Authorized Officer</div></div><div class="foot">This document was generated from the LSO Orchestra Management System.</div>
-      <script>window.onload=()=>{window.print()}<\/script></body></html>`);
+      ${window.LSOBrand.printRuntimeScript}</body></html>`);
     popup.document.close();
   }
 
