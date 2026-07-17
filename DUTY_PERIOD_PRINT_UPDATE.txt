@@ -1,0 +1,46 @@
+LSO DUTY HOURS — SEPARATE TRAINEE AND PROBATIONARY PRINT REPORTS
+================================================================
+
+NEW PRINT REPORTS
+-----------------
+1. Print Trainee Members
+   - Available directly in the Trainee Period roster card.
+   - Prints all current and archived Trainee duty records.
+
+2. Print Probationary Members
+   - Available directly in the Probationary Period roster card.
+   - Prints all current, archived, and skipped Probationary duty records.
+
+These period reports are separate from the existing "Print Selected Individual"
+report, which prints the detailed ledger of one selected name.
+
+INFORMATION INCLUDED
+--------------------
+Each period report includes:
+- Full name
+- Membership ID and Student Number
+- College, course, year level, and section
+- Contact number and Outlook account, when recorded
+- Current membership stage
+- Duty-record status: Active, Archived, or Skipped / Archived
+- Period start date
+- Committed duty time
+- Rendered duty time
+- Incentive adjustments
+- Credited time
+- Remaining or excess time
+- Number of ledger entries
+- Progress percentage
+
+REPORT ORGANIZATION
+-------------------
+- Current Active Members are shown in a separate section.
+- Archived / Completed Period Records are shown in another section.
+- A final academic-year table keeps First Semester and Second Semester duty
+  totals separate and also shows the whole-year total.
+- The selected Duty Semester controls the detailed semester calculations.
+- Archived records are never removed from these reports.
+
+DATABASE
+--------
+No new Supabase SQL is required for this update.

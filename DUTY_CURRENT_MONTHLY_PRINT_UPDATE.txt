@@ -1,0 +1,41 @@
+LSO DUTY HOURS — CURRENT ROSTER AND MONTHLY PRINT UPDATE
+=========================================================
+
+NEW PRINT BUTTONS
+-----------------
+Trainee Period:
+- Print Current Trainees
+- Print Monthly Report
+
+Probationary Period:
+- Print Current Probationary
+- Print Monthly Report
+
+CURRENT ROSTER REPORTS
+----------------------
+These reports list only members who are currently in the applicable period.
+They include member IDs, academic and contact information, period start date,
+committed time, rendered time, incentives, credited time, balance, entry count,
+and progress for the selected semester.
+
+MONTHLY REPORTS
+---------------
+Choose a month in the Duty Hours Print Center before printing. Monthly reports:
+- respect the selected First or Second Semester
+- remain separate for Trainee and Probationary members
+- include all current members in that period, even when they have no entries
+- calculate rendered time, incentives, credited time, and duty-session count
+  only from the selected month
+- include a detailed monthly ledger
+- show semester committed, credited-to-date, and remaining balance for context
+
+ARCHIVED RECORDS
+----------------
+Archived records are not included in the Current roster or Monthly reports.
+They remain accessible in Duty Archive and can still be selected and printed
+through the Individual Duty Hours Report.
+
+DATABASE
+--------
+No Supabase SQL change is required. This update changes presentation and report
+logic only and keeps the existing configured shared database connection.

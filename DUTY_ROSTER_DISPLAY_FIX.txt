@@ -1,0 +1,17 @@
+DUTY ROSTER DISPLAY CONSISTENCY FIX
+===================================
+
+This update aligns the Trainee and Probationary roster cards consistently.
+
+CHANGES
+-------
+- Stage identity and count badges now occupy the same positions.
+- Print buttons use a dedicated equal-width row below each stage title.
+- Long button labels wrap cleanly without pushing the stage title downward.
+- Both roster cards have equal minimum height on desktop.
+- Empty roster messages are vertically centered and aligned.
+- Member rows use a consistent minimum height.
+- Disabled print buttons remain readable while clearly unavailable.
+- Mobile layouts stack the print buttons into one clean column.
+
+No Supabase SQL changes are required.

@@ -83,3 +83,18 @@ DUTY HOURS ARCHIVE BEHAVIOR
 - Direct Trainee-to-Membership registrations may mark Probationary as skipped.
 - Skipped Probationary records remain editable, printable, and included in combined calculations.
 
+
+CURRENT DUTY ROSTER AND MONTHLY PRINT REPORTS
+---------------------------------------------
+Duty Hours now provides four period-specific print actions:
+- Print Current Trainees
+- Print Monthly Trainee Report
+- Print Current Probationary
+- Print Monthly Probationary Report
+
+The current roster reports include only members presently assigned to that
+period and are separate from the selected-name Individual Duty Hours Report.
+The monthly reports use the selected Duty Semester and Monthly Report Month.
+They show monthly rendered time, monthly incentives, monthly credited time,
+duty-session counts, and the current semester commitment and balance.
+Trainee and Probationary reports are never combined.

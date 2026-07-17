@@ -108,3 +108,19 @@ DUTY HOURS ARCHIVE UPDATE
 -------------------------
 This package adds Active Records and Duty Archive views. Duty records remain accessible after a member progresses, and skipped Probationary records are marked Skipped • Archived while remaining included in totals. No new Supabase SQL is required when the current Semester Duty Hours setup is already installed.
 
+
+CURRENT AND MONTHLY DUTY PRINT UPDATE
+-------------------------------------
+Inside Duty Hours:
+1. Select the correct 1st or 2nd Semester ledger.
+2. Select the Monthly Report Month in the Duty Hours Print Center.
+3. Use Print Current Trainees for the current Trainee roster.
+4. Use Print Current Probationary for the current Probationary roster.
+5. Use the separate Print Monthly Report button in each roster card for a
+   period-specific monthly report.
+
+Current roster reports do not include archived records. Archived duty records
+remain available in Duty Archive and through the selected-name Individual report.
+Monthly reports include only entries from the selected semester and month, while
+showing semester commitment and balance for context.
+No additional Supabase SQL is required for this print-only update.

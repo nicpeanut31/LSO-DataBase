@@ -1,0 +1,15 @@
+DUTY ROSTER READABILITY FIX
+===========================
+
+This update rebuilds the Trainee and Probationary roster card headers instead
+of layering more CSS over the earlier layout.
+
+Changes:
+- Full stage titles are visible and may wrap naturally.
+- Count badges have a fixed, matching position.
+- Report buttons are placed in their own dedicated row.
+- Button wording is split into readable two-line labels.
+- Both cards use matching spacing, dividers, heights, and empty states.
+- Mobile and narrower desktop layouts stack the report buttons cleanly.
+
+No Supabase SQL change is required.

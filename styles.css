@@ -2462,3 +2462,453 @@ input:disabled {
   .skip-probationary-control { padding: 12px; }
   .duty-record-state { white-space: normal !important; }
 }
+
+/* ================================================================
+   Duty Period Member Print Controls
+   ================================================================ */
+.duty-roster-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.duty-roster-header-actions > strong {
+  min-width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--green-50);
+  color: var(--green-800);
+  font-size: 18px;
+}
+.duty-period-print {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.trainee-roster-card .duty-period-print {
+  color: #245f86;
+  border-color: #cfe5f4;
+  background: #f5fbff;
+}
+.probationary-roster-card .duty-period-print {
+  color: #805d12;
+  border-color: #eadcae;
+  background: #fffaf0;
+}
+@media (max-width: 1160px) {
+  .duty-roster-card > header {
+    align-items: flex-start;
+  }
+  .duty-roster-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 760px) {
+  .duty-roster-card > header {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .duty-roster-header-actions {
+    width: 100%;
+  }
+  .duty-period-print {
+    flex: 1 1 auto;
+  }
+}
+
+/* ================================================================
+   Current Roster and Monthly Duty Print Center
+   ================================================================ */
+.duty-print-center-panel {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.5fr) minmax(210px, .65fr) minmax(210px, .65fr);
+  gap: 18px;
+  align-items: end;
+  margin-top: 18px;
+  background:
+    radial-gradient(circle at 90% 15%, rgba(32, 166, 111, .10), transparent 32%),
+    linear-gradient(135deg, #ffffff, #f5fbf8);
+}
+.duty-print-center-copy h3 { margin: 5px 0 6px; }
+.duty-print-center-copy .panel-subtitle { max-width: 720px; }
+.duty-report-month-field { min-width: 0; }
+.duty-report-month-field input { min-height: 46px; font-weight: 750; }
+.duty-print-center-help {
+  min-height: 82px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.88);
+}
+.duty-print-center-help span,
+.duty-print-center-help small { color: var(--muted); font-size: 10px; }
+.duty-print-center-help span { text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
+.duty-print-center-help strong { color: var(--green-800); font-size: 15px; }
+.duty-period-print-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.duty-monthly-print {
+  border-style: dashed;
+}
+.duty-period-print:disabled {
+  opacity: .52;
+  cursor: not-allowed;
+  transform: none;
+}
+@media (max-width: 1120px) {
+  .duty-print-center-panel { grid-template-columns: 1fr 1fr; }
+  .duty-print-center-copy { grid-column: 1 / -1; }
+  .duty-period-print-group { justify-content: flex-start; }
+}
+@media (max-width: 680px) {
+  .duty-print-center-panel { grid-template-columns: 1fr; }
+  .duty-print-center-copy { grid-column: auto; }
+  .duty-period-print-group { width: 100%; display: grid; grid-template-columns: 1fr; }
+  .duty-period-print-group .button { width: 100%; }
+  .duty-roster-header-actions > strong { position: absolute; top: 14px; right: 14px; }
+  .duty-roster-card > header { position: relative; padding-right: 64px; }
+}
+
+/* ================================================================
+   Duty Roster Display Consistency Fix
+   Keeps Trainee and Probationary cards visually aligned.
+   ================================================================ */
+.duty-roster-grid {
+  align-items: stretch;
+}
+
+.duty-roster-card {
+  display: grid;
+  grid-template-rows: auto minmax(250px, 1fr);
+  min-height: 356px;
+  overflow: hidden;
+}
+
+.duty-roster-card > header {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "identity count"
+    "actions actions";
+  align-items: center;
+  gap: 14px 16px;
+  min-height: 104px;
+  padding: 0 0 14px;
+}
+
+.duty-roster-card > header > div:first-child {
+  grid-area: identity;
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.duty-roster-card > header > div:first-child > div {
+  min-width: 0;
+}
+
+.duty-roster-card h4 {
+  margin: 3px 0 0;
+  font-size: 18px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.duty-roster-header-actions {
+  display: contents;
+}
+
+.duty-roster-header-actions > strong {
+  grid-area: count;
+  position: static;
+  min-width: 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 20px;
+  align-self: start;
+}
+
+.duty-roster-header-actions .duty-period-print-group {
+  grid-area: actions;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.duty-roster-header-actions .duty-period-print {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 12px;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: center;
+}
+
+.duty-roster-list {
+  align-content: start;
+  min-height: 250px;
+  max-height: 430px;
+  margin-top: 14px;
+  padding-right: 4px;
+}
+
+.duty-roster-list .roster-empty {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  padding: 28px 16px;
+}
+
+.duty-roster-person {
+  min-height: 76px;
+}
+
+.duty-period-print:disabled {
+  color: #8a8070;
+  border-color: #e7dfce;
+  background: #fbf9f4;
+  opacity: .72;
+}
+
+@media (max-width: 1180px) {
+  .duty-roster-card > header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity count"
+      "actions actions";
+  }
+
+  .duty-roster-header-actions {
+    width: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .duty-roster-card {
+    min-height: 0;
+    grid-template-rows: auto auto;
+  }
+
+  .duty-roster-card > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity count"
+      "actions actions";
+    padding-right: 0;
+  }
+
+  .duty-roster-header-actions .duty-period-print-group {
+    grid-template-columns: 1fr;
+  }
+
+  .duty-roster-card h4 {
+    white-space: normal;
+  }
+
+  .duty-roster-list,
+  .duty-roster-list .roster-empty {
+    min-height: 0;
+  }
+}
+
+/* ================================================================
+   Duty Roster Readability Rebuild
+   Uses explicit header and report rows to avoid legacy grid conflicts.
+   ================================================================ */
+.duty-roster-card {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 410px;
+  padding: 20px;
+  overflow: visible;
+}
+
+.duty-roster-card > .duty-roster-card-header {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 78px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.duty-roster-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.duty-roster-title-copy {
+  min-width: 0;
+}
+
+.duty-roster-title-copy .eyebrow {
+  margin-bottom: 4px;
+  line-height: 1.25;
+}
+
+.duty-roster-card .duty-roster-title-copy h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.2;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.duty-roster-title-copy small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.duty-roster-count {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--green-50);
+  color: var(--green-800);
+  font-size: 22px;
+  box-shadow: inset 0 0 0 1px rgba(32,166,111,.08);
+}
+
+.duty-roster-report-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.duty-roster-report-actions .duty-period-print {
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 10px 14px;
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.duty-roster-report-actions .duty-period-print span {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: .78;
+}
+
+.duty-roster-report-actions .duty-period-print strong {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.duty-roster-card > .duty-roster-list {
+  flex: 1 1 auto;
+  min-height: 230px;
+  max-height: 430px;
+  margin-top: 14px;
+  align-content: start;
+}
+
+.duty-roster-card > .duty-roster-list .roster-empty {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  padding: 32px 18px;
+}
+
+.duty-roster-card > .duty-roster-list .roster-empty strong {
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.duty-roster-card > .duty-roster-list .roster-empty small {
+  max-width: 330px;
+  margin: 7px auto 0;
+  line-height: 1.45;
+}
+
+.duty-roster-person {
+  min-height: 82px;
+  padding: 12px 14px;
+}
+
+.duty-roster-person-copy strong {
+  font-size: 14px;
+}
+
+.duty-roster-person-copy small {
+  font-size: 11px;
+}
+
+@media (max-width: 1120px) {
+  .duty-roster-card {
+    min-height: 390px;
+  }
+
+  .duty-roster-report-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .duty-roster-card {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .duty-roster-card > .duty-roster-card-header {
+    align-items: flex-start;
+  }
+
+  .duty-roster-title-copy small {
+    display: none;
+  }
+
+  .duty-roster-count {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 19px;
+  }
+
+  .duty-roster-report-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .duty-roster-card > .duty-roster-list,
+  .duty-roster-card > .duty-roster-list .roster-empty {
+    min-height: 0;
+  }
+}

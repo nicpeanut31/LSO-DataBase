@@ -1,23 +1,15 @@
-LSO DUTY HOURS ARCHIVE FIX — VALIDATION RESULTS
-===============================================
+LSO CURRENT AND MONTHLY DUTY PRINT — VALIDATION RESULTS
+=======================================================
 
-PASSED
-------
-- JavaScript syntax validation for every project .js file.
-- HTML duplicate-ID validation: no duplicate IDs found.
-- HTML local script and stylesheet reference validation: no missing files.
-- Active Trainee roster lifecycle test.
-- Active Probationary roster lifecycle test.
-- Trainee archive after progression to Probationary.
-- Trainee and Probationary archive after progression to Membership Period.
-- Skipped Probationary record classified as "Skipped • Archived".
-- Skipped Probationary committed time remains included in totals.
-- Skipped Probationary incentives remain included in totals.
-- Combined semester calculation includes both Trainee and skipped Probationary records.
-- Existing 12:00 PM to 5:00 PM clock calculation remains 300 minutes / 5 hours.
-- Legacy Membership records with a Membership Start date and no Probationary Start date are automatically recognized as skipped Probationary records.
-- Supabase Project URL and publishable key remain configured.
-
-DATABASE MIGRATION
-------------------
-No new SQL migration is required. Archive status is derived from each member's current membership period and timeline, while the original duty data remains unchanged.
+PASS — All JavaScript files pass Node syntax validation.
+PASS — index.html contains no duplicate IDs.
+PASS — Every local script and stylesheet referenced by index.html exists.
+PASS — Current Trainee report includes active Trainees and excludes archived records.
+PASS — Current Probationary report uses a separate active Probationary roster.
+PASS — Monthly report filters entries by selected YYYY-MM month.
+PASS — Monthly Trainee report does not include Probationary members.
+PASS — Monthly report excludes entries from other months.
+PASS — Monthly calculations preserve exact-minute rendered and incentive values.
+PASS — Report month defaults to the current month.
+PASS — Supabase configuration remains unchanged.
+PASS — No new Supabase SQL is required.
