@@ -96,6 +96,25 @@
     const TEMPLATE_URL=${JSON.stringify(officialTemplateUrl)};
     const CONTENT_HEIGHT_MM=219;
     const pxPerMm=()=>{const probe=document.createElement('div');probe.style.cssText='position:absolute;visibility:hidden;width:100mm;height:1mm';document.body.appendChild(probe);const value=probe.getBoundingClientRect().width/100;probe.remove();return value||3.7795275591};
+    const normalizeHeader=(value)=>String(value||'').trim().replace(/\s+/g,' ').toUpperCase();
+    const removeUnneededColumns=()=>{
+      const alwaysRemove=new Set(['#','NO.','NUMBER','PERIOD','REHEARSAL','REHEARSALS','PRESENT','LATE','ABSENT','EXCUSED']);
+      document.querySelectorAll('table').forEach((table)=>{
+        const headerRow=table.querySelector(':scope > thead > tr');
+        if(!headerRow)return;
+        const headers=Array.from(headerRow.children);
+        const labels=headers.map((cell)=>normalizeHeader(cell.textContent));
+        const memberAttendanceSummary=labels.includes('MEMBER')&&labels.some((label)=>['PRESENT','LATE','ABSENT','EXCUSED'].includes(label));
+        const removeIndexes=labels.map((label,index)=>alwaysRemove.has(label)||(memberAttendanceSummary&&label==='ACTIVITIES')?index:-1).filter((index)=>index>=0);
+        if(!removeIndexes.length)return;
+        table.querySelectorAll('tr').forEach((row)=>{
+          const cells=Array.from(row.children);
+          removeIndexes.slice().sort((a,b)=>b-a).forEach((index)=>{if(cells[index])cells[index].remove();});
+          const remaining=Array.from(row.children);
+          if(remaining.length===1&&remaining[0].hasAttribute('colspan'))remaining[0].setAttribute('colspan',String(Math.max(1,headers.length-removeIndexes.length)));
+        });
+      });
+    };
     const directContent=()=>Array.from(document.body.children).filter((node)=>node.tagName!=='SCRIPT'&&!node.classList.contains('lso-print-pages')&&!node.classList.contains('lso-official-template-header')&&!node.classList.contains('lso-official-template-footer'));
     const makePage=(container)=>{const page=document.createElement('section');page.className='lso-print-page';const template=document.createElement('img');template.className='lso-page-template';template.alt='';template.src=TEMPLATE_URL;const content=document.createElement('div');content.className='lso-page-content';page.append(template,content);container.appendChild(page);return {page,content};};
     const overflows=(content)=>content.scrollHeight>content.clientHeight+1;
@@ -110,6 +129,7 @@
       return state;
     };
     const paginate=()=>{
+      removeUnneededColumns();
       const nodes=directContent();
       const pages=document.createElement('main');pages.className='lso-print-pages';
       document.body.appendChild(pages);

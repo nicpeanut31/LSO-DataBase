@@ -715,14 +715,14 @@
       ['First Semester', year.first.combined], ['Second Semester', year.second.combined], ['Whole Academic Year', year.academicYear]
     ].map(([label, item]) => `<tr><td><strong>${safeText(label)}</strong></td><td>${safeText(durationLabel(item.committed))}</td><td>${safeText(durationLabel(item.rendered))}</td><td>${safeText(durationLabel(item.incentives, true))}</td><td>${safeText(durationLabel(item.credited))}</td><td>${safeText(balanceText(item.balance, item.committed, item.credited))}</td></tr>`).join('');
     const entries = entriesFor(data, member.id, activeSemester, selectedPeriod).sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    const ledgerRows = entries.map((entry, index) => `<tr><td>${index + 1}</td><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(entry.entryType === 'Duty' ? clockRangeLabel(entry) : '—')}</td><td>${safeText(entry.entryType === 'Duty' ? 'Rendered Duty' : 'Incentive Adjustment')}</td><td class="${entry.minutes < 0 ? 'negative' : 'positive'}">${safeText(durationLabel(entry.minutes, entry.entryType === 'Incentive'))}</td><td>${safeText(entry.description || '—')}</td><td>${safeText(entry.createdBy || '—')}</td></tr>`).join('');
+    const ledgerRows = entries.map((entry) => `<tr><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(entry.entryType === 'Duty' ? clockRangeLabel(entry) : '—')}</td><td>${safeText(entry.entryType === 'Duty' ? 'Rendered Duty' : 'Incentive Adjustment')}</td><td class="${entry.minutes < 0 ? 'negative' : 'positive'}">${safeText(durationLabel(entry.minutes, entry.entryType === 'Incentive'))}</td><td>${safeText(entry.description || '—')}</td><td>${safeText(entry.createdBy || '—')}</td></tr>`).join('');
     const html = `<!doctype html><html><head><title>${safeText(member.fullName)} — Duty Hours</title><style>${printStyles('landscape')}</style></head><body>
       ${window.LSOBrand.printHeader({ title: 'Individual Duty Hours Report', subtitle: `${member.fullName} • ${activeSemester} • ${selectedPeriod} • ${lifecycle.label}`, meta: `Generated ${dateLabel(today())}` })}
       <div class="summary">${[
         ['Committed', durationLabel(focus.committed)], ['Rendered', durationLabel(focus.rendered)], ['Net Incentives', durationLabel(focus.incentives, true)], ['Credited', durationLabel(focus.credited)], ['Remaining / Excess', balanceText(focus.balance, focus.committed, focus.credited)], ['Ledger Entries', entries.length]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <table class="period-table"><thead><tr><th>Academic Period</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Balance</th></tr></thead><tbody>${yearRows}</tbody></table>
-      <table><thead><tr><th>#</th><th>Date</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th><th>Recorded By</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="7">No entries in the selected semester and period.</td></tr>'}</tbody></table>
+      <table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th><th>Recorded By</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="6">No entries in the selected semester and period.</td></tr>'}</tbody></table>
       <div class="sign"><div>Member Signature</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
@@ -798,8 +798,7 @@
     const totals = combineSummaries(records.map((item) => item.summary));
     const outstanding = records.reduce((sum, item) => sum + Math.max(0, item.summary.balance), 0);
     const completed = records.filter((item) => item.summary.committed > 0 && item.summary.balance <= 0).length;
-    const rows = records.map(({ member, lifecycle, summary }, index) => `<tr>
-      <td>${index + 1}</td>
+    const rows = records.map(({ member, lifecycle, summary }) => `<tr>
       <td><strong>${safeText(member.fullName)}</strong><br><span class="muted">${safeText(member.membershipId || 'No Membership ID')} • ${safeText(member.studentNumber || 'No Student No.')}</span></td>
       <td>${memberAcademicDetails(member)}</td>
       <td>${memberContactDetails(member)}</td>
@@ -823,7 +822,7 @@
         ['Current Members', records.length], ['Completed', completed], ['Committed', durationLabel(totals.committed)], ['Rendered', durationLabel(totals.rendered)], ['Credited', durationLabel(totals.credited)], ['Outstanding', durationLabel(outstanding)]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <div class="report-note"><strong>Report scope:</strong> This report lists only members who are currently in the ${safeText(normalizedPeriod)}. It is separate from the selected-name Individual Duty Hours Report and excludes archived or completed-period records.</div>
-      <table class="roster-detail-table"><thead><tr><th>#</th><th>Member / IDs</th><th>Academic Information</th><th>Contact</th><th>Current Stage</th><th>Duty Status</th><th>Period Start</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Balance</th><th>Entries</th><th>Progress</th></tr></thead><tbody>${rows}</tbody></table>
+      <table class="roster-detail-table"><thead><tr><th>Member / IDs</th><th>Academic Information</th><th>Contact</th><th>Current Stage</th><th>Duty Status</th><th>Period Start</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Balance</th><th>Entries</th><th>Progress</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
@@ -851,8 +850,7 @@
     const monthlyCredited = records.reduce((sum, item) => sum + item.monthSummary.credited, 0);
     const dutySessions = records.reduce((sum, item) => sum + item.monthSummary.dutyEntries, 0);
 
-    const rows = records.map(({ member, summary, monthSummary }, index) => `<tr>
-      <td>${index + 1}</td>
+    const rows = records.map(({ member, summary, monthSummary }) => `<tr>
       <td><strong>${safeText(member.fullName)}</strong><br><span class="muted">${safeText(member.membershipId || 'No Membership ID')} • ${safeText(member.studentNumber || 'No Student No.')}</span></td>
       <td>${memberAcademicDetails(member)}</td>
       <td>${safeText(periodStartValue(member, normalizedPeriod))}</td>
@@ -867,7 +865,7 @@
 
     const ledgerRows = records.flatMap(({ member, monthSummary }) => monthSummary.entries.map((entry) => ({ member, entry })))
       .sort((a, b) => String(a.entry.date).localeCompare(String(b.entry.date)) || String(a.member.fullName).localeCompare(String(b.member.fullName)))
-      .map(({ member, entry }, index) => `<tr><td>${index + 1}</td><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(entry.entryType === 'Duty' ? clockRangeLabel(entry) : '—')}</td><td>${safeText(entry.entryType === 'Duty' ? 'Rendered Duty' : 'Incentive Adjustment')}</td><td class="${entry.minutes < 0 ? 'negative' : 'positive'}">${safeText(durationLabel(entry.minutes, entry.entryType === 'Incentive'))}</td><td>${safeText(entry.description || '—')}</td></tr>`).join('');
+      .map(({ member, entry }) => `<tr><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(entry.entryType === 'Duty' ? clockRangeLabel(entry) : '—')}</td><td>${safeText(entry.entryType === 'Duty' ? 'Rendered Duty' : 'Incentive Adjustment')}</td><td class="${entry.minutes < 0 ? 'negative' : 'positive'}">${safeText(durationLabel(entry.minutes, entry.entryType === 'Incentive'))}</td><td>${safeText(entry.description || '—')}</td></tr>`).join('');
 
     const html = `<!doctype html><html><head><title>${safeText(monthName)} ${safeText(normalizedPeriod)} Duty Hours</title><style>${printStyles('landscape')}
       body{font-size:9px}.report-note{padding:9px 11px;border:1px solid #d8e6df;border-radius:7px;background:#f7fbf9;margin:10px 0 16px;line-height:1.45}.monthly-roster{font-size:7.7px}.monthly-roster th{font-size:6.9px}.monthly-roster td{padding:5px}.muted{color:#687c74;font-size:7px}.section-title{display:flex;justify-content:space-between;align-items:end;margin:20px 0 7px}.section-title h2{margin:0;font-size:15px;color:#0b4c3a}.page-break{break-before:page;page-break-before:always}
@@ -877,9 +875,9 @@
         ['Current Members', records.length], ['With Entries', membersWithEntries], ['Duty Sessions', dutySessions], ['Monthly Rendered', durationLabel(monthlyRendered)], ['Net Incentives', durationLabel(monthlyIncentives, true)], ['Monthly Credited', durationLabel(monthlyCredited)]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
       <div class="report-note"><strong>Monthly scope:</strong> Only ${safeText(monthName)} entries from ${safeText(activeSemester)} are included. Semester commitment, credited-to-date, and balance columns are shown for context and are not recalculated as monthly commitments.</div>
-      <table class="monthly-roster"><thead><tr><th>#</th><th>Member / IDs</th><th>Academic Information</th><th>Period Start</th><th>Duty Sessions</th><th>Monthly Rendered</th><th>Monthly Incentives</th><th>Monthly Credited</th><th>Semester Committed</th><th>Semester Credited to Date</th><th>Semester Balance</th></tr></thead><tbody>${rows}</tbody></table>
+      <table class="monthly-roster"><thead><tr><th>Member / IDs</th><th>Academic Information</th><th>Period Start</th><th>Duty Sessions</th><th>Monthly Rendered</th><th>Monthly Incentives</th><th>Monthly Credited</th><th>Semester Committed</th><th>Semester Credited to Date</th><th>Semester Balance</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="section-title page-break"><h2>Monthly Duty Ledger</h2><span>${ledgerRows ? `${records.reduce((sum, item) => sum + item.monthSummary.entries.length, 0)} entries` : 'No entries'}</span></div>
-      <table><thead><tr><th>#</th><th>Date</th><th>Member</th><th>ID</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="8">No rendered-duty or incentive entries were recorded for this month.</td></tr>'}</tbody></table>
+      <table><thead><tr><th>Date</th><th>Member</th><th>ID</th><th>Clock In–Out</th><th>Entry</th><th>Computed Time</th><th>Description / Basis</th></tr></thead><tbody>${ledgerRows || '<tr><td colspan="7">No rendered-duty or incentive entries were recorded for this month.</td></tr>'}</tbody></table>
       <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">This monthly report is separate for the ${safeText(normalizedPeriod)} and does not combine Trainee and Probationary records.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }
@@ -890,13 +888,13 @@
     const summaries = members.map((member) => ({ member, summary: calculatePeriod(data, member.id, activeSemester, overallPeriod), lifecycle: periodLifecycle(member, overallPeriod, data) }));
     const totals = combineSummaries(summaries.map((item) => item.summary));
     const outstanding = summaries.reduce((sum, item) => sum + Math.max(0, item.summary.balance), 0);
-    const rows = summaries.map(({ member, summary, lifecycle }, index) => `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(lifecycle.label)}</td><td>${safeText(durationLabel(summary.committed))}</td><td>${safeText(durationLabel(summary.rendered))}</td><td>${safeText(durationLabel(summary.incentives, true))}</td><td>${safeText(durationLabel(summary.credited))}</td><td>${safeText(balanceText(summary.balance, summary.committed, summary.credited))}</td><td>${summary.progress}%</td></tr>`).join('');
+    const rows = summaries.map(({ member, summary, lifecycle }) => `<tr><td>${safeText(member.fullName)}</td><td>${safeText(member.membershipId || member.studentNumber || '—')}</td><td>${safeText(lifecycle.label)}</td><td>${safeText(durationLabel(summary.committed))}</td><td>${safeText(durationLabel(summary.rendered))}</td><td>${safeText(durationLabel(summary.incentives, true))}</td><td>${safeText(durationLabel(summary.credited))}</td><td>${safeText(balanceText(summary.balance, summary.committed, summary.credited))}</td><td>${summary.progress}%</td></tr>`).join('');
     const html = `<!doctype html><html><head><title>${safeText(activeSemester)} Duty Hours</title><style>${printStyles('landscape')}</style></head><body>
       ${window.LSOBrand.printHeader({ title: `${activeSemester} Duty Hours Report`, subtitle: `${overallPeriod} roster`, meta: `Generated ${dateLabel(today())}` })}
       <div class="summary">${[
         ['Roster', members.length], ['Committed', durationLabel(totals.committed)], ['Rendered', durationLabel(totals.rendered)], ['Net Incentives', durationLabel(totals.incentives, true)], ['Credited', durationLabel(totals.credited)], ['Outstanding', durationLabel(outstanding)]
       ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>
-      <table><thead><tr><th>#</th><th>Member</th><th>ID</th><th>Record Status</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No duty-hour records.</td></tr>'}</tbody></table>
+      <table><thead><tr><th>Member</th><th>ID</th><th>Record Status</th><th>Committed</th><th>Rendered</th><th>Incentives</th><th>Credited</th><th>Remaining / Excess</th><th>Progress</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No duty-hour records.</td></tr>'}</tbody></table>
       <div class="sign"><div>Prepared by</div><div>Authorized Officer</div></div><div class="footer">Rendered duty is calculated automatically from clock-based Time In and Time Out and stored in exact minutes.</div>${window.LSOBrand.printRuntimeScript}</body></html>`;
     openPrint(html);
   }

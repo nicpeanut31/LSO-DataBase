@@ -319,26 +319,25 @@
       ['Total Rehearsals', summary.totalRehearsals], ['Present', summary.counts.Present], ['Late', summary.counts.Late],
       ['Absent', summary.counts.Absent], ['Excused', summary.counts.Excused], ['Attendance Rate', summary.rate === null ? '—' : `${summary.rate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
-    const rows = summary.events.map((event, index) => {
+    const rows = summary.events.map((event) => {
       const record = recordMap.get(event.id) || {};
-      return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${member.fullName} — ${activeSemester()} Attendance`,
       subtitle: `${activeSemester()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`, 
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>#</th><th>Date</th><th>Rehearsal</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No completed rehearsal records.</td></tr>'}</tbody></table>`
+      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No completed rehearsal records.</td></tr>'}</tbody></table>`
     }));
   }
 
   function eventDetailReportTable(events) {
     const attendance = getAttendance();
-    const rows = events.map((event, index) => {
+    const rows = events.map((event) => {
       const records = attendance.filter((record) => record.eventId === event.id && record.status);
-      const counts = statusCounts(records);
-      return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.type || 'Activity')}</td><td>${safeText(event.venue || '—')}</td><td>${counts.Present}</td><td>${counts.Late}</td><td>${counts.Absent}</td><td>${counts.Excused}</td><td>${records.length}</td></tr>`;
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.type || 'Activity')}</td><td>${safeText(event.venue || '—')}</td><td>${records.length}</td></tr>`;
     }).join('');
-    return `<h2 class="report-section">Activity Breakdown</h2><p class="report-note">Each row summarizes the recorded attendance for one completed activity.</p><table><thead><tr><th>#</th><th>Date</th><th>Activity</th><th>Type</th><th>Venue</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Recorded</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No completed activities in this report period.</td></tr>'}</tbody></table>`;
+    return `<h2 class="report-section">Activity Breakdown</h2><p class="report-note">Each row lists one completed activity and the number of recorded attendance entries.</p><table><thead><tr><th>Date</th><th>Activity</th><th>Type</th><th>Venue</th><th>Recorded</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No completed activities in this report period.</td></tr>'}</tbody></table>`;
   }
 
   function printOverallAttendance() {
@@ -350,15 +349,15 @@
     const summaryHtml = `<div class="summary">${[
       ['Activities', events.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Excused', counts.Excused], ['Overall Rate', rate === null ? '—' : `${rate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
-    const rows = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName))).map((member, index) => {
+    const rows = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName))).map((member) => {
       const summary = memberRehearsalSummary(member.id);
-      return `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.periodGroup)}</td><td>${summary.totalRehearsals}</td><td>${summary.counts.Present}</td><td>${summary.counts.Late}</td><td>${summary.counts.Absent}</td><td>${summary.counts.Excused}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
+      return `<tr><td>${safeText(member.fullName)}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${activeSemester()} Overall Attendance Report`,
       subtitle: `${events.length} completed activities • ${records.length} recorded attendance statuses`,
       summaryHtml,
-      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Semester Summary</h2><p class="report-note">Member totals below are based on completed rehearsal events in ${safeText(activeSemester())}.</p><table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Rehearsals</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`
+      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Semester Summary</h2><p class="report-note">The simplified summary shows each member and their attendance rate for ${safeText(activeSemester())}.</p><table><thead><tr><th>Member</th><th>Attendance Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="2">No member records.</td></tr>'}</tbody></table>`
     }));
   }
 
@@ -372,15 +371,15 @@
     const summaryHtml = `<div class="summary">${[
       ['Activities', events.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Excused', counts.Excused], ['Overall Rate', rate === null ? '—' : `${rate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
-    const rows = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName))).map((member, index) => {
+    const rows = getMembers().sort((a, b) => String(a.fullName).localeCompare(String(b.fullName))).map((member) => {
       const summary = memberSummaryForEvents(member.id, events);
-      return `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.periodGroup)}</td><td>${summary.totalEvents}</td><td>${summary.counts.Present}</td><td>${summary.counts.Late}</td><td>${summary.counts.Absent}</td><td>${summary.counts.Excused}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
+      return `<tr><td>${safeText(member.fullName)}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${monthLabel} Monthly Attendance Report`,
       subtitle: `${activeSemester()} • ${events.length} completed activities • ${records.length} recorded attendance statuses`,
       summaryHtml,
-      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Monthly Summary</h2><p class="report-note">The table includes only completed activities in ${safeText(monthLabel)} under ${safeText(activeSemester())}.</p><table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Activities</th><th>Present</th><th>Late</th><th>Absent</th><th>Excused</th><th>Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No member records.</td></tr>'}</tbody></table>`,
+      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">Member Monthly Summary</h2><p class="report-note">The simplified summary shows each member and their attendance rate for ${safeText(monthLabel)} under ${safeText(activeSemester())}.</p><table><thead><tr><th>Member</th><th>Attendance Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="2">No member records.</td></tr>'}</tbody></table>`,
       footer: `Monthly attendance report for ${monthLabel}, ${activeSemester()}. Only completed activities inside the displayed calendar month are included.`
     }));
   }
@@ -396,15 +395,15 @@
       ['Rehearsals', summary.totalEvents], ['Present', summary.counts.Present], ['Late', summary.counts.Late],
       ['Absent', summary.counts.Absent], ['Excused', summary.counts.Excused], ['Attendance Rate', summary.rate === null ? '—' : `${summary.rate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
-    const rows = summary.events.map((event, index) => {
+    const rows = summary.events.map((event) => {
       const record = recordMap.get(event.id) || {};
-      return `<tr><td>${index + 1}</td><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${member.fullName} — ${monthLabel} Attendance`,
       subtitle: `${activeSemester()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`,
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>#</th><th>Date</th><th>Rehearsal</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No completed rehearsal records for this month.</td></tr>'}</tbody></table>`,
+      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No completed rehearsal records for this month.</td></tr>'}</tbody></table>`,
       footer: `Individual monthly attendance report for ${monthLabel}, ${activeSemester()}.`
     }));
   }
@@ -420,15 +419,15 @@
     const summaryHtml = `<div class="summary">${[
       ['Roster', members.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Excused', counts.Excused], ['Recorded', records.filter((r) => r.status).length]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
-    const rows = members.map((member, index) => {
+    const rows = members.map((member) => {
       const record = map.get(member.id) || {};
-      return `<tr><td>${index + 1}</td><td>${safeText(member.fullName)}</td><td>${safeText(member.periodGroup)}</td><td>${safeText(member.orchestraSection || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+      return `<tr><td>${safeText(member.fullName)}</td><td>${safeText(member.orchestraSection || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: event.title,
       subtitle: `${eventSemester(event)} • ${dateLabel(event.date)} • ${event.venue || 'Venue not recorded'} • ${event.type || 'Activity'}`, 
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>#</th><th>Member</th><th>Period</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows}</tbody></table>`
+      tableHtml: `<table><thead><tr><th>Member</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows}</tbody></table>`
     }));
   }
 

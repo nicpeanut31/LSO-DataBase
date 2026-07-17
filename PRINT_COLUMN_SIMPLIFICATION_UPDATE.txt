@@ -1,0 +1,24 @@
+LSO PRINT COLUMN SIMPLIFICATION UPDATE
+======================================
+
+Removed from generated print tables:
+- Number / # columns
+- Period columns
+- Rehearsal / Rehearsals columns
+- Present columns
+- Late columns
+- Absent columns
+- Excused columns
+
+Attendance report changes:
+- Individual attendance history now prints Date, Venue, Status, and Remarks.
+- Activity breakdown now prints Date, Activity, Type, Venue, and Recorded entries.
+- Semester and monthly member summaries now print Member and Attendance Rate.
+- Selected-event rosters now print Member, Section, Status, and Remarks.
+
+Duty Hours report changes:
+- Number / # columns were removed from all individual, current roster, monthly,
+  ledger, and overall Duty Hours print tables.
+
+Summary cards above the tables remain because the request applied to table
+columns. No database records or Supabase configuration were changed.
