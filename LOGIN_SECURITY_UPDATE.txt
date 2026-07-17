@@ -1,0 +1,16 @@
+LSO LOGIN SECURITY UPDATE
+=========================
+
+CHANGES
+-------
+- The login username field now opens blank.
+- The login password field now opens blank.
+- The website no longer inserts SNA1161 credentials after logout or reload.
+- The visible Default administrator username/password notice was removed.
+- Browser autocomplete is disabled on the login form to reduce unintended credential display.
+
+INSTALLATION
+------------
+Replace the existing website files with this package, commit the changes, wait for GitHub Pages to deploy, and hard-refresh the website.
+
+No Supabase SQL update is required for this visual/login-form change.

@@ -3,7 +3,6 @@
 
   const SESSION_KEY = 'lso_shared_session_v1';
   const DEFAULT_USERNAME = 'SNA1161';
-  const DEFAULT_PASSWORD = 'SNA1161';
   const el = (id) => document.getElementById(id);
   const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
 
@@ -142,8 +141,8 @@
     document.title = 'Login | LSO Orchestra Management System';
     el('loginForm')?.reset();
     el('registerForm')?.reset();
-    if (el('loginUsername')) el('loginUsername').value = DEFAULT_USERNAME;
-    if (el('loginPassword')) el('loginPassword').value = DEFAULT_PASSWORD;
+    if (el('loginUsername')) el('loginUsername').value = '';
+    if (el('loginPassword')) el('loginPassword').value = '';
     if (!preserveMessage) switchAuthMode('login');
     emit('lso:auth-changed', null);
     stopAccountRefresh();

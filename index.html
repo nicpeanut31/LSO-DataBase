@@ -38,7 +38,7 @@
 <button aria-selected="true" class="auth-tab active" id="loginTab" role="tab" type="button">Login</button>
 <button aria-selected="false" class="auth-tab" id="registerTab" role="tab" type="button">Register Account</button>
 </div>
-<form class="auth-form" id="loginForm">
+<form autocomplete="off" class="auth-form" id="loginForm">
 <div class="auth-heading">
 <p class="eyebrow">Welcome back</p>
 <h2>Log in to LSO</h2>
@@ -46,18 +46,17 @@
 </div>
 <label class="field">
 <span>Username</span>
-<input autocomplete="username" id="loginUsername" maxlength="30" minlength="4" placeholder="Enter username" required="" type="text" value="SNA1161"/>
+<input autocomplete="off" id="loginUsername" maxlength="30" minlength="4" placeholder="Enter username" required="" type="text"/>
 </label>
 <label class="field">
 <span>Password</span>
 <div class="password-field">
-<input autocomplete="current-password" id="loginPassword" placeholder="Enter password" required="" type="password" value="SNA1161"/>
+<input autocomplete="new-password" id="loginPassword" placeholder="Enter password" required="" type="password"/>
 <button aria-label="Show password" class="password-toggle" data-password-target="loginPassword" type="button">Show</button>
 </div>
 </label>
 <div class="auth-message hidden" id="loginMessage"></div>
 <button class="button button-primary auth-submit" type="submit">Login to Database</button>
-<p class="default-account-note"><strong>Default administrator:</strong> Username: SNA1161 &nbsp;•&nbsp; Password: SNA1161</p>
 </form>
 <form class="auth-form hidden" id="registerForm">
 <div class="auth-heading">
