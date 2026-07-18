@@ -335,21 +335,27 @@
     const executive = members.filter((m) => m.organizationPosition === 'Executive Board').length;
     const average = total ? Math.round(members.reduce((sum, m) => sum + Number(m.recordQuality || 0), 0) / total) : 0;
 
-    el('metricGrid').innerHTML = [
-      metricCard('Membership Period', membership, 'Official member directory'),
-      metricCard('Probationary Period', probationary, 'Under evaluation'),
-      metricCard('Trainee Period', trainee, 'Recruitment and training'),
-      metricCard('Active Records', active, total ? `${Math.round((active / total) * 100)}% of all profiles` : 'No records yet'),
-      metricCard('Executive Board', executive, 'Organization officers'),
-      metricCard('Profile Quality', `${average}%`, average >= 90 ? 'Records are in good shape' : 'Some profiles need review')
-    ].join('');
+    const metricGrid = el('metricGrid');
+    if (metricGrid) {
+      metricGrid.innerHTML = [
+        metricCard('Membership Period', membership, 'Official member directory'),
+        metricCard('Probationary Period', probationary, 'Under evaluation'),
+        metricCard('Trainee Period', trainee, 'Recruitment and training'),
+        metricCard('Active Records', active, total ? `${Math.round((active / total) * 100)}% of all profiles` : 'No records yet'),
+        metricCard('Executive Board', executive, 'Organization officers'),
+        metricCard('Profile Quality', `${average}%`, average >= 90 ? 'Records are in good shape' : 'Some profiles need review')
+      ].join('');
+    }
 
     renderBars('statusBars', ['Active', 'Nonactive', 'LOA'], 'memberStatus');
     renderBars('sectionBars', ['Piano', 'String', 'Woodwinds', 'Brass', 'Percussion'], 'orchestraSection');
+    // Backward-compatible only: the former stageBars panel may no longer exist
+    // because stage intelligence is now rendered by dashboard-intelligence.js.
     renderBars('stageBars', PERIOD_GROUPS, 'periodGroup');
 
     const recent = [...members].sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).slice(0, 6);
-    el('recentMembers').innerHTML = recent.length ? recent.map((member) => `
+    const recentMembers = el('recentMembers');
+    if (recentMembers) recentMembers.innerHTML = recent.length ? recent.map((member) => `
       <div class="recent-item">
         <div class="member-avatar">${safeText(initials(member.fullName))}</div>
         <div><h4>${safeText(member.fullName)}</h4><p>${safeText(member.membershipId)} • ${safeText(member.primaryInstrument || 'No instrument')}</p></div>
@@ -360,8 +366,10 @@
   }
 
   function renderBars(containerId, labels, field) {
+    const container = el(containerId);
+    if (!container) return;
     const total = members.length || 1;
-    el(containerId).innerHTML = labels.map((label) => {
+    container.innerHTML = labels.map((label) => {
       const count = members.filter((member) => member[field] === label).length;
       const percent = Math.round((count / total) * 100);
       return `<div><div class="bar-row-top"><span>${safeText(label)}</span><span>${count} (${members.length ? percent : 0}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${members.length ? percent : 0}%"></div></div></div>`;

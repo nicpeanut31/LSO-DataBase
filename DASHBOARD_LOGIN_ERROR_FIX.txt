@@ -1,0 +1,28 @@
+LSO DASHBOARD LOGIN NULL-REFERENCE FIX
+========================================
+
+ERROR FIXED
+-----------
+Cannot set properties of null (setting 'innerHTML')
+
+ROOT CAUSE
+----------
+The upgraded dashboard replaced the old Stage and Period Groups panel with the
+new People Intelligence section. app.js still attempted to render into the old
+stageBars element during login, which threw a null-reference error and caused
+authorization to return to the login screen.
+
+FIXES INCLUDED
+--------------
+1. app.js now checks that dashboard containers exist before writing innerHTML.
+2. renderBars() safely returns when an optional dashboard container is absent.
+3. index.html includes a hidden stageBars compatibility target for older cached
+   app.js copies.
+4. The app.js cache-busting version was changed so GitHub Pages browsers load
+   the corrected script immediately.
+
+INSTALLATION
+------------
+Replace all GitHub website files with this package, commit, wait for Pages to
+finish deploying, and use Ctrl+F5 or an Incognito window. No Supabase SQL update
+is required.

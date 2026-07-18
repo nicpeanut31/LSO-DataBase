@@ -1,0 +1,5 @@
+PASS - hidden compatibility stageBars
+PASS - new app cache version
+PASS - renderBars null guard
+PASS - metricGrid null guard
+PASS - recentMembers null guard

@@ -1,0 +1,37 @@
+LSO DASHBOARD GENDER & INTELLIGENCE UPGRADE
+===========================================
+
+NEW DASHBOARD FEATURES
+----------------------
+1. Gender Summary by Membership Stage
+   - Official Members / Membership Period
+   - Trainee Period
+   - Probationary Period
+   - Separate Male and Female counts and percentages
+   - Unspecified entries are shown when present
+   - Click a stage card to open that member directory
+
+2. System Readiness Panel
+   - Average member-profile quality
+   - Incomplete profiles
+   - Missing gender entries
+   - Missing emergency contacts
+   - Profiles due for review
+   - Activities scheduled within seven days
+   - Pending account requests for Administrators
+
+3. Visual and Functional Dashboard Improvements
+   - Upgraded futuristic command-center background
+   - Stronger visual hierarchy for metrics and modules
+   - Responsive 12-column operations layout on desktop
+   - Improved tablet and mobile stacking
+   - Live updates when members, accounts, events, or cloud data change
+
+INSTALLATION
+------------
+Replace all files in the GitHub Pages publishing folder with the files from
+this package. Keep dashboard-v2.css and dashboard-intelligence.js beside
+index.html. No Supabase SQL update is required.
+
+After GitHub Pages redeploys, press Ctrl + F5 or open the site in an Incognito
+window to bypass cached CSS and JavaScript.

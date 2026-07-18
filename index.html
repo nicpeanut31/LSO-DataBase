@@ -17,6 +17,7 @@
 <link href="branding.css?v=20260717-logos" rel="stylesheet"/>
 <link href="login-page.css?v=20260717-landing-v2" rel="stylesheet"/>
 <link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
+<link href="dashboard-v2.css?v=20260718-gender-dashboard-v1" rel="stylesheet"/>
 </head>
 <body>
 <section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
@@ -195,6 +196,10 @@
 
 <div class="metric-grid" id="metricGrid"></div>
 
+<div id="dashboardIntelligenceHub" aria-live="polite"></div>
+<!-- Compatibility target for older cached dashboard code; intentionally hidden. -->
+<div class="hidden" id="stageBars" aria-hidden="true"></div>
+
 <div class="dashboard-operations-grid">
 <article class="panel dashboard-module upcoming-module">
 <div class="panel-header"><div><p class="eyebrow">Schedule</p><h3>Upcoming Events</h3><p class="panel-subtitle" id="dashboardUpcomingSummary">Loading schedule…</p></div><button class="text-button" data-dashboard-action="attendance" type="button">Open attendance →</button></div>
@@ -231,10 +236,6 @@
 <article class="panel">
 <div class="panel-header"><div><p class="eyebrow">Orchestra</p><h3>Section Distribution</h3></div></div>
 <div class="bar-list" id="sectionBars"></div>
-</article>
-<article class="panel wide-panel">
-<div class="panel-header"><div><p class="eyebrow">Recruitment Pipeline</p><h3>Stage and Period Groups</h3></div></div>
-<div class="bar-list compact-bars" id="stageBars"></div>
 </article>
 <article class="panel wide-panel priority-panel">
 <div class="panel-header"><div><p class="eyebrow">Action Center</p><h3>Items Requiring Attention</h3></div><button class="text-button" data-dashboard-action="alerts" type="button">Open action center →</button></div>
@@ -891,7 +892,7 @@
 <script src="supabase-config.js?v=20260717-1605"></script>
 <script src="branding.js?v=20260717-simplified-columns-v1"></script>
 <script src="cloud.js?v=20260717-1605"></script>
-<script src="app.js?v=20260717-print-fix"></script>
+<script src="app.js?v=20260718-dashboard-null-fix-v1"></script>
 <script src="auth.js?v=20260717-1605"></script>
 <script src="management.js?v=20260717-attendance-current-archive-v2"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
@@ -901,6 +902,7 @@
 <script src="pdf-lib.min.js?v=1.17.1"></script>
 <script src="contract-template-data.js?v=20260718-contract-v3"></script>
 <script src="contract-maker.js?v=20260718-contract-v3"></script>
+<script src="dashboard-intelligence.js?v=20260718-gender-dashboard-v2"></script>
 <script src="permissions.js?v=20260718-contract-v1"></script>
 </body>
 </html>
