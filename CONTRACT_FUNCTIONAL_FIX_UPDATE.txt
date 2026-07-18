@@ -1,0 +1,42 @@
+LSO CONTRACT MAKER — FUNCTIONAL AND DISPLAY FIX
+================================================
+
+WHAT WAS FIXED
+--------------
+1. Removed the contract template network dependency that caused "Failed to fetch".
+   The official two-page contract template is now embedded in
+   contract-template-data.js. The original PDF file remains included as a
+   fallback.
+
+2. Fixed contract generation and direct PDF downloading.
+   - Select an Official Member.
+   - Review or enter the Postal Address.
+   - Choose the Contract Date.
+   - Enter the Officer in Charge.
+   - Click Download Contract PDF.
+
+3. Fixed the live preview.
+   - The preview is generated from the same completed PDF that is downloaded.
+   - An Open PDF button is shown after successful generation.
+   - If the browser cannot display an inline PDF, the Open PDF button and the
+     Download Contract PDF button remain available.
+
+4. Rebuilt the Contract workspace layout.
+   - Member names can wrap to two lines and are not covered by avatars or
+     address labels.
+   - Address status is shown below the member identity.
+   - The form buttons no longer overlap.
+   - The preview panel uses a larger, responsive document area.
+   - The command header now has readable contrast.
+
+FILES THAT MUST BE UPLOADED
+---------------------------
+Upload every file in this folder. These new files are essential:
+- contract-maker-v2.css
+- contract-template-data.js
+
+The following existing files were also updated:
+- index.html
+- contract-maker.js
+
+No Supabase SQL update is required.

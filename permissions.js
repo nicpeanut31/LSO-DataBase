@@ -7,12 +7,12 @@
     'addEventButton', 'createEventOnSelectedDate', 'editEventButton', 'deleteEventButton',
     'markAllPresent', 'saveAttendanceButton',
     'addInstrumentButton', 'saveSystemSettings', 'clearActivityLog', 'clearDatabase',
-    'applyTimelineDefaults'
+    'applyTimelineDefaults', 'previewContractButton', 'downloadContractButton', 'resetContractButton'
   ]);
   const MUTATION_FILE_IDS = new Set(['restoreCompleteSystem', 'csvImport', 'jsonRestore']);
   const MUTATION_FORM_IDS = new Set([
     'memberForm', 'eventForm', 'instrumentForm',
-    'dutyCommitmentForm', 'dutyRenderedForm', 'dutyIncentiveForm'
+    'dutyCommitmentForm', 'dutyRenderedForm', 'dutyIncentiveForm', 'contractMakerForm'
   ]);
   const MUTATION_CLICK_SELECTOR = [
     '[data-action="edit"]',

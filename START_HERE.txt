@@ -18,3 +18,7 @@ The configured Supabase URL and publishable key are retained.
 LOGO BRANDING
 -------------
 The official LSO logo, browser icon, and print-document branding are included. Upload all image, CSS, and JavaScript files without renaming them.
+
+CONTRACT MAKER
+--------------
+The Contract page uses lso-contract-template.pdf and pdf-lib.min.js. Keep both files beside index.html when uploading to GitHub. No additional Supabase SQL is required.

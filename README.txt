@@ -98,3 +98,13 @@ The monthly reports use the selected Duty Semester and Monthly Report Month.
 They show monthly rendered time, monthly incentives, monthly credited time,
 duty-session counts, and the current semester commitment and balance.
 Trainee and Probationary reports are never combined.
+
+CONTRACT MAKER
+--------------
+- Open Contract from the sidebar.
+- Select an active official member in the Membership Period.
+- The member name and Home Address are inserted into the official two-page contract template.
+- Review/correct the postal address, select the contract date, and manually enter the Officer in Charge.
+- The preview is generated automatically.
+- Download Contract PDF creates and downloads the completed PDF.
+- Only Administrator accounts can generate contracts.

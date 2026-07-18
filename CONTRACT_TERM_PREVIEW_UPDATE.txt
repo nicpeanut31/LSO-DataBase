@@ -1,0 +1,31 @@
+LSO CONTRACT TERM AND PREVIEW UPGRADE
+=====================================
+
+WHAT CHANGED
+------------
+1. The generated Name and Postal Address block on page 1 is centered.
+2. The generated Name and Postal Address are bold and underlined.
+3. Contract Term is now manually entered through two required fields:
+   - Semester
+   - Academic Year
+4. The manually entered Semester and Academic Year replace the fixed term in Clause 1.
+5. The generated Semester and Academic Year are bold and underlined in the PDF.
+6. The live PDF preview is now a full-width panel below the roster and form.
+7. The preview height was increased for clearer viewing of the two A4 pages.
+8. The Open PDF control is renamed Open Large Preview.
+
+INSTALLATION
+------------
+Replace all website files in GitHub with the contents of this folder.
+No Supabase SQL update is required.
+After GitHub Pages deploys, press Ctrl + F5.
+
+NEW REQUIRED INPUTS
+-------------------
+Before previewing or downloading a contract, enter:
+- Contract Date
+- Officer in Charge
+- Semester, for example: 2nd Semester
+- Academic Year, for example: 2026-2027
+
+The member Name and Address still come from the selected member record. The address remains editable for the contract.

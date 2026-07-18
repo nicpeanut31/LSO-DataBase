@@ -1,0 +1,26 @@
+LSO CONTRACT MAKER UPDATE
+=========================
+
+A new Contract section has been added to the website.
+
+FUNCTIONS
+---------
+- Lists active official members in the Membership Period.
+- Search by name, Membership ID, or Student Number.
+- Clicking a member automatically generates a two-page contract preview.
+- Member Name and Home Address are filled from the member database.
+- Postal Address can be corrected for the contract without changing the member record.
+- Contract Date defaults to the current date and may be changed.
+- Officer in Charge is entered manually.
+- Download Contract PDF creates and automatically downloads the completed official PDF.
+- The uploaded LSO-CONTRACT.pdf is used as the unchanged official base template.
+- Staff Accounts cannot generate contracts; Administrator access is required.
+
+FILES ADDED
+-----------
+contract-maker.js
+contract-maker.css
+pdf-lib.min.js
+lso-contract-template.pdf
+
+No Supabase SQL update is required because contracts are generated from existing member records and are not stored in the database.

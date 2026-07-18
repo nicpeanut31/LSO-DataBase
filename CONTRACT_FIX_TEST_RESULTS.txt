@@ -1,0 +1,16 @@
+LSO CONTRACT MAKER FIX — VALIDATION RESULTS
+===========================================
+
+PASS — JavaScript syntax validation for contract-maker.js.
+PASS — Official contract template embedded in contract-template-data.js.
+PASS — PDF generation completed without a network fetch.
+PASS — Generated PDF contains exactly two pages.
+PASS — Member name, postal address, contract date, signee name, and Officer in Charge were inserted.
+PASS — Generated PDF size: approximately 296 KB in functional test.
+PASS — Page 1 and Page 2 were rendered and visually inspected.
+PASS — All local index.html script and stylesheet references exist.
+PASS — New member-card structure prevents status labels from covering names.
+PASS — Download function creates an application/pdf Blob with a member-specific filename.
+
+The live website must be refreshed with Ctrl+F5 after GitHub Pages deploys so
+it loads the new contract-maker-v2.css and contract-template-data.js files.

@@ -1,0 +1,15 @@
+LSO CONTRACT TERM AND PREVIEW UPGRADE - VALIDATION RESULTS
+==========================================================
+
+PASS - contract-maker.js JavaScript syntax validated with Node.js.
+PASS - all JavaScript files in the package passed syntax validation.
+PASS - index.html contains the new Semester and Academic Year inputs.
+PASS - all local JavaScript, CSS, image, icon, and PDF references exist.
+PASS - generated contract contains two A4 portrait pages.
+PASS - generated Name and Address are centered and visibly underlined.
+PASS - manual Semester and Academic Year appear in Clause 1.
+PASS - Signee and Officer in Charge remain correctly generated on page 2.
+PASS - the generated PDF was rendered to PNG and visually checked for clipping and overlap.
+PASS - WITNESSETH and Clause 2 remain unobstructed after the page-1 overlays.
+
+Test output: CONTRACT_TERM_PREVIEW_SAMPLE.pdf

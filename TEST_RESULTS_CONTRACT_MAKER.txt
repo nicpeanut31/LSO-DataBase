@@ -1,0 +1,21 @@
+LSO CONTRACT MAKER - VALIDATION RESULTS
+=======================================
+
+PASS - New Contract navigation item and Contract Maker view are present.
+PASS - Active official members are sourced from the Membership Period directory.
+PASS - Member Name, Membership ID, Student Number, Course, and Home Address are read from the member database.
+PASS - Postal Address remains editable for the generated contract without changing the member record.
+PASS - Contract Date defaults to the current date.
+PASS - Officer in Charge is a required manual input before PDF download.
+PASS - The exact uploaded two-page LSO-CONTRACT.pdf is included as lso-contract-template.pdf (matching SHA-256 checksum).
+PASS - Page 1 inserts the contract date, member name, and address without altering the remaining official contract text.
+PASS - Page 2 inserts the signee name and Officer in Charge above the official signature labels.
+PASS - Generated PDF remains A4 portrait with exactly two pages.
+PASS - Long member names and addresses use automatic font fitting and line wrapping.
+PASS - Download Contract PDF creates a PDF Blob and triggers an automatic browser download.
+PASS - Administrator-only access is enforced for contract generation.
+PASS - JavaScript syntax checks passed for all application modules.
+PASS - All local HTML, CSS, JavaScript, image, and PDF references exist.
+PASS - Generated sample PDF was rendered and visually checked; no clipping or overlap was found.
+
+No Supabase SQL change is required.

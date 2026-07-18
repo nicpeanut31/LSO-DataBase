@@ -16,6 +16,7 @@
 <link href="access-control.css?v=20260717-1605" rel="stylesheet"/>
 <link href="branding.css?v=20260717-logos" rel="stylesheet"/>
 <link href="login-page.css?v=20260717-landing-v2" rel="stylesheet"/>
+<link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
 </head>
 <body>
 <section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
@@ -109,6 +110,7 @@
 <button class="nav-item active" data-view="dashboardView">Dashboard</button>
 <button class="nav-item" data-view="membersView">Members</button>
 <button class="nav-item" data-view="lookupView">Member Lookup</button>
+<button class="nav-item" data-view="contractView">Contract</button>
 <button class="nav-item" data-view="attendanceView">Attendance</button>
 <button class="nav-item" data-view="dutyHoursView">Duty Hours</button>
 
@@ -346,6 +348,81 @@
 <div><span></span><p>Member Signature</p></div>
 <div><span></span><p>Authorized Officer</p></div>
 </div>
+</div>
+</article>
+</div>
+</section>
+
+<section class="view" id="contractView">
+<div class="contract-command-header">
+<div>
+<p class="eyebrow">Official Membership Document</p>
+<h3>Contract Generation Center</h3>
+<p>Select an official member, verify the postal address, and enter the authorized officer. The system prepares the official two-page LSO Membership Contract instantly.</p>
+</div>
+<div class="contract-header-badge"><span>PDF</span><strong>Official two-page contract</strong><small>Automated member details • Live preview • Direct download</small></div>
+</div>
+
+<div class="contract-staff-notice panel hidden" id="contractReadOnlyNotice">
+<div class="empty-icon">🔒</div>
+<h3>Administrator access required</h3>
+<p>Staff Accounts may view system records, but only an Administrator can prepare and download membership contracts.</p>
+</div>
+
+<div class="contract-workspace admin-only" id="contractAdminWorkspace">
+<article class="panel contract-member-panel">
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Step 1</p><h3>Select Official Member</h3><p class="panel-subtitle">Only active records in the Membership Period are listed.</p></div>
+<span class="contract-count-badge" id="contractMemberCount">0</span>
+</div>
+<label class="field">
+<span>Search member</span>
+<input id="contractMemberSearch" type="search" autocomplete="off" placeholder="Name, membership ID, or student number..."/>
+</label>
+<div class="contract-member-list" id="contractMemberList"></div>
+</article>
+
+<article class="panel contract-form-panel">
+<div class="panel-header">
+<div><p class="eyebrow">Step 2</p><h3>Contract Information</h3><p class="panel-subtitle">Member information is filled automatically. Review the address and enter the authorized officer.</p></div>
+<span class="contract-ready-state" id="contractReadyState">Select a member</span>
+</div>
+<form id="contractMakerForm" novalidate>
+<input id="contractMemberId" type="hidden"/>
+<div class="contract-selected-profile hidden" id="contractSelectedProfile">
+<div class="contract-profile-avatar" id="contractProfileAvatar">LSO</div>
+<div><strong id="contractProfileName">—</strong><small id="contractProfileIdentity">—</small></div>
+</div>
+<div class="form-grid two-columns contract-form-grid">
+<label class="field span-2"><span>Name of Signee</span><input id="contractSigneeName" readonly/></label>
+<label class="field span-2"><span>Postal Address *</span><textarea id="contractAddress" rows="3" required placeholder="Member's complete postal address"></textarea><small class="field-help">This is prefilled from Home Address and may be corrected for this contract.</small></label>
+<label class="field"><span>Contract Date *</span><input id="contractDate" type="date" required/></label>
+<label class="field"><span>Officer in Charge *</span><input id="contractOfficer" maxlength="100" required placeholder="Full name of EVP for Membership"/></label>
+<div class="contract-term-heading span-2"><strong>Contract Term</strong><small>Enter the semester and academic year exactly as they should appear in Clause 1.</small></div>
+<label class="field"><span>Semester *</span><input id="contractSemester" maxlength="40" required placeholder="e.g., 2nd Semester"/></label>
+<label class="field"><span>Academic Year *</span><input id="contractAcademicYear" maxlength="30" required placeholder="e.g., 2025-2026"/></label>
+</div>
+<div class="form-message hidden" id="contractFormMessage"></div>
+<div class="contract-actions">
+<button class="button button-secondary" id="resetContractButton" type="button">Clear</button>
+<button class="button button-secondary" id="previewContractButton" type="button" disabled>Refresh Preview</button>
+<button class="button button-primary" id="downloadContractButton" type="button" disabled>Download Contract PDF</button>
+</div>
+</form>
+</article>
+
+<article class="panel contract-preview-panel" id="contractPreviewPanel">
+<div class="panel-header stack-mobile">
+<div><p class="eyebrow">Live Document Preview</p><h3>Generated Contract</h3><p class="panel-subtitle">The full-width preview shows both official contract pages. Use Open Large Preview for the clearest view.</p></div>
+<div class="contract-preview-heading-actions"><span class="contract-preview-status" id="contractPreviewStatus">Waiting for member</span><button class="button button-secondary contract-open-preview-button hidden" id="openContractPreviewButton" type="button">Open Large Preview</button></div>
+</div>
+<div class="contract-preview-shell">
+<div class="contract-preview-placeholder" id="contractPreviewPlaceholder">
+<div class="contract-document-icon">PDF</div>
+<h4>No contract generated yet</h4>
+<p>Choose an official member from the roster to generate a preview.</p>
+</div>
+<iframe class="contract-preview-frame hidden" id="contractPreviewFrame" title="Membership contract preview"></iframe>
 </div>
 </article>
 </div>
@@ -821,6 +898,9 @@
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
 <script src="workflow-upgrades.js?v=20260717-attendance-current-archive-v2"></script>
 <script src="duty-hours.js?v=20260717-simplified-columns-v1"></script>
-<script src="permissions.js?v=20260717-1605"></script>
+<script src="pdf-lib.min.js?v=1.17.1"></script>
+<script src="contract-template-data.js?v=20260718-contract-v3"></script>
+<script src="contract-maker.js?v=20260718-contract-v3"></script>
+<script src="permissions.js?v=20260718-contract-v1"></script>
 </body>
 </html>

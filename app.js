@@ -309,6 +309,7 @@
       dashboardView: 'Dashboard',
       membersView: 'Members',
       lookupView: 'Member Lookup',
+      contractView: 'Contract Maker',
       attendanceView: 'Attendance',
       dutyHoursView: 'Duty Hours',
       alertsView: 'Action Center',
