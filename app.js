@@ -310,6 +310,7 @@
       membersView: 'Members',
       lookupView: 'Member Lookup',
       contractView: 'Contract Maker',
+      monthlyReportView: 'Overall Monthly Report',
       attendanceView: 'Attendance',
       dutyHoursView: 'Duty Hours',
       alertsView: 'Action Center',

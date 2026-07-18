@@ -24,7 +24,8 @@
     '[data-dashboard-action="add-member"]',
     '[data-dashboard-action="new-event"]',
     '[data-dashboard-action="add-instrument"]',
-    '[data-alert-instrument]'
+    '[data-alert-instrument]',
+    '[data-monthly-write]'
   ].join(',');
 
   let observer = null;
@@ -107,6 +108,9 @@
 
     // Keep attendance values visible while preventing edits.
     root.querySelectorAll?.('.attendance-status, .attendance-remarks').forEach((node) => setReadonlyControl(node, staff));
+
+    // Monthly Report setup and filing fields stay visible but are read-only for Staff.
+    root.querySelectorAll?.('[data-monthly-edit]').forEach((node) => setReadonlyControl(node, staff));
 
     // Settings remain visible so Staff can inspect the configuration.
     ['settingTraineeDays', 'settingProbationaryDays', 'settingRegular1Days', 'settingAlertDays', 'settingAttendanceThreshold']

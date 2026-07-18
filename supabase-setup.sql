@@ -66,6 +66,7 @@ create table if not exists public.system_state (
   events jsonb not null default '[]'::jsonb,
   attendance jsonb not null default '[]'::jsonb,
   duty_hours jsonb not null default '{"version":2,"commitments":{},"entries":[]}'::jsonb,
+  monthly_reports jsonb not null default '{"version":1,"reports":{},"civilStatusByMember":{},"traineeFiles":{}}'::jsonb,
   instruments jsonb not null default '[]'::jsonb,
   settings jsonb not null default '{}'::jsonb,
   activity_log jsonb not null default '[]'::jsonb,
@@ -80,6 +81,11 @@ on conflict (id) do nothing;
 alter table public.system_state
   add column if not exists duty_hours jsonb not null
   default '{"version":2,"commitments":{},"entries":[]}'::jsonb;
+
+-- Upgrade existing projects with the Overall Monthly Report shared filing.
+alter table public.system_state
+  add column if not exists monthly_reports jsonb not null
+  default '{"version":1,"reports":{},"civilStatusByMember":{},"traineeFiles":{}}'::jsonb;
 
 create or replace function public.lso_set_updated_at()
 returns trigger
@@ -436,6 +442,7 @@ begin
     'events', state.events,
     'attendance', state.attendance,
     'duty_hours', state.duty_hours,
+    'monthly_reports', state.monthly_reports,
     'instruments', state.instruments,
     'settings', state.settings,
     'activity_log', state.activity_log,
@@ -469,7 +476,7 @@ begin
     raise exception 'The selected data collection must be a JSON array.' using errcode = '22023';
   end if;
 
-  if p_column in ('settings', 'duty_hours') and jsonb_typeof(p_value) <> 'object' then
+  if p_column in ('settings', 'duty_hours', 'monthly_reports') and jsonb_typeof(p_value) <> 'object' then
     raise exception 'The selected data collection must be a JSON object.' using errcode = '22023';
   end if;
 
@@ -482,6 +489,8 @@ begin
       update public.system_state set attendance = p_value, updated_at = now() where id = 1;
     when 'duty_hours' then
       update public.system_state set duty_hours = p_value, updated_at = now() where id = 1;
+    when 'monthly_reports' then
+      update public.system_state set monthly_reports = p_value, updated_at = now() where id = 1;
     when 'instruments' then
       update public.system_state set instruments = p_value, updated_at = now() where id = 1;
     when 'settings' then
@@ -515,6 +524,7 @@ begin
       events = case when jsonb_typeof(p_state -> 'events') = 'array' then p_state -> 'events' else events end,
       attendance = case when jsonb_typeof(p_state -> 'attendance') = 'array' then p_state -> 'attendance' else attendance end,
       duty_hours = case when jsonb_typeof(p_state -> 'duty_hours') = 'object' then p_state -> 'duty_hours' else duty_hours end,
+      monthly_reports = case when jsonb_typeof(p_state -> 'monthly_reports') = 'object' then p_state -> 'monthly_reports' else monthly_reports end,
       instruments = case when jsonb_typeof(p_state -> 'instruments') = 'array' then p_state -> 'instruments' else instruments end,
       settings = case when jsonb_typeof(p_state -> 'settings') = 'object' then p_state -> 'settings' else settings end,
       activity_log = case when jsonb_typeof(p_state -> 'activity_log') = 'array' then p_state -> 'activity_log' else activity_log end,
@@ -717,3 +727,10 @@ commit;
 -- 3. Other registrations remain Pending until approved from Accounts.
 -- 4. No email-confirmation setting is required because this version does not
 --    use Supabase Auth email accounts.
+
+-- Monthly Report compatibility migration and PostgREST cache refresh.
+update public.system_state
+set monthly_reports = settings -> '__lso_monthly_reports_v1'
+where jsonb_typeof(settings -> '__lso_monthly_reports_v1') = 'object'
+  and coalesce(jsonb_object_length(settings -> '__lso_monthly_reports_v1'), 0) > 0;
+notify pgrst, 'reload schema';

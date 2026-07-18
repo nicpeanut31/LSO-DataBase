@@ -18,6 +18,7 @@
 <link href="login-page.css?v=20260717-landing-v2" rel="stylesheet"/>
 <link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
 <link href="dashboard-v2.css?v=20260718-gender-dashboard-v1" rel="stylesheet"/>
+<link href="monthly-report.css?v=20260719-autosave-layout-v3" rel="stylesheet"/>
 </head>
 <body>
 <section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
@@ -112,6 +113,7 @@
 <button class="nav-item" data-view="membersView">Members</button>
 <button class="nav-item" data-view="lookupView">Member Lookup</button>
 <button class="nav-item" data-view="contractView">Contract</button>
+<button class="nav-item" data-view="monthlyReportView">Monthly Report</button>
 <button class="nav-item" data-view="attendanceView">Attendance</button>
 <button class="nav-item" data-view="dutyHoursView">Duty Hours</button>
 
@@ -428,6 +430,138 @@
 </article>
 </div>
 </section>
+
+<section class="view" id="monthlyReportView">
+  <div class="monthly-report-command">
+    <div>
+      <p class="eyebrow">Official Administrative Filing</p>
+      <h3>Overall Monthly Report</h3>
+      <p>Prepare the Lasallian Symphony Orchestra manpower complement, monthly member summaries, Leave and OJT records, and the permanent Trainee filing in one official PDF.</p>
+    </div>
+    <div class="monthly-report-command-badge"><span>PDF</span><div><strong>Automated official report</strong><small>Shared records • Fillable filing tables • Direct PDF download</small></div></div>
+  </div>
+
+  <div class="monthly-report-filing-map" aria-label="Official report sequence">
+    <div><strong>Cover &amp; Complement</strong><small>Official cover, comparative counts, and continuous manpower roster.</small></div>
+    <div><strong>Member Summaries</strong><small>Gender, year level, Leave, and OJT tables follow the reference format.</small></div>
+    <div><strong>Trainee Filing</strong><small>Permanent Trainee file, removed records, and remaining roster are retained by semester.</small></div>
+    <div><strong>Print-ready PDF</strong><small>Letter portrait pages, repeated official template, automatic pagination, and direct download.</small></div>
+  </div>
+
+  <div class="monthly-report-toolbar">
+    <div class="monthly-report-tabs" role="tablist" aria-label="Monthly report workspace">
+      <button class="monthly-report-tab active" data-monthly-tab="setup" type="button">Setup &amp; Summary</button>
+      <button class="monthly-report-tab" data-monthly-tab="manpower" type="button">Manpower Complement</button>
+      <button class="monthly-report-tab" data-monthly-tab="status" type="button">Leave &amp; OJT</button>
+      <button class="monthly-report-tab" data-monthly-tab="trainees" type="button">Trainee Filing</button>
+      <button class="monthly-report-tab" data-monthly-tab="preview" type="button">PDF Preview</button>
+    </div>
+    <div class="monthly-report-toolbar-actions">
+      <div class="monthly-report-status" id="monthlyReportStatus" aria-live="polite">Loading report…</div>
+      <div class="monthly-report-action-buttons">
+        <button class="button button-secondary" id="monthlyReportSaveButton" data-monthly-write type="button">Save Draft</button>
+        <button class="button button-secondary" id="monthlyReportPreviewButton" type="button">Preview PDF</button>
+        <button class="button button-primary" id="monthlyReportDownloadButton" type="button">Download Monthly Report PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="monthly-report-tab-panel active" data-monthly-panel="setup">
+    <div class="monthly-report-setup-grid">
+      <article class="panel monthly-report-panel">
+        <div class="panel-header"><div><p class="eyebrow">Report Details</p><h3>Monthly Filing Information</h3><p class="panel-subtitle">The date and signatories are entered by the Administrator and printed throughout the official report.</p></div></div>
+        <div class="monthly-report-form-grid">
+          <label class="field"><span>Report Month *</span><input id="monthlyReportMonth" type="month"/></label>
+          <label class="field"><span>As-of Date *</span><input id="monthlyReportDate" data-monthly-edit type="date"/></label>
+          <label class="field"><span>Semester *</span><select id="monthlyReportSemester" data-monthly-edit><option>First Semester</option><option>Second Semester</option><option>Summer Term</option></select></label>
+          <label class="field"><span>Academic Year *</span><input id="monthlyReportAcademicYear" data-monthly-edit placeholder="e.g., 2026-2027"/></label>
+          <label class="field"><span>Prepared By *</span><input id="monthlyReportPreparedBy" data-monthly-edit placeholder="Full name"/></label>
+          <label class="field"><span>Prepared By Position</span><input id="monthlyReportPreparedTitle" data-monthly-edit placeholder="e.g., EVP for Membership"/></label>
+          <label class="field"><span>Noted By *</span><input id="monthlyReportNotedBy" data-monthly-edit placeholder="Full name"/></label>
+          <label class="field"><span>Noted By Position</span><input id="monthlyReportNotedTitle" data-monthly-edit placeholder="e.g., President"/></label>
+        </div>
+        <p class="monthly-report-help">The Trainer is permanently counted as <strong>1</strong> in the Comparative Manpower Complement. Member counts are read from the shared database.</p>
+      </article>
+
+      <article class="panel monthly-report-panel">
+        <div class="panel-header"><div><p class="eyebrow">Live Complement</p><h3>Comparative Manpower Summary</h3><p class="panel-subtitle">The Trainer is fixed at 1. Current Trainee and Probationary records are combined under one TRAINEE classification.</p></div></div>
+        <div class="monthly-report-summary-grid" id="monthlyReportSummaryGrid"></div>
+        <div class="table-wrap monthly-comparative-table">
+          <table><thead><tr><th>Classification</th><th>Number</th><th>Percent</th></tr></thead><tbody id="monthlyComparativeBody"></tbody></table>
+        </div>
+      </article>
+    </div>
+
+    <div class="monthly-section-grid">
+      <article class="panel monthly-report-panel">
+        <div class="panel-header"><div><p class="eyebrow">Table 1</p><h3>According to Gender</h3></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Gender</th><th>Count</th></tr></thead><tbody id="monthlyGenderSummaryBody"></tbody></table></div>
+      </article>
+      <article class="panel monthly-report-panel">
+        <div class="panel-header"><div><p class="eyebrow">Table 2</p><h3>According to Year Level</h3></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Year Level</th><th>Count</th></tr></thead><tbody id="monthlyYearSummaryBody"></tbody></table></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="monthly-report-tab-panel" data-monthly-panel="manpower">
+    <article class="panel monthly-report-panel">
+      <div class="panel-header stack-mobile">
+        <div><p class="eyebrow">Continuous Numbering</p><h3>Manpower Complement</h3><p class="panel-subtitle">Official Members are listed first, followed by Trainees and Probationary Members. Rank is assigned automatically; Civil Status is fillable.</p></div>
+        <div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyManpowerCount">0</span><button class="button button-secondary" id="monthlyFillBlankSingle" data-monthly-write type="button">Fill Blank as Single</button></div>
+      </div>
+      <div class="monthly-search-row"><label class="field"><span>Search roster</span><input id="monthlyManpowerSearch" type="search" placeholder="Name, ID, course, year, or stage…"/></label><div class="monthly-inline-note"><span>ⓘ</span><div><strong>Rank automation</strong><br/>Executive Board records become OFFICER. Other Official Members become MEMBER.</div></div></div>
+      <div class="monthly-table-wrap">
+        <table><thead><tr><th>#</th><th>Name</th><th>Rank</th><th>Year</th><th>Course</th><th>Civil Status</th><th>Gender</th></tr></thead><tbody id="monthlyManpowerBody"></tbody></table>
+      </div>
+    </article>
+  </div>
+
+  <div class="monthly-report-tab-panel" data-monthly-panel="status">
+    <div class="monthly-section-grid">
+      <article class="panel monthly-report-panel full">
+        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 3</p><h3>Summary of Members on Leave</h3><p class="panel-subtitle">Synchronize members marked LOA, then complete the purpose and duration. Manual rows may also be added.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyLoaCount">0</span><button class="button button-secondary" id="monthlySyncLoa" data-monthly-write type="button">Sync from Member Records</button><button class="button button-primary" id="monthlyAddLoa" data-monthly-write type="button">+ Add Leave Row</button></div></div>
+        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Year</th><th>Purpose of Filing LOA</th><th>LOA Until</th><th>Action</th></tr></thead><tbody id="monthlyLoaBody"></tbody></table></div>
+      </article>
+      <article class="panel monthly-report-panel full">
+        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 4</p><h3>Members on On-the-Job Training</h3><p class="panel-subtitle">Select members and enter the OJT completion period.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyOjtCount">0</span><button class="button button-primary" id="monthlyAddOjt" data-monthly-write type="button">+ Add OJT Row</button></div></div>
+        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Year</th><th>OJT Until</th><th>Action</th></tr></thead><tbody id="monthlyOjtBody"></tbody></table></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="monthly-report-tab-panel" data-monthly-panel="trainees">
+    <div class="monthly-section-grid">
+      <article class="panel monthly-report-panel full">
+        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 5</p><h3>Permanent Summary of Trainees</h3><p class="panel-subtitle">Once captured, names remain in the semester file even when members progress to another stage. Updating only adds new Trainees.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyTraineeFileCount">0</span><button class="button button-primary" id="monthlyCaptureTrainees" data-monthly-write type="button">Update Permanent Trainee File</button></div></div>
+        <div class="monthly-snapshot-banner" id="monthlyTraineeFileStatus"></div>
+        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Year</th><th>Original Entry Date</th></tr></thead><tbody id="monthlyTraineeFileBody"></tbody></table></div>
+      </article>
+
+      <article class="panel monthly-report-panel full">
+        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 6</p><h3>Quitted/Removed Trainees</h3><p class="panel-subtitle">This table is manually maintained for the selected monthly report.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyQuittedCount">0</span><button class="button button-primary" id="monthlyAddQuitted" data-monthly-write type="button">+ Add Record</button></div></div>
+        <datalist id="monthlyTraineeNames"></datalist>
+        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Reason/s</th><th>Remarks</th><th>Action</th></tr></thead><tbody id="monthlyQuittedBody"></tbody></table></div>
+      </article>
+
+      <article class="panel monthly-report-panel full">
+        <div class="panel-header stack-mobile monthly-remaining-header"><div><p class="eyebrow">Table 7</p><h3>Remaining Trainees</h3><p class="panel-subtitle">Use automatic mode to calculate the permanent Trainee file less Quitted/Removed records, or switch to a manual list.</p></div><div class="monthly-report-actions monthly-remaining-actions"><div class="monthly-control-block"><span class="monthly-control-label">Current total</span><span class="monthly-count-pill" id="monthlyRemainingCount">0</span></div><label class="monthly-control-field"><span>List mode</span><select class="monthly-mode-select" id="monthlyRemainingMode" data-monthly-edit><option value="automatic">Automatic Calculation</option><option value="manual">Manual List</option></select></label><button class="button button-primary hidden" id="monthlyAddRemaining" data-monthly-write type="button">+ Add Remaining Trainee</button></div></div>
+        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Source / Action</th></tr></thead><tbody id="monthlyRemainingBody"></tbody></table></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="monthly-report-tab-panel" data-monthly-panel="preview">
+    <article class="panel monthly-report-panel">
+      <div class="panel-header stack-mobile"><div><p class="eyebrow">Official PDF Preview</p><h3>Overall Monthly Report</h3><p class="panel-subtitle">Preview the complete multi-page report before downloading. The final button generates and downloads the PDF automatically.</p></div><div class="monthly-report-actions"><button class="button button-secondary" id="monthlyReportPreviewButtonSecondary" type="button" onclick="window.LSOMonthlyReport?.preview()">Refresh Preview</button><button class="button button-primary" id="monthlyReportDownloadButtonSecondary" type="button" onclick="window.LSOMonthlyReport?.download()">Download PDF</button></div></div>
+      <div class="monthly-report-preview-shell">
+        <div class="monthly-report-preview-placeholder" id="monthlyReportPreviewPlaceholder"><div><span>PDF</span><strong>No preview generated yet</strong><p>Complete the report information, then choose Preview PDF.</p></div></div>
+        <iframe class="monthly-report-preview-frame hidden" id="monthlyReportPreviewFrame" title="Overall Monthly Report PDF preview"></iframe>
+      </div>
+    </article>
+  </div>
+</section>
+
 
 <section class="view" id="attendanceView">
 <div class="attendance-command-header futuristic-command-header">
@@ -891,18 +1025,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20260717-1605"></script>
 <script src="branding.js?v=20260717-simplified-columns-v1"></script>
-<script src="cloud.js?v=20260717-1605"></script>
-<script src="app.js?v=20260718-dashboard-null-fix-v1"></script>
+<script src="cloud.js?v=20260719-monthly-compat-v2"></script>
+<script src="app.js?v=20260719-monthly-report-v1"></script>
 <script src="auth.js?v=20260717-1605"></script>
-<script src="management.js?v=20260717-attendance-current-archive-v2"></script>
+<script src="management.js?v=20260719-monthly-report-v1"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
 <script src="workflow-upgrades.js?v=20260717-attendance-current-archive-v2"></script>
 <script src="duty-hours.js?v=20260717-simplified-columns-v1"></script>
 <script src="pdf-lib.min.js?v=1.17.1"></script>
+<script src="monthly-report-template-data.js?v=20260719-monthly-report-v1"></script>
+<script src="monthly-report.js?v=20260719-autosave-layout-v3"></script>
 <script src="contract-template-data.js?v=20260718-contract-v3"></script>
 <script src="contract-maker.js?v=20260718-contract-v3"></script>
 <script src="dashboard-intelligence.js?v=20260718-gender-dashboard-v2"></script>
-<script src="permissions.js?v=20260718-contract-v1"></script>
+<script src="permissions.js?v=20260719-monthly-report-v1"></script>
 </body>
 </html>

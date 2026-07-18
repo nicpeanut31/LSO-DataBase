@@ -8,6 +8,7 @@
   const SETTINGS_KEY = 'lso_system_settings_v2';
   const MEMBERS_KEY = 'lso_member_database_v1';
   const DUTY_HOURS_KEY = 'lso_duty_hours_v1';
+  const MONTHLY_REPORTS_KEY = 'lso_monthly_reports_v1';
   const ATTENDANCE_SEMESTERS = ['First Semester', 'Second Semester'];
   const ATTENDANCE_GROUPS = ['Official Members', 'Trainee Members', 'Probationary Members'];
   const ATTENDANCE_ROSTER_MODES = ['Current', 'Archive'];
@@ -74,6 +75,17 @@
         : { version: 1, commitments: {}, entries: [] };
     } catch {
       return { version: 1, commitments: {}, entries: [] };
+    }
+  }
+
+  function loadMonthlyReports() {
+    try {
+      const parsed = JSON.parse(window.LSOStorage.getItem(MONTHLY_REPORTS_KEY) || '{}');
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? parsed
+        : { version: 1, reports: {}, civilStatusByMember: {}, traineeFiles: {} };
+    } catch {
+      return { version: 1, reports: {}, civilStatusByMember: {}, traineeFiles: {} };
     }
   }
 
@@ -1050,13 +1062,14 @@
   // Complete backup and audit log
   function completeBackup() {
     const backup = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       application: 'Lasallian Symphony Orchestra Management System',
       exportedAt: new Date().toISOString(),
       members: getMembers(),
       events,
       attendance,
       dutyHours: loadDutyHours(),
+      monthlyReports: loadMonthlyReports(),
       instruments,
       settings: loadSettings(),
       activityLog: loadArray(ACTIVITY_KEY)
@@ -1088,6 +1101,8 @@
         saveArray(ATTENDANCE_KEY, attendance);
         window.LSOStorage.setItem(DUTY_HOURS_KEY, JSON.stringify(backup.dutyHours && typeof backup.dutyHours === 'object' ? backup.dutyHours : { version: 1, commitments: {}, entries: [] }));
         window.dispatchEvent(new CustomEvent('lso:duty-hours-changed'));
+        window.LSOStorage.setItem(MONTHLY_REPORTS_KEY, JSON.stringify(backup.monthlyReports && typeof backup.monthlyReports === 'object' ? backup.monthlyReports : { version: 1, reports: {}, civilStatusByMember: {}, traineeFiles: {} }));
+        window.dispatchEvent(new CustomEvent('lso:monthly-report-changed'));
         saveArray(INSTRUMENTS_KEY, instruments);
         saveSettings(backup.settings || DEFAULT_SETTINGS);
         saveArray(ACTIVITY_KEY, Array.isArray(backup.activityLog) ? backup.activityLog : []);
@@ -1124,6 +1139,7 @@
   function refreshView(viewId) {
     if (viewId === 'attendanceView') renderAttendance();
     if (viewId === 'dutyHoursView') window.LSODutyHours?.refresh?.();
+    if (viewId === 'monthlyReportView') window.LSOMonthlyReport?.refresh?.();
     if (viewId === 'instrumentsView') renderInstruments();
     if (viewId === 'alertsView') renderAlerts();
     if (viewId === 'accountsView') renderAccounts();

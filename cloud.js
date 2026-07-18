@@ -4,6 +4,8 @@
   const TABLE_ROW_ID = 1;
   const POLL_INTERVAL_MS = 5000;
   const PENDING_KEY = 'lso_cloud_pending_v1';
+  const MONTHLY_COMPAT_COLUMN = 'monthly_reports_compat';
+  const MONTHLY_SETTINGS_KEY = '__lso_monthly_reports_v1';
   const KEY_TO_COLUMN = {
     lso_member_database_v1: 'members',
     lso_events_v2: 'events',
@@ -11,10 +13,11 @@
     lso_instruments_v2: 'instruments',
     lso_activity_log_v2: 'activity_log',
     lso_system_settings_v2: 'settings',
-    lso_duty_hours_v1: 'duty_hours'
+    lso_duty_hours_v1: 'duty_hours',
+    lso_monthly_reports_v1: MONTHLY_COMPAT_COLUMN
   };
   const ARRAY_COLUMNS = new Set(['members', 'events', 'attendance', 'instruments', 'activity_log']);
-  const OBJECT_COLUMNS = new Set(['settings', 'duty_hours']);
+  const OBJECT_COLUMNS = new Set(['settings', 'duty_hours', MONTHLY_COMPAT_COLUMN]);
   const nativeStorage = window.localStorage;
   const config = window.LSO_SUPABASE_CONFIG || {};
   const configured = Boolean(
@@ -40,7 +43,8 @@
   try {
     const pending = JSON.parse(nativeStorage.getItem(PENDING_KEY) || '[]');
     if (Array.isArray(pending)) pending.forEach((column) => {
-      if ([...ARRAY_COLUMNS, ...OBJECT_COLUMNS].includes(column)) dirtyVersions.set(column, 1);
+      const normalizedColumn = column === 'monthly_reports' ? MONTHLY_COMPAT_COLUMN : column;
+      if ([...ARRAY_COLUMNS, ...OBJECT_COLUMNS].includes(normalizedColumn)) dirtyVersions.set(normalizedColumn, 1);
     });
   } catch {
     // A malformed pending marker is ignored.
@@ -118,7 +122,7 @@
 
   function dispatchDomainChange(key, source = 'cloud') {
     if (key === 'lso_member_database_v1') emit('lso:members-changed', { source });
-    if (['lso_events_v2', 'lso_attendance_v2', 'lso_instruments_v2', 'lso_activity_log_v2', 'lso_system_settings_v2', 'lso_duty_hours_v1'].includes(key)) {
+    if (['lso_events_v2', 'lso_attendance_v2', 'lso_instruments_v2', 'lso_activity_log_v2', 'lso_system_settings_v2', 'lso_duty_hours_v1', 'lso_monthly_reports_v1'].includes(key)) {
       emit('lso:operations-changed', { key, source });
     }
     emit('lso:cloud-state-changed', { key, source });
@@ -126,6 +130,21 @@
 
   function stateColumn(stateObject, column) {
     if (!stateObject) return defaultForColumn(column);
+    if (column === MONTHLY_COMPAT_COLUMN) {
+      const settingsValue = stateObject.settings && typeof stateObject.settings === 'object' && !Array.isArray(stateObject.settings)
+        ? stateObject.settings[MONTHLY_SETTINGS_KEY]
+        : null;
+      if (settingsValue && typeof settingsValue === 'object' && !Array.isArray(settingsValue)) {
+        return normalizeColumn(column, settingsValue);
+      }
+      return normalizeColumn(column, stateObject.monthly_reports);
+    }
+    if (column === 'settings') {
+      const settingsValue = normalizeColumn(column, stateObject.settings);
+      const cleanSettings = { ...settingsValue };
+      delete cleanSettings[MONTHLY_SETTINGS_KEY];
+      return cleanSettings;
+    }
     return normalizeColumn(column, stateObject[column]);
   }
 
@@ -158,6 +177,9 @@
     }
     if (/function .* does not exist|could not find the function|schema cache/i.test(message)) {
       return 'The required database functions are missing. Run the latest supabase-setup.sql in the Supabase SQL Editor.';
+    }
+    if (/unsupported shared-data column/i.test(message)) {
+      return 'The shared database is using an older schema. Monthly Report data will use compatibility storage automatically.';
     }
     return message;
   }
@@ -209,8 +231,18 @@
   }
 
   function currentValueForColumn(column) {
+    if (column === MONTHLY_COMPAT_COLUMN) {
+      return normalizeColumn(column, safeParse(getLocal('lso_monthly_reports_v1'), {}));
+    }
     const key = Object.keys(KEY_TO_COLUMN).find((item) => KEY_TO_COLUMN[item] === column);
     return normalizeColumn(column, safeParse(getLocal(key), defaultForColumn(column)));
+  }
+
+  function settingsPayloadWithMonthlyCompatibility() {
+    return {
+      ...currentValueForColumn('settings'),
+      [MONTHLY_SETTINGS_KEY]: currentValueForColumn(MONTHLY_COMPAT_COLUMN)
+    };
   }
 
   function persistDirtyMarkers() {
@@ -245,10 +277,14 @@
 
     try {
       for (const [column, version] of [...dirtyVersions.entries()]) {
+        const serverColumn = column === MONTHLY_COMPAT_COLUMN ? 'settings' : column;
+        const serverValue = column === MONTHLY_COMPAT_COLUMN || column === 'settings'
+          ? settingsPayloadWithMonthlyCompatibility()
+          : currentValueForColumn(column);
         const nextState = await rpc('lso_update_state', {
           p_token: sessionToken,
-          p_column: column,
-          p_value: currentValueForColumn(column)
+          p_column: serverColumn,
+          p_value: serverValue
         });
         online = true;
         state = nextState;
@@ -312,20 +348,32 @@
 
   function buildLegacyState() {
     const result = {};
+    let monthlyReports = {};
     Object.entries(KEY_TO_COLUMN).forEach(([key, column]) => {
+      if (column === MONTHLY_COMPAT_COLUMN) {
+        monthlyReports = normalizeColumn(column, safeParse(legacySnapshot[key], {}));
+        return;
+      }
       result[column] = normalizeColumn(column, safeParse(legacySnapshot[key], defaultForColumn(column)));
     });
+    result.settings = { ...(result.settings || {}), [MONTHLY_SETTINGS_KEY]: monthlyReports };
+    result.monthly_reports = monthlyReports;
     return result;
   }
 
   function hasMeaningfulData(candidate) {
     if (!candidate) return false;
     const duty = candidate.duty_hours && typeof candidate.duty_hours === 'object' ? candidate.duty_hours : {};
+    const monthly = candidate.settings?.[MONTHLY_SETTINGS_KEY] && typeof candidate.settings[MONTHLY_SETTINGS_KEY] === 'object'
+      ? candidate.settings[MONTHLY_SETTINGS_KEY]
+      : (candidate.monthly_reports && typeof candidate.monthly_reports === 'object' ? candidate.monthly_reports : {});
     return ['members', 'events', 'attendance', 'instruments', 'activity_log']
       .some((column) => Array.isArray(candidate[column]) && candidate[column].length > 0) ||
       (candidate.settings && typeof candidate.settings === 'object' && Object.keys(candidate.settings).length > 0) ||
       (Array.isArray(duty.entries) && duty.entries.length > 0) ||
-      (duty.commitments && typeof duty.commitments === 'object' && Object.keys(duty.commitments).length > 0);
+      (duty.commitments && typeof duty.commitments === 'object' && Object.keys(duty.commitments).length > 0) ||
+      (monthly.reports && typeof monthly.reports === 'object' && Object.keys(monthly.reports).length > 0) ||
+      (monthly.traineeFiles && typeof monthly.traineeFiles === 'object' && Object.keys(monthly.traineeFiles).length > 0);
   }
 
   function isCloudEmpty() {
