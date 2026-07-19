@@ -1,0 +1,6 @@
+JavaScript files checked: 17
+Missing index references: 0
+Package file count: 44
+Member directory table class present: True
+Protected member identity markup present: True
+SVG action icons present: True

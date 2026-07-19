@@ -3126,3 +3126,194 @@ body[data-access-mode="read-only"] .account-copy #currentAccountRole { color: #f
   .attendance-group-print-button { grid-column: auto; }
   .attendance-roster-mode-toggle { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   Member directory table — protected, readable alignment
+   ========================================================= */
+#membersView .table-wrap {
+  border-radius: 18px;
+  background: #fff;
+}
+
+#membersView .members-directory-table {
+  width: 100%;
+  min-width: 1420px;
+  table-layout: fixed;
+}
+
+#membersView .members-directory-table col.col-membership-id { width: 140px; }
+#membersView .members-directory-table col.col-member { width: 265px; }
+#membersView .members-directory-table col.col-student { width: 130px; }
+#membersView .members-directory-table col.col-section { width: 145px; }
+#membersView .members-directory-table col.col-instrument { width: 130px; }
+#membersView .members-directory-table col.col-organization { width: 165px; }
+#membersView .members-directory-table col.col-stage { width: 185px; }
+#membersView .members-directory-table col.col-status { width: 95px; }
+#membersView .members-directory-table col.col-record { width: 85px; }
+#membersView .members-directory-table col.col-actions { width: 140px; }
+
+#membersView .members-directory-table th,
+#membersView .members-directory-table td {
+  padding: 16px 14px;
+  vertical-align: middle;
+}
+
+#membersView .members-directory-table th {
+  height: 52px;
+  font-size: 11px;
+  letter-spacing: .055em;
+}
+
+#membersView .members-directory-table tbody tr {
+  min-height: 82px;
+}
+
+#membersView .members-directory-table tbody tr:nth-child(even) {
+  background: #fcfefd;
+}
+
+#membersView .members-directory-table tbody tr:hover {
+  background: #f5fbf8;
+}
+
+#membersView .member-identity {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-width: 0;
+}
+
+#membersView .member-identity .member-avatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1;
+  flex: none;
+  overflow: hidden;
+}
+
+#membersView .member-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+#membersView .member-name {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.28;
+  letter-spacing: .01em;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+#membersView .member-email {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#membersView .organization-cell,
+#membersView .stage-cell {
+  line-height: 1.35;
+}
+
+#membersView .organization-cell strong,
+#membersView .organization-cell small,
+#membersView .stage-cell small {
+  display: block;
+}
+
+#membersView .organization-cell small,
+#membersView .stage-cell small {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#membersView .members-directory-table td:first-child strong {
+  display: block;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+#membersView .member-row-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 38px);
+  justify-content: start;
+  align-items: center;
+  gap: 7px;
+  min-width: 128px;
+}
+
+#membersView .member-row-actions .table-action {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 11px;
+}
+
+#membersView .member-row-actions .table-action svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+#membersView .member-row-actions .table-action:hover {
+  border-color: var(--green-500);
+  background: var(--green-50);
+}
+
+#membersView .member-row-actions .table-action.danger:hover {
+  border-color: #efb8bf;
+  background: #fff5f6;
+}
+
+@media (max-width: 760px) {
+  #membersView .members-directory-table {
+    min-width: 0 !important;
+    table-layout: auto;
+  }
+
+  #membersView .members-directory-table colgroup {
+    display: none;
+  }
+
+  #membersView .member-identity {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  #membersView .member-email {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+
+  #membersView .member-row-actions {
+    grid-template-columns: repeat(3, 38px);
+    min-width: 0;
+  }
+}

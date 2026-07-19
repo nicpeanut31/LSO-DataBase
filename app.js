@@ -397,9 +397,12 @@
   }
 
   function memberActions(member) {
-    return `<div class="table-actions">
-      <button class="table-action" title="View" data-action="view" data-id="${safeText(member.id)}">◉</button>
-      ${isAdmin() ? `<button class="table-action" title="Edit" data-action="edit" data-id="${safeText(member.id)}">✎</button><button class="table-action danger" title="Delete" data-action="delete" data-id="${safeText(member.id)}">⌫</button>` : ''}
+    const viewIcon = `<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg>`;
+    const editIcon = `<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"></path><path d="m13.5 6.5 4 4"></path></svg>`;
+    const deleteIcon = `<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="m7 7 1 13h8l1-13"></path><path d="M10 11v5M14 11v5"></path></svg>`;
+    return `<div class="table-actions member-row-actions">
+      <button class="table-action" aria-label="View ${safeText(member.fullName)}" title="View record" data-action="view" data-id="${safeText(member.id)}">${viewIcon}</button>
+      ${isAdmin() ? `<button class="table-action" aria-label="Edit ${safeText(member.fullName)}" title="Edit member" data-action="edit" data-id="${safeText(member.id)}">${editIcon}</button><button class="table-action danger" aria-label="Delete ${safeText(member.fullName)}" title="Delete member" data-action="delete" data-id="${safeText(member.id)}">${deleteIcon}</button>` : ''}
     </div>`;
   }
 
@@ -424,7 +427,7 @@
         ${groupMembers.length ? `<div class="period-table-wrap"><table class="period-table">
           <thead><tr><th>Member</th><th>Membership ID</th><th>Student No.</th><th>Section / Instrument</th><th>Status</th><th>Timeline</th><th>Actions</th></tr></thead>
           <tbody>${groupMembers.map((member) => `<tr>
-            <td><div class="member-cell"><div class="member-avatar">${safeText(initials(member.fullName))}</div><div><strong>${safeText(member.fullName)}</strong><small>${safeText(member.outlook || 'No Outlook account')}</small></div></div></td>
+            <td><div class="member-cell member-identity"><div class="member-avatar" aria-hidden="true">${safeText(initials(member.fullName))}</div><div class="member-copy"><strong class="member-name">${safeText(member.fullName)}</strong><small class="member-email" title="${safeText(member.outlook || 'No Outlook account')}">${safeText(member.outlook || 'No Outlook account')}</small></div></div></td>
             <td><strong>${safeText(member.membershipId)}</strong></td>
             <td>${safeText(member.studentNumber || '—')}</td>
             <td><strong>${safeText(member.orchestraSection || '—')}</strong><br><small>${safeText(member.primaryInstrument || '—')}</small></td>
@@ -454,12 +457,12 @@
     el('membersTableBody').innerHTML = filtered.map((member) => `
       <tr>
         <td><strong>${safeText(member.membershipId)}</strong></td>
-        <td><div class="member-cell"><div class="member-avatar">${safeText(initials(member.fullName))}</div><div><strong>${safeText(member.fullName)}</strong><small>${safeText(member.outlook || 'No Outlook account')}</small></div></div></td>
+        <td><div class="member-cell member-identity"><div class="member-avatar" aria-hidden="true">${safeText(initials(member.fullName))}</div><div class="member-copy"><strong class="member-name">${safeText(member.fullName)}</strong><small class="member-email" title="${safeText(member.outlook || 'No Outlook account')}">${safeText(member.outlook || 'No Outlook account')}</small></div></div></td>
         <td>${safeText(member.studentNumber || '—')}</td>
         <td>${safeText(member.orchestraSection || '—')}</td>
         <td>${safeText(member.primaryInstrument || '—')}</td>
-        <td><strong>${safeText(member.organizationPosition || '—')}</strong><br><small>${safeText(member.organizationRole || '')}</small></td>
-        <td><span class="badge ${getPeriodBadge(member.periodGroup)}">${safeText(member.periodGroup)}</span><br><small>${safeText(member.stagePeriodStatus)}</small></td>
+        <td class="organization-cell"><strong>${safeText(member.organizationPosition || '—')}</strong><small>${safeText(member.organizationRole || '')}</small></td>
+        <td class="stage-cell"><span class="badge ${getPeriodBadge(member.periodGroup)}">${safeText(member.periodGroup)}</span><small>${safeText(member.stagePeriodStatus)}</small></td>
         <td><span class="badge ${getStatusBadge(member.memberStatus)}">${safeText(member.memberStatus || 'Unspecified')}</span></td>
         <td><span class="badge ${member.recordQuality >= 90 ? 'badge-green' : member.recordQuality >= 70 ? 'badge-gold' : 'badge-red'}">${safeText(member.recordQuality)}%</span></td>
         <td>${memberActions(member)}</td>

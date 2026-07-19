@@ -1,0 +1,14 @@
+LSO MEMBER DIRECTORY DISPLAY FIX
+================================
+
+Updated:
+- Protected the Member column from collapsing.
+- Fixed avatar size and alignment.
+- Long names now wrap by words instead of splitting letters.
+- Outlook/email text stays on one clean line on desktop and wraps safely on phones.
+- Added fixed, balanced widths for every directory column.
+- Improved row spacing, vertical alignment, and alternating-row readability.
+- Replaced text-symbol actions with aligned SVG View, Edit, and Delete icons.
+- Preserved responsive mobile card layout and all existing functions.
+
+No Supabase SQL update is required.

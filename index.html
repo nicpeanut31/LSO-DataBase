@@ -11,7 +11,7 @@
 <link rel="icon" href="favicon.ico?v=20260717-logos" sizes="any"/>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260717-logos"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260717-logos"/>
-<link href="styles.css?v=20260717-attendance-current-archive-v2" rel="stylesheet"/>
+<link href="styles.css?v=20260720-member-table-v2" rel="stylesheet"/>
 <link href="duty-roster-layout.css?v=20260717-1605" rel="stylesheet"/>
 <link href="access-control.css?v=20260717-1605" rel="stylesheet"/>
 <link href="branding.css?v=20260717-logos" rel="stylesheet"/>
@@ -281,7 +281,19 @@
 </div>
 <div id="memberListContainer">
 <div class="table-wrap">
-<table>
+<table class="members-directory-table">
+<colgroup>
+<col class="col-membership-id"/>
+<col class="col-member"/>
+<col class="col-student"/>
+<col class="col-section"/>
+<col class="col-instrument"/>
+<col class="col-organization"/>
+<col class="col-stage"/>
+<col class="col-status"/>
+<col class="col-record"/>
+<col class="col-actions"/>
+</colgroup>
 <thead>
 <tr>
 <th>Membership ID</th>
@@ -1026,7 +1038,7 @@
 <script src="supabase-config.js?v=20260717-1605"></script>
 <script src="branding.js?v=20260717-simplified-columns-v1"></script>
 <script src="cloud.js?v=20260719-monthly-compat-v2"></script>
-<script src="app.js?v=20260719-monthly-report-v1"></script>
+<script src="app.js?v=20260720-member-table-v2"></script>
 <script src="auth.js?v=20260717-1605"></script>
 <script src="management.js?v=20260719-monthly-report-v1"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
