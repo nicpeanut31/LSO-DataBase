@@ -1,0 +1,19 @@
+LASALLIAN SYMPHONY ORCHESTRA — FINAL DUTY HOURS PACKAGE
+
+Primary installation files:
+- index.html
+- app.js
+- auth.js
+- cloud.js
+- management.js
+- permissions.js
+- duty-hours.js
+- access-control.css
+- supabase-config.js
+- supabase-setup.sql                      Fresh Supabase installation
+- LSO_DUTY_HOURS_COMPLETE_INSTALL.sql     Existing project update/repair
+- INSTALL_DUTY_HOURS_WORKFLOW.txt
+- TEST_RESULTS_DUTY_HOURS_FINAL.txt
+
+The remaining CSS, JavaScript, image, PDF, and template files are required by
+other LSO modules and must remain beside index.html.

@@ -71,8 +71,15 @@
     return sessionAccount?.role === 'Administrator';
   }
 
+  function isTraineeAccount() {
+    return sessionAccount?.role === 'Trainee/Probationary';
+  }
+
   function emitReadOnlyDenied() {
-    emit('lso:permission-denied', { message: 'Staff Accounts have read-only access. An Administrator is required to save changes.' });
+    const message = isTraineeAccount()
+      ? 'Trainee/Probationary accounts may submit only their own Duty Hours entries.'
+      : 'Staff Accounts have read-only access. An Administrator is required to save changes.';
+    emit('lso:permission-denied', { message });
   }
 
   function safeParse(raw, fallback) {
@@ -175,11 +182,32 @@
     if (/failed to fetch|networkerror|load failed/i.test(message)) {
       return 'The Supabase project could not be reached. Verify the Project URL, project status, and internet connection.';
     }
+    if (/column [\"']?member_id[\"']? does not exist/i.test(message)) {
+      return 'The account database is missing the member_id upgrade. Run LSO_MASTER_DATABASE_REPAIR.sql in Supabase SQL Editor, then refresh this page.';
+    }
+    if (/violates check constraint.*role|lso_accounts_role_check/i.test(message)) {
+      return 'The account database still uses the old role list. Run LSO_MASTER_DATABASE_REPAIR.sql in Supabase SQL Editor, then refresh this page.';
+    }
     if (/function .* does not exist|could not find the function|schema cache/i.test(message)) {
-      return 'The required database functions are missing. Run the latest supabase-setup.sql in the Supabase SQL Editor.';
+      return 'The required database functions are missing. Run URGENT_MEMBER_ID_APPROVAL_FIX.sql in the Supabase SQL Editor, then refresh this page.';
     }
     if (/unsupported shared-data column/i.test(message)) {
       return 'The shared database is using an older schema. Monthly Report data will use compatibility storage automatically.';
+    }
+    if (/already linked to another active approved/i.test(message)) {
+      return 'This member is already linked to another active approved Trainee/Probationary account.';
+    }
+    if (/overlaps an existing pending or approved duty entry/i.test(message)) {
+      return 'This time overlaps an existing pending or approved duty entry for the same date.';
+    }
+    if (/already been reviewed/i.test(message)) {
+      return 'This duty entry was already reviewed. Refresh the Duty Hours page to see its current status.';
+    }
+    if (/outside this member.*Trainee or Probationary period/i.test(message)) {
+      return 'The selected date is outside the linked member’s Trainee or Probationary period.';
+    }
+    if (/future duty date/i.test(message)) {
+      return 'A future duty date cannot be submitted.';
     }
     return message;
   }
@@ -427,7 +455,11 @@
     if (sessionToken) {
       startPolling();
       if (canWriteShared() && dirtyVersions.size) scheduleFlush(500);
-      status('online', canWriteShared() ? 'Shared database connected' : 'Shared database connected • Staff read-only access');
+      status('online', canWriteShared()
+        ? 'Shared database connected'
+        : isTraineeAccount()
+          ? 'Shared database connected • Duty Hours submission access'
+          : 'Shared database connected • Staff read-only access');
     } else stopPolling();
   }
 
@@ -486,6 +518,37 @@
     return rpc('lso_delete_account', { p_token: sessionToken, p_account_id: accountId });
   }
 
+
+  async function submitDutyEntry({ semester, period, date, timeIn, timeOut, description }) {
+    if (!isTraineeAccount()) throw new Error('Only a Trainee/Probationary account can use self-service duty submission.');
+    const nextState = await rpc('lso_submit_duty_entry', {
+      p_token: sessionToken,
+      p_semester: semester,
+      p_period: period,
+      p_date: date,
+      p_time_in: timeIn,
+      p_time_out: timeOut,
+      p_description: description || ''
+    });
+    online = true;
+    applyState(nextState, 'duty-submission');
+    status('online', 'Duty entry submitted for administrator approval');
+    return cloneState();
+  }
+
+  async function reviewDutyEntry(entryId, decision) {
+    if (!canWriteShared()) throw new Error('Administrator access is required to review duty entries.');
+    const nextState = await rpc('lso_review_duty_entry', {
+      p_token: sessionToken,
+      p_entry_id: entryId,
+      p_decision: decision
+    });
+    online = true;
+    applyState(nextState, 'duty-review');
+    status('online', 'Duty entry review saved');
+    return cloneState();
+  }
+
   window.LSOStorage = {
     getItem: storageGetItem,
     setItem: storageSetItem,
@@ -521,6 +584,8 @@
     updateProfiles: saveAccounts,
     deleteAccount,
     saveAccounts,
+    submitDutyEntry,
+    reviewDutyEntry,
     flush: flushDirty,
     pollNow: pollState,
     canWrite: canWriteShared

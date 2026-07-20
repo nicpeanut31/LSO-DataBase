@@ -1,0 +1,63 @@
+LASALLIAN SYMPHONY ORCHESTRA
+TRAINEE / PROBATIONARY DUTY HOURS — INSTALLATION GUIDE
+
+A. EXISTING LIVE LSO WEBSITE
+
+1. Back up the current Supabase database and the current website files.
+2. Upload all website files from this folder to the same hosting location and
+   allow the new files to replace the old copies.
+3. Open Supabase > SQL Editor > New query.
+4. Open LSO_DUTY_HOURS_COMPLETE_INSTALL.sql, copy the entire file, paste it in
+   the SQL Editor, and click Run.
+5. Wait until Supabase displays Success. Do not run any of the older role,
+   member_id, or monthly_reports hotfix scripts after this file.
+6. Return to the website and perform a hard refresh:
+      Windows: Ctrl + Shift + R
+      Mac: Command + Shift + R
+7. Sign in as Administrator.
+8. Open Accounts. For the pending member account:
+      a. Select Trainee/Probationary as the role.
+      b. Select the correct current Trainee or Probationary member.
+      c. Click Approve Selected Role.
+9. Sign in using that member account and test one Duty Hours submission.
+10. Return to the Administrator account, open Duty Hours, and approve or reject
+    the pending entry.
+
+B. NEW SUPABASE PROJECT
+
+Run the complete supabase-setup.sql once. It already includes the final Duty
+Hours workflow and compatibility updates. Do not also run the existing-project
+installer on a fresh project unless a later repair is required.
+
+C. FINAL WORKFLOW
+
+- A Trainee/Probationary account sees only Duty Hours.
+- The account is linked to one member by the Administrator.
+- The member enters the duty date, Time In, Time Out, and assignment.
+- The system calculates the duration. The member cannot enter credited minutes
+  or submit for a different member.
+- The entry is stored as Pending and adds zero to totals.
+- Only an Administrator may Approve or Reject it.
+- Approved entries are credited to the linked member.
+- Rejected entries remain in the ledger but add zero to totals.
+
+D. PROTECTIONS INCLUDED
+
+- Missing member_id and older shared-state schemas are repaired.
+- The role is enforced in both the interface and Supabase functions.
+- The server derives the member and duty period from the approved account link.
+- Future dates, invalid dates, invalid clock values, reverse times, durations
+  over 16 hours, empty descriptions, duplicate time ranges, and overlapping
+  submissions are rejected.
+- The shared database row is locked during submission and review to prevent
+  simultaneous updates from overwriting one another.
+- One current member cannot be linked to two active approved
+  Trainee/Probationary accounts.
+- Changing an approved account role or linked member requires approval again.
+- Only Approved entries are included in credited totals.
+
+E. IMPORTANT LIMITATION
+
+This workflow treats each Time In and Time Out as a same-day duty entry. Time
+Out must be later than Time In. Overnight entries must be entered as separate
+records on their respective dates.

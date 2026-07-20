@@ -872,11 +872,49 @@
     return ['Pending', 'Approved', 'Rejected'].includes(account?.approvalStatus) ? account.approvalStatus : 'Approved';
   }
 
+  function normalizeAccountRole(role) {
+    return ['Administrator', 'Staff Account', 'Trainee/Probationary'].includes(role) ? role : 'Staff Account';
+  }
+
+  function returnAccountToPending(account) {
+    if (!account || account.isDefault) return;
+    account.approvalStatus = 'Pending';
+    account.approvedAt = '';
+    account.approvedBy = '';
+    account.rejectedAt = '';
+    account.rejectedBy = '';
+  }
+
+  function setAccountRowBusy(accountId, busy) {
+    const row = [...document.querySelectorAll('[data-account-row]')]
+      .find((node) => node.dataset.accountRow === accountId);
+    if (!row) return;
+    row.classList.toggle('account-row-busy', Boolean(busy));
+    row.querySelectorAll('button, select').forEach((control) => {
+      if (!control.dataset.originalDisabled) control.dataset.originalDisabled = control.disabled ? 'true' : 'false';
+      control.disabled = Boolean(busy) || control.dataset.originalDisabled === 'true';
+    });
+  }
+
+  function accountRowSelection(accountId, fallbackAccount = null) {
+    const roleSelect = [...document.querySelectorAll('.account-role-select')]
+      .find((node) => node.dataset.accountId === accountId);
+    const memberSelect = [...document.querySelectorAll('.account-member-select')]
+      .find((node) => node.dataset.accountId === accountId);
+    const role = normalizeAccountRole(roleSelect?.value || fallbackAccount?.role);
+    return {
+      role,
+      memberId: role === 'Trainee/Probationary'
+        ? String(memberSelect?.value || fallbackAccount?.memberId || '')
+        : ''
+    };
+  }
+
   function renderAccounts() {
     const body = el('accountsTableBody');
     if (!body) return;
     if (!isAdmin()) {
-      body.innerHTML = '<tr><td colspan="7"><div class="empty-state"><h4>Administrator access required</h4><p>This page is available only to the administrator account.</p></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="8"><div class="empty-state"><h4>Administrator access required</h4><p>This page is available only to the administrator account.</p></div></td></tr>';
       return;
     }
     const accounts = window.LSOAuth?.loadAccounts?.() || [];
@@ -889,28 +927,40 @@
     body.innerHTML = sorted.map((account) => {
       const approval = accountApprovalStatus(account);
       const protectedAccount = Boolean(account.isDefault) || account.username === active?.username;
-      const approved = approval === 'Approved';
       const accessLabel = approval === 'Pending' ? 'Pending approval' : approval === 'Rejected' ? 'Rejected' : account.disabled ? 'Disabled' : 'Active';
       const accessBadge = approval === 'Pending' ? 'badge-gold' : (approval === 'Rejected' || account.disabled) ? 'badge-red' : 'badge-green';
       const requestedDate = account.requestedAt || account.createdAt;
       const approvalNote = account.isDefault
         ? '<small class="table-subtext">Default administrator</small>'
         : approval === 'Pending'
-          ? '<small class="table-subtext">Awaiting admin validation</small>'
+          ? '<small class="table-subtext warning-text">Administrator must choose the role before approval</small>'
           : approval === 'Rejected'
             ? '<small class="table-subtext">Access not approved</small>'
             : account.approvedBy
               ? `<small class="table-subtext">Approved by @${safeText(account.approvedBy)}</small>`
               : '';
       const approvalActions = approval === 'Pending'
-        ? `<button class="small-button approve" data-account-action="approve" data-id="${safeText(account.id)}">Approve</button><button class="small-button danger" data-account-action="reject" data-id="${safeText(account.id)}">Reject</button>`
+        ? `<button class="small-button approve" data-account-action="approve" data-id="${safeText(account.id)}">Approve Selected Role</button><button class="small-button danger" data-account-action="reject" data-id="${safeText(account.id)}">Reject</button>`
         : approval === 'Rejected'
-          ? `<button class="small-button approve" data-account-action="approve" data-id="${safeText(account.id)}">Approve</button>`
+          ? `<button class="small-button approve" data-account-action="approve" data-id="${safeText(account.id)}">Approve Selected Role</button>`
           : `<button class="small-button" data-account-action="toggle" data-id="${safeText(account.id)}" ${protectedAccount ? 'disabled' : ''}>${account.disabled ? 'Enable' : 'Disable'}</button>`;
-      return `<tr>
+      const eligibleMembers = (window.LSOApp?.getMembers?.() || [])
+        .filter((member) => ['Trainee Period', 'Probationary Period'].includes(member.periodGroup) || member.id === account.memberId)
+        .sort((a, b) => String(a.fullName || '').localeCompare(String(b.fullName || '')));
+      const memberOptions = ['<option value="">Select linked member…</option>', ...eligibleMembers.map((member) => `<option value="${safeText(member.id)}" ${member.id === account.memberId ? 'selected' : ''}>${safeText(member.fullName)} — ${safeText(member.periodGroup || member.membershipStage || 'No period')}</option>`)].join('');
+      const roleInstruction = approval === 'Pending'
+        ? '<small class="table-subtext account-approval-instruction">Choose or change this before clicking Approve.</small>'
+        : '<small class="table-subtext">Changing an approved role requires approval again.</small>';
+      const memberInstruction = account.role === 'Trainee/Probationary'
+        ? account.memberId
+          ? '<small class="table-subtext">This account will use only this member’s Duty Hours.</small>'
+          : '<small class="table-subtext warning-text">Required before approval</small>'
+        : '<small class="table-subtext">Required only for Trainee/Probationary.</small>';
+      return `<tr data-account-row="${safeText(account.id)}">
         <td><strong>${safeText(account.displayName || account.username)}</strong>${approvalNote}</td>
         <td><strong>@${safeText(account.username)}</strong><small class="table-subtext">${safeText(account.email || 'No optional email')}</small></td>
-        <td><select class="account-role-select" data-account-id="${safeText(account.id)}" ${account.isDefault || !approved ? 'disabled' : ''}><option ${account.role === 'Administrator' ? 'selected' : ''}>Administrator</option><option ${account.role !== 'Administrator' ? 'selected' : ''}>Staff Account</option></select></td>
+        <td><select class="account-role-select account-approval-select" data-account-id="${safeText(account.id)}" aria-label="${approval === 'Pending' ? 'Role to approve' : 'Account role'}" ${account.isDefault ? 'disabled' : ''}><option ${account.role === 'Administrator' ? 'selected' : ''}>Administrator</option><option ${account.role === 'Staff Account' ? 'selected' : ''}>Staff Account</option><option ${account.role === 'Trainee/Probationary' ? 'selected' : ''}>Trainee/Probationary</option></select>${roleInstruction}</td>
+        <td><select class="account-member-select" data-account-id="${safeText(account.id)}" ${account.isDefault || account.role !== 'Trainee/Probationary' ? 'disabled' : ''}>${memberOptions}</select>${memberInstruction}</td>
         <td>${safeText(dateLabel(String(requestedDate || '').slice(0, 10), true))}</td>
         <td><span class="badge ${accessBadge}">${safeText(accessLabel)}</span></td>
         <td>${account.approvedAt ? safeText(dateLabel(String(account.approvedAt).slice(0, 10), true)) : '—'}</td>
@@ -923,13 +973,62 @@
     if (!isAdmin()) return;
     const accounts = window.LSOAuth?.loadAccounts?.() || [];
     const account = accounts.find((item) => item.id === accountId);
-    if (!account || account.isDefault || accountApprovalStatus(account) !== 'Approved') return;
-    account.role = role === 'Administrator' ? 'Administrator' : 'Staff Account';
+    if (!account || account.isDefault) return;
+    const previousRole = normalizeAccountRole(account.role);
+    const nextRole = normalizeAccountRole(role);
+    if (previousRole === nextRole) {
+      renderAccounts();
+      return;
+    }
+    const wasApproved = accountApprovalStatus(account) === 'Approved';
+    account.role = nextRole;
+    if (nextRole !== 'Trainee/Probationary') account.memberId = '';
+    if (wasApproved) returnAccountToPending(account);
+    setAccountRowBusy(accountId, true);
     const saved = await window.LSOAuth.saveAccounts(accounts);
-    if (!saved) return;
-    logActivity('Changed account role', 'Accounts', `${account.username} → ${account.role}`);
+    if (!saved) {
+      renderAccounts();
+      return;
+    }
+    logActivity('Changed account role', 'Accounts', `${account.username} → ${account.role}${wasApproved ? ' • returned to Pending' : ''}`);
     renderAccounts();
-    toast('Account role updated.');
+    if (wasApproved) {
+      toast(`@${account.username} was returned to Pending. Review the new role and approve the account again.`);
+    } else if (account.role === 'Trainee/Probationary') {
+      toast('Trainee/Probationary selected. Link the correct current member, then approve the account.');
+    } else {
+      toast('Role selection saved. The Administrator may still change it before approval.');
+    }
+  }
+
+  async function saveAccountMemberLink(accountId, memberId) {
+    if (!isAdmin()) return;
+    const accounts = window.LSOAuth?.loadAccounts?.() || [];
+    const account = accounts.find((item) => item.id === accountId);
+    if (!account || account.isDefault || account.role !== 'Trainee/Probationary') return;
+    const previousMemberId = String(account.memberId || '');
+    const member = (window.LSOApp?.getMembers?.() || []).find((item) => item.id === memberId);
+    if (memberId && (!member || !['Trainee Period', 'Probationary Period'].includes(member.periodGroup))) {
+      toast('Link only a member who is currently in the Trainee or Probationary Period.', true);
+      renderAccounts();
+      return;
+    }
+    const wasApproved = accountApprovalStatus(account) === 'Approved';
+    account.memberId = memberId || '';
+    if (wasApproved && previousMemberId !== account.memberId) returnAccountToPending(account);
+    setAccountRowBusy(accountId, true);
+    const saved = await window.LSOAuth.saveAccounts(accounts);
+    if (!saved) {
+      renderAccounts();
+      return;
+    }
+    logActivity('Linked duty-hours account', 'Accounts', `${account.username} → ${member?.fullName || 'No member linked'}${wasApproved ? ' • returned to Pending' : ''}`);
+    renderAccounts();
+    if (wasApproved && previousMemberId !== account.memberId) {
+      toast(`@${account.username} was returned to Pending because its linked member changed. Approve it again after review.`);
+    } else {
+      toast(member ? `@${account.username} is linked to ${member.fullName}.` : 'Member link removed. Select a member before approval.');
+    }
   }
 
   async function accountAction(action, accountId) {
@@ -940,15 +1039,46 @@
     if (!account || account.isDefault || account.username === currentAccount()?.username) return;
 
     if (action === 'approve') {
+      const selection = accountRowSelection(accountId, account);
+      const eligibleMembers = window.LSOApp?.getMembers?.() || [];
+      const linkedMember = eligibleMembers.find((item) => item.id === selection.memberId);
+      const linkedPeriod = linkedMember
+        ? window.LSODutyHours?.memberPeriodOnDate?.(linkedMember, new Date().toISOString().slice(0, 10)) || linkedMember.periodGroup
+        : '';
+      if (selection.role === 'Trainee/Probationary' && (!linkedMember || !['Trainee Period', 'Probationary Period'].includes(linkedPeriod))) {
+        toast('Before approval, select the correct current Trainee or Probationary member for this account.', true);
+        return;
+      }
+      if (selection.role === 'Trainee/Probationary') {
+        const duplicateLink = accounts.find((item) => item.id !== account.id
+          && item.role === 'Trainee/Probationary'
+          && item.approvalStatus === 'Approved'
+          && !item.disabled
+          && item.memberId === selection.memberId);
+        if (duplicateLink) {
+          toast(`This member is already linked to the approved account @${duplicateLink.username}.`, true);
+          return;
+        }
+      }
+      account.role = selection.role;
+      account.memberId = selection.role === 'Trainee/Probationary' ? selection.memberId : '';
       account.approvalStatus = 'Approved';
       account.approvedAt = new Date().toISOString();
       account.approvedBy = currentAccount()?.username || 'Administrator';
+      account.rejectedAt = '';
+      account.rejectedBy = '';
       account.disabled = false;
+      setAccountRowBusy(accountId, true);
       const saved = await window.LSOAuth.saveAccounts(accounts);
-      if (!saved) return;
-      logActivity('Approved account registration', 'Accounts', account.username);
+      if (!saved) {
+        renderAccounts();
+        return;
+      }
+      logActivity('Approved account registration', 'Accounts', `${account.username} • ${account.role}${linkedMember ? ` • ${linkedMember.fullName}` : ''}`);
       renderAccounts();
-      toast(`@${account.username} is approved and may now log in.`);
+      toast(account.role === 'Trainee/Probationary'
+        ? `@${account.username} is approved. Only Duty Hours will be visible, and submissions will require Administrator approval.`
+        : `@${account.username} is approved as ${account.role}.`);
       return;
     }
 
@@ -959,8 +1089,12 @@
       account.approvedAt = '';
       account.approvedBy = '';
       removeAccountSessionIfNeeded(account.username);
+      setAccountRowBusy(accountId, true);
       const saved = await window.LSOAuth.saveAccounts(accounts);
-      if (!saved) return;
+      if (!saved) {
+        renderAccounts();
+        return;
+      }
       logActivity('Rejected account registration', 'Accounts', account.username);
       renderAccounts();
       toast(`@${account.username} was rejected.`);
@@ -969,8 +1103,12 @@
 
     if (action === 'toggle' && accountApprovalStatus(account) === 'Approved') {
       account.disabled = !account.disabled;
+      setAccountRowBusy(accountId, true);
       const saved = await window.LSOAuth.saveAccounts(accounts);
-      if (!saved) return;
+      if (!saved) {
+        renderAccounts();
+        return;
+      }
       logActivity(account.disabled ? 'Disabled account' : 'Enabled account', 'Accounts', account.username);
       renderAccounts();
       toast(`Account ${account.disabled ? 'disabled' : 'enabled'}.`);
@@ -987,8 +1125,8 @@
   }
 
   function removeAccountSessionIfNeeded(username) {
-    // Session storage is isolated per browser tab. This hook documents that rejected
-    // users will also be blocked on the next auth refresh or page load.
+    // Session storage is isolated per browser tab. Rejected or reassigned users
+    // are also invalidated by the database and must authenticate again.
     if (currentAccount()?.username === username) window.LSOAuth?.signOut?.();
   }
 
@@ -1212,8 +1350,10 @@
     });
 
     el('accountsTableBody').addEventListener('change', (event) => {
-      const select = event.target.closest('.account-role-select');
-      if (select) saveAccountRole(select.dataset.accountId, select.value);
+      const roleSelect = event.target.closest('.account-role-select');
+      const memberSelect = event.target.closest('.account-member-select');
+      if (roleSelect) saveAccountRole(roleSelect.dataset.accountId, roleSelect.value);
+      if (memberSelect) saveAccountMemberLink(memberSelect.dataset.accountId, memberSelect.value);
     });
     el('accountsTableBody').addEventListener('click', (event) => {
       const button = event.target.closest('[data-account-action]');

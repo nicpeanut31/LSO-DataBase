@@ -1,0 +1,12 @@
+LSO DUTY DATE TIMEZONE FIX - VALIDATION RESULTS
+
+PASS - Browser duty date uses Asia/Manila.
+PASS - Supabase date helper uses Asia/Manila.
+PASS - Future-date validation compares against the same Philippines date.
+PASS - Account approval current-period validation uses the Philippines date.
+PASS - Linked-member current-period validation uses the Philippines date.
+PASS - Existing data is not deleted or reset by the focused hotfix.
+PASS - JavaScript syntax validated.
+PASS - SQL installer contains the required helper and replacements.
+
+Live execution against the user's private Supabase project was not available in this environment.

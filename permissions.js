@@ -43,6 +43,10 @@
     return currentAccount()?.role === 'Staff Account';
   }
 
+  function isTrainee() {
+    return currentAccount()?.role === 'Trainee/Probationary';
+  }
+
   function notify(message = 'Read-only access: only an Administrator can add, edit, delete, approve, import, restore, or save records.') {
     window.LSOApp?.showToast?.(message, true);
   }
@@ -94,7 +98,7 @@
     return [...root.querySelectorAll('button,input[type="button"],input[type="submit"],input[type="file"]')].filter((node) => {
       if (MUTATION_BUTTON_IDS.has(node.id) || MUTATION_FILE_IDS.has(node.id)) return true;
       if (node.matches(MUTATION_CLICK_SELECTOR)) return true;
-      if (node.closest('#accountsView') && (node.matches('[data-account-action]') || node.classList.contains('account-role-select'))) return true;
+      if (node.closest('#accountsView') && (node.matches('[data-account-action]') || node.classList.contains('account-role-select') || node.classList.contains('account-member-select'))) return true;
       return false;
     });
   }
@@ -117,7 +121,7 @@
       .forEach((id) => setReadonlyControl(el(id), staff));
 
     // Account role selectors are an Administrator-only write control.
-    root.querySelectorAll?.('.account-role-select').forEach((node) => setReadonlyControl(node, staff));
+    root.querySelectorAll?.('.account-role-select, .account-member-select').forEach((node) => setReadonlyControl(node, staff));
 
     // Editing forms are not useful in Staff mode; hide the write panels but keep reports and summaries.
     ['dutyCommitmentForm', 'dutyRenderedForm', 'dutyIncentiveForm'].forEach((id) => {
@@ -167,7 +171,7 @@
   document.addEventListener('change', (event) => {
     if (!isStaff()) return;
     const target = event.target;
-    if (target?.matches?.('.attendance-status, .attendance-remarks, .account-role-select') || MUTATION_FILE_IDS.has(target?.id)) {
+    if (target?.matches?.('.attendance-status, .attendance-remarks, .account-role-select, .account-member-select') || MUTATION_FILE_IDS.has(target?.id)) {
       event.preventDefault();
       event.stopImmediatePropagation();
       notify();
@@ -197,6 +201,7 @@
   window.LSOPermissions = {
     isAdmin,
     isStaff,
+    isTrainee,
     canModify: isAdmin,
     apply: () => applyReadOnly(document),
     requireAdmin(message) {

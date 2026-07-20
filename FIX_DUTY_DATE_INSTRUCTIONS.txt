@@ -1,0 +1,20 @@
+LSO DUTY DATE TIMEZONE FIX
+
+WHY THE MESSAGE APPEARED
+The browser used the user's local calendar date, but the Supabase function used PostgreSQL current_date. In a UTC database session, the server can still be on the previous date while it is already the next day in the Philippines. A duty entry dated today in the Philippines was therefore incorrectly classified as a future date.
+
+EXISTING SUPABASE PROJECT
+1. Open Supabase > SQL Editor > New query.
+2. Paste the complete contents of LSO_DUTY_DATE_PHILIPPINES_TIMEZONE_FIX.sql.
+3. Click Run and wait for Success.
+4. Upload the revised website files, especially duty-hours.js.
+5. Hard-refresh the site with Ctrl + Shift + R, then log in again.
+
+NEW INSTALLATION
+Run the revised LSO_DUTY_HOURS_COMPLETE_INSTALL.sql or supabase-setup.sql.
+
+RESULT
+- Today is calculated using Asia/Manila in both the browser and Supabase.
+- A genuinely future date remains blocked.
+- Today's date in the Philippines is accepted.
+- Existing members, accounts, duty entries, and approvals are preserved.

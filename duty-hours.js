@@ -17,9 +17,22 @@
   let searchTerm = '';
 
   function today() {
-    const date = new Date();
-    const offset = date.getTimezoneOffset();
-    return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10);
+    // Duty records follow the orchestra's Philippines calendar date, not UTC.
+    // Using a fixed IANA zone keeps the browser and Supabase validation aligned.
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date());
+      const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+      return `${values.year}-${values.month}-${values.day}`;
+    } catch {
+      const date = new Date();
+      const offset = date.getTimezoneOffset();
+      return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10);
+    }
   }
 
   function uid(prefix = 'duty') {
@@ -34,6 +47,10 @@
 
   function isAdmin() {
     return currentAccount()?.role === 'Administrator';
+  }
+
+  function isTraineeAccount() {
+    return currentAccount()?.role === 'Trainee/Probationary';
   }
 
   function getMembers() {
@@ -70,7 +87,7 @@
   }
 
   function defaultData() {
-    return { version: 3, commitments: {}, entries: [] };
+    return { version: 5, commitments: {}, entries: [] };
   }
 
   function normalizeCommitments(rawCommitments) {
@@ -124,6 +141,17 @@
         timeIn: entryType === 'Duty' ? String(entry?.timeIn || '') : '',
         timeOut: entryType === 'Duty' ? String(entry?.timeOut || '') : '',
         description: String(entry?.description || ''),
+        approvalStatus: ['Pending', 'Approved', 'Rejected'].includes(entry?.approvalStatus) ? entry.approvalStatus : 'Approved',
+        submittedByAccountId: String(entry?.submittedByAccountId || ''),
+        submittedByUsername: String(entry?.submittedByUsername || entry?.createdByUsername || ''),
+        submittedByRole: String(entry?.submittedByRole || ''),
+        approvedAt: String(entry?.approvedAt || ''),
+        approvedBy: String(entry?.approvedBy || ''),
+        rejectedAt: String(entry?.rejectedAt || ''),
+        rejectedBy: String(entry?.rejectedBy || ''),
+        reviewedAt: String(entry?.reviewedAt || ''),
+        reviewedBy: String(entry?.reviewedBy || ''),
+        submittedAt: String(entry?.submittedAt || entry?.createdAt || ''),
         createdAt: entry?.createdAt || new Date().toISOString(),
         createdBy: String(entry?.createdBy || ''),
         createdByUsername: String(entry?.createdByUsername || '')
@@ -134,7 +162,7 @@
   function normalizeData(raw) {
     const data = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
     return {
-      version: 3,
+      version: 5,
       commitments: normalizeCommitments(data.commitments),
       entries: normalizeEntries(data.entries)
     };
@@ -161,7 +189,7 @@
 
   function ensureDataMigration() {
     const raw = loadRawData();
-    if (raw?.version === 3) return;
+    if (raw?.version === 5 || !isAdmin()) return;
     const normalized = normalizeData(raw);
     window.LSOStorage?.setItem(DUTY_KEY, JSON.stringify(normalized));
   }
@@ -186,7 +214,10 @@
   }
 
   function calculatePeriod(data, memberId, semester, period) {
-    const entries = entriesFor(data, memberId, semester, period);
+    const allEntries = entriesFor(data, memberId, semester, period);
+    const entries = allEntries.filter((entry) => entry.approvalStatus === 'Approved');
+    const pendingEntries = allEntries.filter((entry) => entry.approvalStatus === 'Pending');
+    const rejectedEntries = allEntries.filter((entry) => entry.approvalStatus === 'Rejected');
     const rendered = entries.filter((entry) => entry.entryType === 'Duty')
       .reduce((sum, entry) => sum + Math.max(0, minuteValue(entry.minutes)), 0);
     const incentives = entries.filter((entry) => entry.entryType === 'Incentive')
@@ -195,7 +226,7 @@
     const credited = rendered + incentives;
     const balance = committed - credited;
     const progress = committed > 0 ? Math.max(0, Math.min(100, Math.round((credited / committed) * 100))) : 0;
-    return { semester: normalizeSemester(semester), period: normalizePeriod(period), committed, rendered, incentives, credited, balance, progress, entries };
+    return { semester: normalizeSemester(semester), period: normalizePeriod(period), committed, rendered, incentives, credited, balance, progress, entries, allEntries, pendingEntries, rejectedEntries };
   }
 
   function combineSummaries(items) {
@@ -370,9 +401,134 @@
         ${summaryStat('Committed', durationLabel(summary.committed))}
         ${summaryStat('Rendered', durationLabel(summary.rendered))}
         ${summaryStat('Incentives', durationLabel(summary.incentives, true), 'Net adjustment')}
-        ${summaryStat('Credited', durationLabel(summary.credited))}
+        ${summaryStat('Credited', durationLabel(summary.credited), summary.pendingEntries?.length ? `${summary.pendingEntries.length} pending approval` : '')}
       </div>
     </article>`;
+  }
+
+  function linkedMember() {
+    const account = currentAccount();
+    if (!account?.memberId) return null;
+    return getMembers().find((member) => member.id === account.memberId) || null;
+  }
+
+  function validIsoDate(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
+  }
+
+  function memberPeriodOnDate(member, dateValue = today()) {
+    if (!member || !validIsoDate(dateValue)) return '';
+    const onDate = String(dateValue);
+    const traineeStart = validIsoDate(member.traineeStartDate)
+      ? member.traineeStartDate
+      : validIsoDate(member.dateRegistered) ? member.dateRegistered : '';
+    const probationaryStart = validIsoDate(member.probationaryStartDate) ? member.probationaryStartDate : '';
+    const membershipStart = validIsoDate(member.regularMemberDate)
+      ? member.regularMemberDate
+      : validIsoDate(member.membershipStartDate) ? member.membershipStartDate : '';
+    const skipped = member.probationarySkipped === true || ['true', '1', 'yes'].includes(String(member.probationarySkipped || '').toLowerCase());
+    const hasTimeline = Boolean(traineeStart || probationaryStart || membershipStart);
+
+    if (membershipStart && onDate >= membershipStart) return 'Membership Period';
+    if (!skipped && probationaryStart && onDate >= probationaryStart) return 'Probationary Period';
+    if (traineeStart && onDate >= traineeStart) return 'Trainee Period';
+    if (hasTimeline) return '';
+
+    if (PERIODS.includes(member.periodGroup)) return member.periodGroup;
+    if (member.membershipStage === 'Trainee') return 'Trainee Period';
+    if (member.membershipStage === 'Probationary') return 'Probationary Period';
+    return '';
+  }
+
+  function activeMemberPeriod(member) {
+    const period = memberPeriodOnDate(member, today());
+    return PERIODS.includes(period) ? period : '';
+  }
+
+  function approvalBadge(status) {
+    const normalized = ['Pending', 'Approved', 'Rejected'].includes(status) ? status : 'Approved';
+    return `<span class="badge approval-status-badge ${normalized.toLowerCase()}">${safeText(normalized)}</span>`;
+  }
+
+  function renderSelfService() {
+    const panel = el('dutySelfEntryPanel');
+    if (!panel) return;
+    const trainee = isTraineeAccount();
+    panel.classList.toggle('hidden', !trainee);
+    if (!trainee) return;
+
+    const member = linkedMember();
+    const dateInput = el('dutySelfDate');
+    const selectedDate = dateInput?.value || today();
+    const currentPeriod = activeMemberPeriod(member);
+    const entryPeriod = memberPeriodOnDate(member, selectedDate);
+    const status = el('dutySelfAccountStatus');
+    const form = el('dutySelfEntryForm');
+    const submit = el('dutySelfSubmitButton');
+
+    if (dateInput) {
+      dateInput.max = today();
+      const earliest = validIsoDate(member?.traineeStartDate)
+        ? member.traineeStartDate
+        : validIsoDate(member?.dateRegistered) ? member.dateRegistered : '';
+      if (earliest) dateInput.min = earliest;
+      else dateInput.removeAttribute('min');
+    }
+    if (el('dutySelfSemester')) el('dutySelfSemester').value = activeSemester;
+    if (el('dutySelfPeriod')) el('dutySelfPeriod').value = PERIODS.includes(entryPeriod) ? entryPeriod : 'Not eligible on selected date';
+
+    const accountEnabled = Boolean(member && PERIODS.includes(currentPeriod));
+    const dateEnabled = Boolean(accountEnabled && PERIODS.includes(entryPeriod) && selectedDate <= today());
+    if (form) {
+      [...form.elements].forEach((control) => {
+        if (control.id === 'dutySelfSemester' || control.id === 'dutySelfPeriod') return;
+        control.disabled = !accountEnabled;
+      });
+    }
+    if (submit) submit.disabled = !dateEnabled;
+    if (!status) return;
+
+    if (!member) {
+      status.innerHTML = '<div class="duty-self-status-warning"><strong>No member record is linked to this account.</strong><br>Ask the Administrator to open Accounts and link your username to your Trainee or Probationary member record.</div>';
+      return;
+    }
+    if (!currentPeriod) {
+      status.innerHTML = `<div class="duty-self-status-warning"><strong>${safeText(member.fullName)} is not currently in the Trainee or Probationary Period.</strong><br>The account cannot submit new duty entries until the Administrator corrects the member timeline or account link.</div>`;
+      return;
+    }
+    if (!PERIODS.includes(entryPeriod)) {
+      status.innerHTML = `<div class="duty-self-status-warning"><strong>The selected date is outside your Trainee or Probationary period.</strong><br>Choose a valid date within your recorded membership timeline.</div>`;
+      if (el('dutySelfAccountBadge')) el('dutySelfAccountBadge').textContent = 'Check duty date';
+      return;
+    }
+
+    const data = loadData();
+    const all = entriesFor(data, member.id);
+    const pending = all.filter((entry) => entry.approvalStatus === 'Pending').length;
+    const approved = all.filter((entry) => entry.approvalStatus === 'Approved').length;
+    const rejected = all.filter((entry) => entry.approvalStatus === 'Rejected').length;
+    status.innerHTML = `<div class="duty-self-status-item"><span>Linked member</span><strong>${safeText(member.fullName)}</strong></div><div class="duty-self-status-item"><span>Selected duty period</span><strong>${safeText(entryPeriod)}</strong></div><div class="duty-self-status-item"><span>Submission status</span><strong>${pending} pending • ${approved} approved • ${rejected} rejected</strong></div>`;
+    if (el('dutySelfAccountBadge')) el('dutySelfAccountBadge').textContent = pending ? `${pending} pending` : 'Ready to submit';
+    selectedMemberId = member.id;
+    selectedPeriod = entryPeriod;
+  }
+
+  function renderApprovalQueue() {
+    const panel = el('dutyApprovalPanel');
+    const body = el('dutyApprovalTableBody');
+    const count = el('dutyPendingApprovalCount');
+    if (!panel || !body || !count) return;
+    panel.classList.toggle('hidden', !isAdmin());
+    if (!isAdmin()) return;
+    const data = loadData();
+    const members = getMembers();
+    const pending = data.entries.filter((entry) => entry.entryType === 'Duty' && entry.approvalStatus === 'Pending')
+      .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+    count.textContent = `${pending.length} pending`;
+    body.innerHTML = pending.length ? pending.map((entry) => {
+      const member = members.find((item) => item.id === entry.memberId);
+      return `<tr><td><strong>@${safeText(entry.submittedByUsername || entry.createdByUsername || 'account')}</strong><small class="table-subtext">${safeText(entry.createdBy || 'Trainee/Probationary')}</small></td><td><strong>${safeText(member?.fullName || 'Unknown member')}</strong><small class="table-subtext">${safeText(member?.membershipId || member?.studentNumber || entry.memberId)}</small></td><td>${safeText(dateLabel(entry.date))}</td><td>${safeText(clockRangeLabel(entry))}</td><td><strong>${safeText(durationLabel(entry.minutes))}</strong></td><td>${safeText(entry.semester)}<small class="table-subtext">${safeText(entry.period)}</small></td><td>${safeText(entry.description || '—')}</td><td><div class="duty-approval-actions"><button class="small-button approve" data-duty-review="Approved" data-entry-id="${safeText(entry.id)}" type="button">Approve</button><button class="small-button danger" data-duty-review="Rejected" data-entry-id="${safeText(entry.id)}" type="button">Reject</button></div></td></tr>`;
+    }).join('') : '<tr><td colspan="8"><div class="empty-state compact-empty"><h4>No pending duty entries</h4><p>New Trainee/Probationary submissions will appear here.</p></div></td></tr>';
   }
 
   function renderSelectedMember() {
@@ -385,8 +541,8 @@
     if (!summaryContainer || !adminControls || !ledgerSection || !printButton) return;
 
     if (!member) {
-      if (el('dutySelectedTitle')) el('dutySelectedTitle').textContent = 'Choose a Trainee or Probationary member';
-      if (el('dutySelectedContext')) el('dutySelectedContext').textContent = 'The selected semester and period control every calculation below.';
+      if (el('dutySelectedTitle')) el('dutySelectedTitle').textContent = isTraineeAccount() ? 'Duty Hours account is not linked' : 'Choose a Trainee or Probationary member';
+      if (el('dutySelectedContext')) el('dutySelectedContext').textContent = isTraineeAccount() ? 'Ask the Administrator to link this account to your member record.' : 'The selected semester and period control every calculation below.';
       if (el('dutySelectedBadge')) { el('dutySelectedBadge').textContent = 'No selection'; el('dutySelectedBadge').className = 'badge badge-gray'; }
       summaryContainer.innerHTML = '<div class="dashboard-empty-state"><span>◷</span><strong>Select a name from either roster</strong><small>Committed time, rendered time, incentives, and remaining balance will appear here.</small></div>';
       adminControls.classList.add('hidden');
@@ -454,6 +610,10 @@
       const effect = isIncentive
         ? minutes > 0 ? `Reduces remaining by ${durationLabel(minutes)}` : `Adds ${durationLabel(Math.abs(minutes))} to remaining`
         : `Adds ${durationLabel(minutes)} rendered`;
+      const pendingActions = entry.approvalStatus === 'Pending'
+        ? `<button class="small-button approve" data-duty-review="Approved" data-entry-id="${safeText(entry.id)}" type="button">Approve</button><button class="small-button danger" data-duty-review="Rejected" data-entry-id="${safeText(entry.id)}" type="button">Reject</button>`
+        : '';
+      const countedEffect = entry.approvalStatus === 'Approved' ? effect : entry.approvalStatus === 'Pending' ? 'Not credited until approved' : 'Rejected — not credited';
       return `<tr>
         <td>${safeText(dateLabel(entry.date))}</td>
         <td><strong>${safeText(isIncentive ? '—' : clockRangeLabel(entry))}</strong></td>
@@ -461,11 +621,12 @@
         <td><span class="badge ${entry.period === 'Trainee Period' ? 'badge-blue' : 'badge-gold'}">${safeText(entry.period)}</span></td>
         <td>${safeText(isIncentive ? 'Incentive Adjustment' : 'Rendered Duty')}</td>
         <td><strong class="${minutes < 0 ? 'negative-value' : ''}">${safeText(durationLabel(minutes, isIncentive))}</strong></td>
-        <td>${safeText(effect)}</td>
+        <td>${approvalBadge(entry.approvalStatus)}</td>
+        <td>${safeText(countedEffect)}</td>
         <td>${safeText(entry.description || '—')}<small class="table-subtext">${safeText(entry.createdBy || '')}</small></td>
-        <td class="admin-only"><button class="table-action danger" data-duty-delete="${safeText(entry.id)}" type="button" aria-label="Delete duty entry">×</button></td>
+        <td class="admin-only"><div class="duty-approval-actions">${pendingActions}<button class="table-action danger" data-duty-delete="${safeText(entry.id)}" type="button" aria-label="Delete duty entry">×</button></div></td>
       </tr>`;
-    }).join('') : '<tr><td colspan="9"><div class="empty-state compact-empty"><h4>No entries in this ledger</h4><p>Add clock-based rendered time or an incentive for the selected semester and period.</p></div></td></tr>';
+    }).join('') : '<tr><td colspan="10"><div class="empty-state compact-empty"><h4>No entries in this ledger</h4><p>Add clock-based rendered time or an incentive for the selected semester and period.</p></div></td></tr>';
     body.querySelectorAll('.admin-only').forEach((node) => node.classList.toggle('hidden', !isAdmin()));
   }
 
@@ -533,6 +694,18 @@
     return { valid: true, reason: '', minutes: end - start };
   }
 
+  function overlapsExistingDuty(data, memberId, date, timeIn, timeOut) {
+    const start = parseClockValue(timeIn);
+    const end = parseClockValue(timeOut);
+    if (start === null || end === null) return false;
+    return data.entries.some((entry) => {
+      if (entry.memberId !== memberId || entry.entryType !== 'Duty' || entry.date !== date || entry.approvalStatus === 'Rejected') return false;
+      const existingStart = parseClockValue(entry.timeIn);
+      const existingEnd = parseClockValue(entry.timeOut);
+      return existingStart !== null && existingEnd !== null && existingStart < end && existingEnd > start;
+    });
+  }
+
   function formatClockTime(value) {
     const total = parseClockValue(value);
     if (total === null) return '';
@@ -573,6 +746,125 @@
 
   function selectedMember() {
     return getMembers().find((member) => member.id === selectedMemberId) || null;
+  }
+
+  function updateSelfDurationPreview() {
+    const preview = el('dutySelfDurationPreview');
+    if (!preview) return;
+    const timeIn = el('dutySelfTimeIn')?.value || '';
+    const timeOut = el('dutySelfTimeOut')?.value || '';
+    const result = calculateClockDuration(timeIn, timeOut);
+    const title = preview.querySelector('strong');
+    const helper = preview.querySelector('small');
+    preview.classList.toggle('valid', result.valid);
+    preview.classList.toggle('invalid', !result.valid && Boolean(timeIn && timeOut));
+    if (!timeIn || !timeOut) {
+      if (title) title.textContent = 'Select Time In and Time Out';
+      if (helper) helper.textContent = 'The Administrator will verify this entry before it is credited.';
+    } else if (!result.valid) {
+      if (title) title.textContent = 'Time Out must be later than Time In';
+      if (helper) helper.textContent = 'Only same-day duty entries are accepted.';
+    } else {
+      if (title) title.textContent = durationLabel(result.minutes);
+      if (helper) helper.textContent = `${formatClockTime(timeIn)} to ${formatClockTime(timeOut)} • pending after submission`;
+    }
+  }
+
+  async function submitSelfDuty(event) {
+    event.preventDefault();
+    if (!isTraineeAccount()) return;
+    const member = linkedMember();
+    const date = el('dutySelfDate')?.value || '';
+    const period = memberPeriodOnDate(member, date);
+    const currentPeriod = activeMemberPeriod(member);
+    const timeIn = el('dutySelfTimeIn')?.value || '';
+    const timeOut = el('dutySelfTimeOut')?.value || '';
+    const description = el('dutySelfDescription')?.value.trim() || '';
+    const duration = calculateClockDuration(timeIn, timeOut);
+
+    if (!member || !currentPeriod) {
+      window.LSOApp?.showToast?.('This account is not linked to a current Trainee or Probationary member record.', true);
+      return;
+    }
+    if (!validIsoDate(date) || date > today()) {
+      window.LSOApp?.showToast?.(!date ? 'Select the duty date.' : 'A future or invalid duty date cannot be submitted.', true);
+      renderSelfService();
+      return;
+    }
+    if (!PERIODS.includes(period)) {
+      window.LSOApp?.showToast?.('The selected date is outside your recorded Trainee or Probationary period.', true);
+      renderSelfService();
+      return;
+    }
+    if (!duration.valid || duration.minutes > 960) {
+      window.LSOApp?.showToast?.(!duration.valid ? 'Time Out must be later than Time In.' : 'A single duty entry cannot exceed 16 hours.', true);
+      updateSelfDurationPreview();
+      return;
+    }
+    if (description.length < 3) {
+      window.LSOApp?.showToast?.('Enter a duty assignment or description with at least 3 characters.', true);
+      return;
+    }
+    if (overlapsExistingDuty(loadData(), member.id, date, timeIn, timeOut)) {
+      window.LSOApp?.showToast?.('This time overlaps an existing pending or approved duty entry for the same date.', true);
+      return;
+    }
+
+    const button = el('dutySelfSubmitButton');
+    if (button) {
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.textContent = 'Submitting…';
+    }
+    try {
+      await window.LSOCloud?.submitDutyEntry?.({ semester: activeSemester, period, date, timeIn, timeOut, description });
+      if (el('dutySelfTimeIn')) el('dutySelfTimeIn').value = '';
+      if (el('dutySelfTimeOut')) el('dutySelfTimeOut').value = '';
+      if (el('dutySelfDescription')) el('dutySelfDescription').value = '';
+      updateSelfDurationPreview();
+      window.LSOApp?.showToast?.(`Duty entry submitted: ${durationLabel(duration.minutes)} pending Administrator approval.`);
+      renderAll();
+    } catch (error) {
+      window.LSOApp?.showToast?.(error.message || 'The duty entry could not be submitted.', true);
+    } finally {
+      if (button) {
+        button.removeAttribute('aria-busy');
+        button.textContent = 'Submit for Administrator Approval';
+      }
+      renderSelfService();
+    }
+  }
+
+  async function reviewDutyEntry(entryId, decision) {
+    if (!isAdmin() || !entryId || !['Approved', 'Rejected'].includes(decision)) return;
+    const data = loadData();
+    const entry = data.entries.find((item) => item.id === entryId);
+    if (!entry || entry.approvalStatus !== 'Pending') {
+      window.LSOApp?.showToast?.('This duty entry is no longer pending. Refreshing the approval queue.', true);
+      renderAll();
+      return;
+    }
+    const member = getMembers().find((item) => item.id === entry.memberId);
+    const decisionVerb = decision === 'Approved' ? 'approve and credit' : 'reject';
+    const confirmed = typeof window.confirm !== 'function' || window.confirm(
+      `${decision === 'Approved' ? 'Approve' : 'Reject'} ${durationLabel(entry.minutes)} for ${member?.fullName || 'this member'} on ${dateLabel(entry.date)}?\n\nThis will ${decisionVerb} the submitted Time In and Time Out.`
+    );
+    if (!confirmed) return;
+
+    const reviewControl = [...document.querySelectorAll('[data-entry-id]')].find((node) => node.dataset.entryId === entryId);
+    const row = reviewControl?.closest('tr');
+    row?.classList.add('duty-review-busy');
+    row?.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+    try {
+      await window.LSOCloud?.reviewDutyEntry?.(entryId, decision);
+      window.LSOApp?.showToast?.(decision === 'Approved'
+        ? 'Duty entry approved and credited to the member.'
+        : 'Duty entry rejected. No time was credited.');
+      renderAll();
+    } catch (error) {
+      window.LSOApp?.showToast?.(error.message || 'The duty entry review could not be saved.', true);
+      renderAll();
+    }
   }
 
   function saveCommitment(event) {
@@ -620,6 +912,7 @@
       id: uid('duty-entry'), memberId: member.id, semester: activeSemester, period: selectedPeriod,
       entryType: 'Duty', date, minutes, timeIn, timeOut,
       description: el('dutyRenderedDescription')?.value.trim() || '',
+      approvalStatus: 'Approved', approvedAt: new Date().toISOString(), approvedBy: account?.username || 'Administrator',
       createdAt: new Date().toISOString(), createdBy: account?.displayName || account?.username || 'Administrator', createdByUsername: account?.username || ''
     });
     persistData(data, { action: 'Recorded clock-based duty time', details: `${member.fullName} • ${activeSemester} • ${selectedPeriod} • ${formatClockTime(timeIn)}–${formatClockTime(timeOut)} • ${durationLabel(minutes)}` });
@@ -649,6 +942,7 @@
       id: uid('duty-entry'), memberId: member.id, semester: activeSemester, period: selectedPeriod,
       entryType: 'Incentive', date, minutes,
       description: el('dutyIncentiveDescription')?.value.trim() || '',
+      approvalStatus: 'Approved', approvedAt: new Date().toISOString(), approvedBy: account?.username || 'Administrator',
       createdAt: new Date().toISOString(), createdBy: account?.displayName || account?.username || 'Administrator', createdByUsername: account?.username || ''
     });
     persistData(data, { action: 'Recorded duty-hour incentive', details: `${member.fullName} • ${activeSemester} • ${selectedPeriod} • ${durationLabel(minutes, true)}` });
@@ -912,12 +1206,19 @@
   }
 
   function renderAll() {
+    if (isTraineeAccount()) {
+      const member = linkedMember();
+      selectedMemberId = member?.id || '';
+      selectedPeriod = activeMemberPeriod(member) || 'Trainee Period';
+    }
     if (el('dutySemesterLabel')) el('dutySemesterLabel').textContent = activeSemester;
     document.querySelectorAll('[data-duty-semester]').forEach((button) => button.classList.toggle('active', button.dataset.dutySemester === activeSemester));
     document.querySelectorAll('[data-duty-period]').forEach((button) => button.classList.toggle('active', button.dataset.dutyPeriod === overallPeriod));
+    renderSelfService();
     renderRosters();
     renderSelectedMember();
     renderOverall();
+    renderApprovalQueue();
   }
 
   function wireEvents() {
@@ -940,6 +1241,17 @@
       const button = event.target.closest('[data-duty-member]');
       if (button) setSelected(button.dataset.dutyMember, button.dataset.dutyRosterPeriod);
     }));
+    el('dutySelfEntryForm')?.addEventListener('submit', submitSelfDuty);
+    el('dutySelfDate')?.addEventListener('change', () => { renderSelfService(); updateSelfDurationPreview(); });
+    el('dutySelfDate')?.addEventListener('input', renderSelfService);
+    ['dutySelfTimeIn', 'dutySelfTimeOut'].forEach((id) => {
+      el(id)?.addEventListener('input', updateSelfDurationPreview);
+      el(id)?.addEventListener('change', updateSelfDurationPreview);
+    });
+    el('dutyApprovalTableBody')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-duty-review]');
+      if (button) reviewDutyEntry(button.dataset.entryId, button.dataset.dutyReview);
+    });
     el('dutyCommitmentForm')?.addEventListener('submit', saveCommitment);
     el('dutyRenderedForm')?.addEventListener('submit', saveRendered);
     ['dutyRenderedTimeIn', 'dutyRenderedTimeOut'].forEach((id) => {
@@ -953,8 +1265,10 @@
     });
     el('dutyIncentiveForm')?.addEventListener('submit', saveIncentive);
     el('dutyLedgerTableBody')?.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-duty-delete]');
-      if (button) deleteEntry(button.dataset.dutyDelete);
+      const deleteButton = event.target.closest('[data-duty-delete]');
+      const reviewButton = event.target.closest('[data-duty-review]');
+      if (deleteButton) deleteEntry(deleteButton.dataset.dutyDelete);
+      if (reviewButton) reviewDutyEntry(reviewButton.dataset.entryId, reviewButton.dataset.dutyReview);
     });
     el('printDutyHoursIndividual')?.addEventListener('click', printIndividual);
     el('printDutyHoursOverall')?.addEventListener('click', printOverall);
@@ -971,10 +1285,12 @@
     if (!el('dutyHoursView')) return;
     ensureDataMigration();
     if (el('dutyRenderedDate')) el('dutyRenderedDate').value = today();
+    if (el('dutySelfDate')) { el('dutySelfDate').value = today(); el('dutySelfDate').max = today(); }
     if (el('dutyIncentiveDate')) el('dutyIncentiveDate').value = today();
     if (el('dutyReportMonth') && !el('dutyReportMonth').value) el('dutyReportMonth').value = today().slice(0, 7);
     wireEvents();
     updateRenderedDurationPreview();
+    updateSelfDurationPreview();
     renderAll();
   }
 
@@ -982,6 +1298,8 @@
     getData: loadData,
     calculateMember: (memberId) => calculateMember(loadData(), memberId),
     calculateClockDuration,
+    memberPeriodOnDate,
+    overlapsExistingDuty: (memberId, date, timeIn, timeOut) => overlapsExistingDuty(loadData(), memberId, date, timeIn, timeOut),
     formatClockTime,
     getDashboardSummary,
     getPeriodLifecycle: (memberId, period) => {

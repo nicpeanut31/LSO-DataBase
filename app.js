@@ -303,6 +303,8 @@
   }
 
   function setView(viewId) {
+    const account = window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount || null;
+    if (account?.role === 'Trainee/Probationary' && viewId !== 'dutyHoursView') viewId = 'dutyHoursView';
     qsa('.view').forEach((view) => view.classList.toggle('active', view.id === viewId));
     qsa('.nav-item').forEach((item) => item.classList.toggle('active', item.dataset.view === viewId));
     const titleMap = {

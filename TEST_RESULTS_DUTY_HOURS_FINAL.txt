@@ -1,0 +1,90 @@
+LASALLIAN SYMPHONY ORCHESTRA
+FINAL TRAINEE / PROBATIONARY DUTY HOURS VALIDATION
+
+Result: 49 automated/static checks passed; 0 failed.
+
+Verified:
+- JavaScript syntax for all 17 JavaScript files
+- No duplicate HTML element IDs
+- All local HTML asset references exist
+- Trainee self-service form fields are present
+- Administrator approval queue is present
+- Duty Hours page-only role presentation is present
+- Account-to-member role logic is present
+- Timeline-based Trainee/Probationary period calculation
+- Same-day Time In/Time Out duration calculation
+- Pending and rejected records contribute zero credited minutes
+- Approved duty and approved incentives are included correctly
+- Pending/approved overlap prevention
+- Rejected records do not block a later corrected time range
+- Cloud RPC calls for submission and administrator review
+- Complete SQL installer includes member_id and older-schema repairs
+- SQL installer includes row locking, Pending/Approved/Rejected workflow,
+  PostgREST schema refresh, and compatibility-safe state loading
+- SQL dollar-quote pairs and transaction boundaries are balanced
+
+Test calculation:
+- Required duty: 600 minutes
+- Approved duty: 180 minutes
+- Pending duty: 120 minutes
+- Rejected duty: 60 minutes
+- Approved incentive: 30 minutes
+- Credited total: 180 + 30 = 210 minutes
+- Pending and rejected credited contribution: 0 minutes
+
+The live Supabase project was not accessible from the test environment. The
+actual database execution must be confirmed when Supabase displays Success
+after running LSO_DUTY_HOURS_COMPLETE_INSTALL.sql.
+
+Detailed automated check output:
+PASS: JavaScript syntax: app.js
+PASS: JavaScript syntax: auth.js
+PASS: JavaScript syntax: branding.js
+PASS: JavaScript syntax: cloud.js
+PASS: JavaScript syntax: contract-maker.js
+PASS: JavaScript syntax: contract-template-data.js
+PASS: JavaScript syntax: dashboard-enhancements.js
+PASS: JavaScript syntax: dashboard-intelligence.js
+PASS: JavaScript syntax: duty-hours.js
+PASS: JavaScript syntax: management.js
+PASS: JavaScript syntax: monthly-report-template-data.js
+PASS: JavaScript syntax: monthly-report.js
+PASS: JavaScript syntax: pdf-lib.min.js
+PASS: JavaScript syntax: permissions.js
+PASS: JavaScript syntax: supabase-config.js
+PASS: JavaScript syntax: ui-enhancements.js
+PASS: JavaScript syntax: workflow-upgrades.js
+PASS: No duplicate HTML IDs
+PASS: All local HTML assets exist
+PASS: HTML workflow marker: dutySelfEntryPanel
+PASS: HTML workflow marker: dutySelfEntryForm
+PASS: HTML workflow marker: dutySelfDate
+PASS: HTML workflow marker: dutySelfTimeIn
+PASS: HTML workflow marker: dutySelfTimeOut
+PASS: HTML workflow marker: dutySelfDescription
+PASS: HTML workflow marker: dutyApprovalPanel
+PASS: HTML workflow marker: dutyApprovalTableBody
+PASS: Duty workflow logic marker: memberPeriodOnDate
+PASS: Duty workflow logic marker: overlapsExistingDuty
+PASS: Duty workflow logic marker: approvalStatus === 'Approved'
+PASS: Duty workflow logic marker: submitDutyEntry
+PASS: Duty workflow logic marker: reviewDutyEntry
+PASS: Duty workflow logic marker: 960
+PASS: Cloud workflow marker: lso_submit_duty_entry
+PASS: Cloud workflow marker: lso_review_duty_entry
+PASS: Cloud workflow marker: overlaps an existing pending or approved
+PASS: SQL workflow marker: lso_member_period_on_date
+PASS: SQL workflow marker: lso_submit_duty_entry
+PASS: SQL workflow marker: lso_review_duty_entry
+PASS: SQL workflow marker: for update
+PASS: SQL workflow marker: approvalStatus
+PASS: SQL workflow marker: 'Pending'
+PASS: SQL workflow marker: 'Approved'
+PASS: SQL workflow marker: 'Rejected'
+PASS: SQL workflow marker: notify pgrst
+PASS: SQL dollar quotes balanced — 34
+PASS: SQL transactions balanced — begin=2 commit=2
+PASS: Complete installer includes compatibility repair
+PASS: Duty Hours calculation/timeline/overlap unit tests — Duty Hours logic tests passed
+
+TOTAL: 49 checks; 0 failed

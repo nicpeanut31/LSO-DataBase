@@ -21,3 +21,66 @@ body.staff-readonly-mode .attendance-remarks.staff-readonly-field { opacity: 1; 
 body[data-access-mode="read-only"] .account-copy #currentAccountRole { color: #f5d878; }
 @media (max-width: 920px) { .staff-readonly-banner { margin: 10px 18px 2px; } }
 @media (max-width: 600px) { .staff-readonly-banner { margin-inline: 12px; align-items: flex-start; } }
+
+/* Trainee / Probationary duty-hours-only access */
+.role-hidden,
+body[data-account-role="Trainee/Probationary"] .duty-management-only,
+body[data-account-role="Trainee/Probationary"] .duty-insight-stack,
+body[data-account-role="Trainee/Probationary"] .duty-hours-overall-panel,
+body[data-account-role="Trainee/Probationary"] #dutyHoursAdminControls {
+  display: none !important;
+}
+.trainee-only { display: none !important; }
+body[data-account-role="Trainee/Probationary"] .trainee-only:not(.hidden) { display: block !important; }
+body[data-account-role="Trainee/Probationary"] .duty-workspace-grid { grid-template-columns: minmax(0, 1fr); }
+body[data-account-role="Trainee/Probationary"] .main-content { min-width: 0; }
+body[data-access-mode="duty-entry"] .account-copy #currentAccountRole { color: #f5d878; }
+.duty-self-entry-panel { border: 1px solid #d8e8e1; }
+.duty-self-entry-panel .duty-entry-card { max-width: 820px; margin-top: 16px; }
+.duty-self-account-status { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.duty-self-status-item { padding: 12px 14px; border-radius: 12px; background: #f6faf8; border: 1px solid #deebe5; }
+.duty-self-status-item span { display: block; color: #73867f; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.duty-self-status-item strong { display: block; color: #173d32; margin-top: 4px; }
+.duty-self-status-warning { padding: 14px 16px; border-radius: 12px; background: #fff7e6; border: 1px solid #f0d99a; color: #75520b; }
+.duty-approval-panel { margin-bottom: 18px; }
+.duty-approval-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.approval-status-badge { white-space: nowrap; }
+.approval-status-badge.pending { background: #fff1c7; color: #7b5900; }
+.approval-status-badge.approved { background: #dff4e8; color: #176145; }
+.approval-status-badge.rejected { background: #fbe1e3; color: #8c2731; }
+.warning-text { color: #9a5a00 !important; }
+.account-member-select { min-width: 220px; }
+@media (max-width: 760px) {
+  .duty-self-account-status { grid-template-columns: 1fr; }
+  .account-member-select { min-width: 180px; }
+}
+
+/* Account approval role assignment — v2 */
+.account-approval-select { min-width: 190px; font-weight: 700; }
+.account-approval-instruction { color: #7a5a08 !important; max-width: 220px; }
+.account-row-busy { opacity: .68; }
+.account-row-busy select,
+.account-row-busy button { cursor: progress !important; }
+
+/* A Trainee/Probationary account has one workspace only: Duty Hours. */
+body[data-account-role="Trainee/Probationary"] .view:not(#dutyHoursView),
+body[data-account-role="Trainee/Probationary"] .notification-center,
+body[data-account-role="Trainee/Probationary"] #staffReadOnlyBanner {
+  display: none !important;
+}
+body[data-account-role="Trainee/Probationary"] #dutyHoursView {
+  display: block;
+}
+body[data-account-role="Trainee/Probationary"] #dutyHoursView:not(.active) {
+  display: none;
+}
+body[data-account-role="Trainee/Probationary"] .sidebar .nav-item:not([data-view="dutyHoursView"]) {
+  display: none !important;
+}
+
+
+/* Final Duty Hours approval workflow */
+.duty-review-busy { opacity: .6; pointer-events: none; }
+#dutySelfSubmitButton[aria-busy="true"] { cursor: wait; }
+body[data-account-role="Trainee/Probationary"] #dutySelfEntryPanel { display: block !important; }
+body[data-account-role="Trainee/Probationary"] #dutyApprovalPanel { display: none !important; }
