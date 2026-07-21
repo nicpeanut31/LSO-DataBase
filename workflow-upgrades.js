@@ -267,6 +267,12 @@
     return denominator ? Math.round(((counts.Present + counts.Late) / denominator) * 100) : null;
   }
 
+  function eventWorkflowState(event, group = activeAttendanceGroup(), mode = activeAttendanceRosterMode()) {
+    if (window.LSOAttendanceGovernance?.workflowState) return window.LSOAttendanceGovernance.workflowState(event, group, mode);
+    const key = `${group}::${mode}`;
+    return event?.attendanceWorkflows?.[key]?.state === 'Finalized' ? 'Finalized' : 'Draft';
+  }
+
   function memberSummaryForEvents(memberId, events) {
     const attendance = getAttendance();
     const member = getMembers().find((item) => item.id === memberId);
@@ -382,7 +388,8 @@
       const record = attendanceByEvent.get(event.id) || {};
       const status = record.status || 'Not marked';
       const badge = status === 'Present' ? 'badge-green' : status === 'Late' || status === 'Excused' ? 'badge-gold' : status === 'Absent' ? 'badge-red' : 'badge-gray';
-      return `<div class="attendance-history-row"><div><strong>${safeText(event.title)}</strong><small>${safeText(dateLabel(event.date, { short: true }))}${event.venue ? ` • ${safeText(event.venue)}` : ''}</small></div><span class="badge ${badge}">${safeText(status)}</span><small>${safeText(record.remarks || '')}</small></div>`;
+      const workflow = eventWorkflowState(event, record.attendanceGroup || activeAttendanceGroup(), record.rosterModeAtEdit || activeAttendanceRosterMode());
+      return `<div class="attendance-history-row"><div><strong>${safeText(event.title)}</strong><small>${safeText(dateLabel(event.date, { short: true }))}${event.venue ? ` • ${safeText(event.venue)}` : ''}</small></div><span class="badge ${badge}">${safeText(status)}</span><span class="badge ${workflow === 'Finalized' ? 'badge-green' : 'badge-gold'}">${safeText(workflow)}</span><small>${safeText(record.remarks || '')}</small></div>`;
     }).join('')}` : '<div class="dashboard-empty-state"><span>□</span><strong>No completed rehearsals</strong><small>Create rehearsal events in the attendance calendar.</small></div>';
     actions.classList.remove('hidden');
   }
@@ -478,20 +485,23 @@
     const member = membersForAttendanceGroup(rehearsalEvents()).find((item) => item.id === selectedAttendanceMemberId);
     if (!member) return;
     const summary = memberRehearsalSummary(member.id);
+    const signals = window.LSOAttendanceGovernance?.memberSignals?.(member.id) || {};
     const recordMap = new Map(summary.records.map((record) => [record.eventId, record]));
     const summaryHtml = `<div class="summary">${[
       ['Total Rehearsals', summary.totalRehearsals], ['Present', summary.counts.Present], ['Late', summary.counts.Late],
-      ['Absent', summary.counts.Absent], ['Excused', summary.counts.Excused], ['Attendance Rate', summary.rate === null ? '—' : `${summary.rate}%`]
+      ['Absent', summary.counts.Absent], ['Working Rate', signals.workingRate == null ? (summary.rate === null ? '—' : `${summary.rate}%`) : `${signals.workingRate}%`],
+      ['Verified Rate', signals.verifiedRate == null ? '—' : `${signals.verifiedRate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
     const rows = summary.events.map((event) => {
       const record = recordMap.get(event.id) || {};
-      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+      const workflow = eventWorkflowState(event, record.attendanceGroup || activeAttendanceGroup(), record.rosterModeAtEdit || activeAttendanceRosterMode());
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(workflow)}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${member.fullName} — ${attendanceRosterModeLabel()} — ${attendanceGroupShortLabel()} Attendance`,
       subtitle: `${activeSemester()} • ${attendanceGroupShortLabel()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`, 
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No completed rehearsal records.</td></tr>'}</tbody></table>`
+      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Verification</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No completed rehearsal records.</td></tr>'}</tbody></table>`
     }));
   }
 
@@ -503,9 +513,10 @@
         const member = memberMap.get(record.memberId);
         return record.eventId === event.id && record.status && member && memberMatchesAttendanceRosterMode(member) && attendanceRecordGroup(record, event, member) === activeAttendanceGroup();
       });
-      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.type || 'Activity')}</td><td>${safeText(event.venue || '—')}</td><td>${records.length}</td></tr>`;
+      const workflow = eventWorkflowState(event);
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.title)}</td><td>${safeText(event.type || 'Activity')}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(workflow)}</td><td>${records.length}</td></tr>`;
     }).join('');
-    return `<h2 class="report-section">Activity Breakdown</h2><p class="report-note">Each row lists one completed activity and the number of recorded attendance entries.</p><table><thead><tr><th>Date</th><th>Activity</th><th>Type</th><th>Venue</th><th>Recorded</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No completed activities in this report period.</td></tr>'}</tbody></table>`;
+    return `<h2 class="report-section">Activity Breakdown</h2><p class="report-note">Each row lists one completed activity, its verification state, and the number of recorded attendance entries.</p><table><thead><tr><th>Date</th><th>Activity</th><th>Type</th><th>Venue</th><th>Verification</th><th>Recorded</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No completed activities in this report period.</td></tr>'}</tbody></table>`;
   }
 
   function printCurrentAttendanceGroupRoster() {
@@ -538,18 +549,20 @@
     const records = groupRecordsForEvents(events).filter((record) => memberIds.has(record.memberId));
     const counts = statusCounts(records);
     const rate = rateFromCounts(counts);
+    const finalizedEvents = events.filter((event) => eventWorkflowState(event) === 'Finalized').length;
     const summaryHtml = `<div class="summary">${[
-      ['Members', members.length], ['Activities', events.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Overall Rate', rate === null ? '—' : `${rate}%`]
+      ['Members', members.length], ['Activities', events.length], ['Finalized', finalizedEvents], ['Draft', Math.max(0, events.length - finalizedEvents)], ['Absent', counts.Absent], ['Working Rate', rate === null ? '—' : `${rate}%`]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
     const rows = members.map((member) => {
       const summary = memberRehearsalSummary(member.id);
-      return `<tr><td>${safeText(member.fullName)}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td></tr>`;
+      const signals = window.LSOAttendanceGovernance?.memberSignals?.(member.id) || {};
+      return `<tr><td>${safeText(member.fullName)}</td><td>${summary.rate === null ? '—' : `${summary.rate}%`}</td><td>${signals.verifiedRate == null ? '—' : `${signals.verifiedRate}%`}</td><td>${safeText((signals.risks || []).join('; ') || 'No current signal')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${attendanceRosterModeLabel()} — ${attendanceGroupShortLabel()} — ${activeSemester()} Attendance Report`,
       subtitle: `${members.length} members • ${events.length} completed activities • ${records.length} recorded attendance statuses`,
       summaryHtml,
-      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">${safeText(attendanceGroupShortLabel())} Semester Summary</h2><p class="report-note">This report is isolated from the other membership attendance groups.</p><table><thead><tr><th>Member</th><th>Attendance Rate</th></tr></thead><tbody>${rows || '<tr><td colspan="2">No member records.</td></tr>'}</tbody></table>`
+      tableHtml: `${eventDetailReportTable(events)}<h2 class="report-section">${safeText(attendanceGroupShortLabel())} Semester Summary</h2><p class="report-note">Working Rate includes Draft and Finalized records. Verified Rate includes Finalized records only.</p><table><thead><tr><th>Member</th><th>Working Rate</th><th>Verified Rate</th><th>Risk Signals</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No member records.</td></tr>'}</tbody></table>`
     }));
   }
 
@@ -591,13 +604,14 @@
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
     const rows = summary.events.map((event) => {
       const record = recordMap.get(event.id) || {};
-      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
+      const workflow = eventWorkflowState(event, record.attendanceGroup || activeAttendanceGroup(), record.rosterModeAtEdit || activeAttendanceRosterMode());
+      return `<tr><td>${safeText(dateLabel(event.date, { short: true }))}</td><td>${safeText(event.venue || '—')}</td><td>${safeText(workflow)}</td><td>${safeText(record.status || 'Not marked')}</td><td>${safeText(record.remarks || '')}</td></tr>`;
     }).join('');
     openPrintDocument(printableDocument({
       title: `${member.fullName} — ${attendanceRosterModeLabel()} — ${attendanceGroupShortLabel()} — ${monthLabel}`, 
       subtitle: `${activeSemester()} • ${attendanceGroupShortLabel()} • ${member.membershipId} • ${member.periodGroup} • ${member.primaryInstrument || 'No instrument recorded'}`,
       summaryHtml,
-      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No completed rehearsal records for this month.</td></tr>'}</tbody></table>`,
+      tableHtml: `<table><thead><tr><th>Date</th><th>Venue</th><th>Verification</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No completed rehearsal records for this month.</td></tr>'}</tbody></table>`,
       footer: `Individual monthly attendance report for ${monthLabel}, ${activeSemester()}.`
     }));
   }
@@ -617,8 +631,9 @@
     });
     const map = new Map(records.map((record) => [record.memberId, record]));
     const counts = statusCounts(records);
+    const workflow = eventWorkflowState(event);
     const summaryHtml = `<div class="summary">${[
-      ['Roster', members.length], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Excused', counts.Excused], ['Recorded', records.filter((r) => r.status).length]
+      ['Roster', members.length], ['Verification', workflow], ['Present', counts.Present], ['Late', counts.Late], ['Absent', counts.Absent], ['Recorded', records.filter((r) => r.status).length]
     ].map(([label, value]) => `<div><span>${safeText(label)}</span><strong>${safeText(value)}</strong></div>`).join('')}</div>`;
     const rows = members.map((member) => {
       const record = map.get(member.id) || {};
@@ -626,7 +641,7 @@
     }).join('');
     openPrintDocument(printableDocument({
       title: `${event.title} — ${attendanceRosterModeLabel()} — ${attendanceGroupShortLabel()}`, 
-      subtitle: `${eventSemester(event)} • ${dateLabel(event.date)} • ${event.venue || 'Venue not recorded'} • ${event.type || 'Activity'}`,
+      subtitle: `${eventSemester(event)} • ${dateLabel(event.date)} • ${event.venue || 'Venue not recorded'} • ${event.type || 'Activity'} • ${workflow}`,
       summaryHtml,
       tableHtml: `<table><thead><tr><th>Member</th><th>Section</th><th>Status</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="4">No members in this attendance group.</td></tr>'}</tbody></table>`
     }));

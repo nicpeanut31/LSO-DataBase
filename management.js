@@ -385,7 +385,8 @@
         return item.eventId === event.id && item.status && member && attendanceRecordGroup(item, event, member) === activeAttendanceGroup();
       });
       const present = records.filter((item) => item.status === 'Present' || item.status === 'Late').length;
-      const recordLabel = records.length ? `${present}/${records.length} attended` : `${rosterMembers.length} ${attendanceGroupShortLabel().toLowerCase()} in roster`;
+      const workflowState = window.LSOAttendanceGovernance?.workflowState?.(event, activeAttendanceGroup(), activeAttendanceRosterMode()) || 'Draft';
+      const recordLabel = `${records.length ? `${present}/${records.length} attended` : `${rosterMembers.length} ${attendanceGroupShortLabel().toLowerCase()} in roster`} • ${workflowState}`;
       return `<button class="event-card ${selectedEventId === event.id ? 'active' : ''}" data-event-id="${safeText(event.id)}">
         <span class="event-date-box"><strong>${safeText(String(event.date || '').slice(8, 10) || '—')}</strong><small>${safeText(new Date(`${event.date}T00:00:00`).toLocaleDateString('en-PH', { month: 'short' }))}</small></span>
         <span class="event-copy"><strong>${safeText(event.title)}</strong><small>${safeText(eventMeta(event))}</small><em>${safeText(recordLabel)}</em></span>
@@ -425,6 +426,7 @@
     const id = el('editingEventId').value || uid('event');
     const existing = events.find((item) => item.id === id);
     const record = {
+      ...(existing || {}),
       id,
       title: el('eventTitle').value.trim(),
       type: el('eventType').value,
@@ -537,6 +539,11 @@
   function saveAttendanceRoster() {
     if (!isAdmin()) { toast('Administrator access is required to record attendance.', true); return; }
     if (!selectedEventId) return;
+    const workflowEvent = events.find((item) => item.id === selectedEventId);
+    if (window.LSOAttendanceGovernance?.isFinalized?.(workflowEvent, activeAttendanceGroup(), activeAttendanceRosterMode())) {
+      toast('This attendance roster is finalized. Unlock it before making corrections.', true);
+      return;
+    }
     const rows = qsa('[data-attendance-member]', el('attendanceRosterBody'));
     const now = new Date().toISOString();
     rows.forEach((row) => {
@@ -554,14 +561,18 @@
         if (index >= 0) attendance.splice(index, 1);
         return;
       }
+      const existingRecord = index >= 0 ? attendance[index] : {};
       const record = {
+        ...existingRecord,
         eventId: selectedEventId,
         memberId,
         status,
         remarks,
         attendanceGroup: activeAttendanceGroup(),
         rosterModeAtEdit: activeAttendanceRosterMode(),
-        updatedAt: now
+        createdAt: existingRecord.createdAt || now,
+        updatedAt: now,
+        updatedBy: currentAccount()?.displayName || currentAccount()?.username || 'Administrator'
       };
       if (index >= 0) attendance[index] = record;
       else attendance.push(record);
@@ -821,7 +832,17 @@
       if (attendanceInfo.sessions >= 3 && attendanceInfo.rate < attendanceThreshold) {
         alerts.push({ type: 'attendance', severity: 'high', title: `${member.fullName} has low attendance`, detail: `${attendanceInfo.rate}% across ${attendanceInfo.sessions} counted activities`, memberId: member.id });
       }
+      const attendanceSignals = window.LSOAttendanceGovernance?.memberSignals?.(member.id, attendanceThreshold);
+      if (attendanceSignals?.absenceStreak >= 2) {
+        alerts.push({ type: 'attendance', severity: 'high', title: `${member.fullName} has consecutive absences`, detail: `${attendanceSignals.absenceStreak} consecutive counted absences in the current attendance group`, memberId: member.id });
+      }
+      if (attendanceSignals?.lateCount >= 3) {
+        alerts.push({ type: 'attendance', severity: 'medium', title: `${member.fullName} has repeated lateness`, detail: `${attendanceSignals.lateCount} Late records in the selected semester`, memberId: member.id });
+      }
     });
+
+    const workflowAlerts = window.LSOAttendanceGovernance?.buildAlerts?.() || [];
+    workflowAlerts.forEach((alert) => alerts.push(alert));
 
     const severityOrder = { high: 0, medium: 1, low: 2 };
     return alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity] || a.title.localeCompare(b.title));
@@ -832,6 +853,7 @@
   }
 
   function alertAction(alert) {
+    if (alert.eventId) return `<button class="small-button" data-alert-event="${safeText(alert.eventId)}">Open Attendance</button>`;
     if (alert.memberId) return `<button class="small-button" data-alert-member="${safeText(alert.memberId)}">Open Member</button>`;
     return '';
   }
@@ -1340,8 +1362,14 @@
     el('refreshAlertsButton').addEventListener('click', () => { renderAlerts(); toast('Action Center refreshed.'); });
     el('alertSections').addEventListener('click', (event) => {
       const memberButton = event.target.closest('[data-alert-member]');
+      const eventButton = event.target.closest('[data-alert-event]');
       const instrumentButton = event.target.closest('[data-alert-instrument]');
       if (memberButton) window.LSOApp?.openRecord?.(memberButton.dataset.alertMember);
+      if (eventButton) {
+        selectedEventId = eventButton.dataset.alertEvent;
+        setView('attendanceView');
+        renderAttendance();
+      }
       if (instrumentButton) {
         setView('instrumentsView');
         const item = instruments.find((instrument) => instrument.id === instrumentButton.dataset.alertInstrument);
@@ -1415,6 +1443,35 @@
     refreshAll,
     getEvents: () => events.map((event) => ({ ...event })),
     getAttendance: () => attendance.map((entry) => ({ ...entry })),
+    getSelectedEventId: () => selectedEventId,
+    setSelectedEventId: (eventId) => {
+      if (!events.some((event) => event.id === eventId)) return false;
+      selectedEventId = eventId;
+      renderAttendance();
+      return true;
+    },
+    getAttendanceRosterMembers: (eventId = selectedEventId) => {
+      const event = events.find((item) => item.id === eventId);
+      return membersForEventAttendanceGroup(event).map((member) => ({ ...member }));
+    },
+    replaceAttendance: (nextAttendance) => {
+      if (!isAdmin() || !Array.isArray(nextAttendance)) return false;
+      attendance = nextAttendance.map((entry) => ({ ...entry }));
+      saveArray(ATTENDANCE_KEY, attendance);
+      renderAttendance();
+      renderAlerts();
+      return true;
+    },
+    updateEventRecord: (nextEvent) => {
+      if (!isAdmin() || !nextEvent?.id) return false;
+      const index = events.findIndex((event) => event.id === nextEvent.id);
+      if (index < 0) return false;
+      events[index] = { ...nextEvent };
+      saveArray(EVENTS_KEY, events);
+      renderAttendance();
+      renderAlerts();
+      return true;
+    },
     getAttendanceSemester: activeAttendanceSemester,
     setAttendanceSemester: (semester) => {
       window.LSOAttendanceSemester = normalizeSemester(semester);

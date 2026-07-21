@@ -3,14 +3,229 @@
 
   const SESSION_KEY = 'lso_shared_session_v1';
   const DEFAULT_USERNAME = 'SNA1161';
+  const LOGIN_SECURITY_KEY = 'lso_login_security_v1';
+  const ACTIVITY_KEY = 'lso_last_activity_v1';
+  const MAX_FAILED_ATTEMPTS = 5;
+  const FAILED_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+  const LOGIN_COOLDOWN_MS = 5 * 60 * 1000;
+  const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+  const INACTIVITY_WARNING_MS = 60 * 1000;
   const el = (id) => document.getElementById(id);
   const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
 
   let accountsCache = [];
   let accountRefreshTimer = null;
+  let loginCooldownTimer = null;
+  let inactivityTimer = null;
+  let inactivityWarningTimer = null;
+  let activityListenersBound = false;
+  let lastActivityRecordedAt = 0;
+  let automaticLogoutInProgress = false;
 
   function emit(name, detail = {}) {
     window.dispatchEvent(new CustomEvent(name, { detail }));
+  }
+
+  function readJsonStorage(storage, key, fallback = null) {
+    try {
+      const parsed = JSON.parse(storage.getItem(key) || 'null');
+      return parsed ?? fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function writeJsonStorage(storage, key, value) {
+    try {
+      storage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function formatCountdown(milliseconds) {
+    const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function getLoginSecurityState() {
+    const now = Date.now();
+    const stored = readJsonStorage(localStorage, LOGIN_SECURITY_KEY, {}) || {};
+    let failedAttempts = Number(stored.failedAttempts) || 0;
+    let lastFailureAt = Number(stored.lastFailureAt) || 0;
+    let lockedUntil = Number(stored.lockedUntil) || 0;
+
+    if (lockedUntil && lockedUntil <= now) {
+      failedAttempts = 0;
+      lastFailureAt = 0;
+      lockedUntil = 0;
+    } else if (!lockedUntil && lastFailureAt && now - lastFailureAt > FAILED_ATTEMPT_WINDOW_MS) {
+      failedAttempts = 0;
+      lastFailureAt = 0;
+    }
+
+    const normalized = { failedAttempts, lastFailureAt, lockedUntil };
+    writeJsonStorage(localStorage, LOGIN_SECURITY_KEY, normalized);
+    return normalized;
+  }
+
+  function resetLoginSecurity() {
+    try { localStorage.removeItem(LOGIN_SECURITY_KEY); } catch { /* Storage can be blocked. */ }
+    stopLoginCooldownTicker();
+    renderLoginCooldown();
+  }
+
+  function recordInvalidCredentials() {
+    const now = Date.now();
+    const state = getLoginSecurityState();
+    const nextAttempts = state.failedAttempts + 1;
+    const locked = nextAttempts >= MAX_FAILED_ATTEMPTS;
+    const nextState = {
+      failedAttempts: locked ? 0 : nextAttempts,
+      lastFailureAt: now,
+      lockedUntil: locked ? now + LOGIN_COOLDOWN_MS : 0
+    };
+    writeJsonStorage(localStorage, LOGIN_SECURITY_KEY, nextState);
+    if (locked) startLoginCooldownTicker();
+    return { ...nextState, locked, remainingAttempts: locked ? 0 : MAX_FAILED_ATTEMPTS - nextAttempts };
+  }
+
+  function loginCooldownRemaining() {
+    const state = getLoginSecurityState();
+    return Math.max(0, state.lockedUntil - Date.now());
+  }
+
+  function renderLoginCooldown() {
+    const form = el('loginForm');
+    const button = form?.querySelector('button[type="submit"]');
+    if (!button) return;
+    const remaining = loginCooldownRemaining();
+    const formBusy = form.classList.contains('is-busy');
+    if (remaining > 0) {
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+      button.textContent = `Try again in ${formatCountdown(remaining)}`;
+      setMessage('loginMessage', `Too many incorrect password attempts. Login is temporarily paused for ${formatCountdown(remaining)}.`);
+    } else {
+      button.disabled = formBusy;
+      button.setAttribute('aria-disabled', String(formBusy));
+      button.textContent = 'Login to Database';
+    }
+  }
+
+  function startLoginCooldownTicker() {
+    clearInterval(loginCooldownTimer);
+    renderLoginCooldown();
+    if (!loginCooldownRemaining()) return;
+    loginCooldownTimer = setInterval(() => {
+      renderLoginCooldown();
+      if (!loginCooldownRemaining()) {
+        stopLoginCooldownTicker();
+        setMessage('loginMessage', 'You may try logging in again.', true);
+        el('loginPassword')?.focus();
+      }
+    }, 1000);
+  }
+
+  function stopLoginCooldownTicker() {
+    clearInterval(loginCooldownTimer);
+    loginCooldownTimer = null;
+  }
+
+  function readLastActivity() {
+    try { return Number(sessionStorage.getItem(ACTIVITY_KEY)) || 0; } catch { return 0; }
+  }
+
+  function writeLastActivity(timestamp) {
+    try { sessionStorage.setItem(ACTIVITY_KEY, String(timestamp)); } catch { /* Storage can be blocked. */ }
+  }
+
+  function clearLastActivity() {
+    try { sessionStorage.removeItem(ACTIVITY_KEY); } catch { /* Storage can be blocked. */ }
+  }
+
+  function clearInactivityTimers() {
+    clearTimeout(inactivityTimer);
+    clearTimeout(inactivityWarningTimer);
+    inactivityTimer = null;
+    inactivityWarningTimer = null;
+  }
+
+  async function handleInactivityLogout() {
+    if (!window.LSOCurrentAccount || automaticLogoutInProgress) return;
+    automaticLogoutInProgress = true;
+    clearInactivityTimers();
+    clearLastActivity();
+    clearSession();
+    try { await window.LSOCloud.logout(); } catch { /* Local logout still continues. */ }
+    showLoginScreen();
+    setMessage('loginMessage', 'For your security, you were logged out after 15 minutes of inactivity.');
+    automaticLogoutInProgress = false;
+  }
+
+  function showInactivityWarning() {
+    if (!window.LSOCurrentAccount) return;
+    window.LSOApp?.showToast?.('Your session will log out in 1 minute unless activity resumes.');
+    emit('lso:inactivity-warning', { remainingMs: INACTIVITY_WARNING_MS });
+  }
+
+  function scheduleInactivityTimers() {
+    clearInactivityTimers();
+    if (!window.LSOCurrentAccount) return;
+    const now = Date.now();
+    const lastActivity = readLastActivity() || now;
+    const elapsed = now - lastActivity;
+    const remaining = INACTIVITY_TIMEOUT_MS - elapsed;
+
+    if (remaining <= 0) {
+      handleInactivityLogout();
+      return;
+    }
+
+    const warningDelay = remaining - INACTIVITY_WARNING_MS;
+    if (warningDelay <= 0) showInactivityWarning();
+    else inactivityWarningTimer = setTimeout(showInactivityWarning, warningDelay);
+    inactivityTimer = setTimeout(handleInactivityLogout, remaining);
+  }
+
+  function recordUserActivity({ force = false } = {}) {
+    if (!window.LSOCurrentAccount) return;
+    const now = Date.now();
+    if (!force && now - lastActivityRecordedAt < 15000) return;
+    lastActivityRecordedAt = now;
+    writeLastActivity(now);
+    scheduleInactivityTimers();
+  }
+
+  function handleVisibilityChange() {
+    if (!window.LSOCurrentAccount) return;
+    if (document.visibilityState === 'visible') scheduleInactivityTimers();
+  }
+
+  function bindActivityListeners() {
+    if (activityListenersBound) return;
+    activityListenersBound = true;
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach((eventName) => {
+      window.addEventListener(eventName, recordUserActivity, { passive: true, capture: true });
+    });
+    window.addEventListener('mousemove', recordUserActivity, { passive: true });
+    window.addEventListener('focus', () => recordUserActivity({ force: true }));
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  }
+
+  function startInactivityTracking() {
+    bindActivityListeners();
+    automaticLogoutInProgress = false;
+    recordUserActivity({ force: true });
+  }
+
+  function stopInactivityTracking() {
+    clearInactivityTimers();
+    clearLastActivity();
+    lastActivityRecordedAt = 0;
   }
 
   function readSession() {
@@ -143,6 +358,8 @@
     window.LSOPermissions?.apply?.();
     document.title = traineeAccess ? 'Duty Hours | LSO Orchestra Management System' : 'LSO Orchestra Management System';
     startAccountRefresh();
+    stopLoginCooldownTicker();
+    startInactivityTracking();
   }
 
   function showLoginScreen({ preserveMessage = false } = {}) {
@@ -163,6 +380,8 @@
     if (!preserveMessage) switchAuthMode('login');
     emit('lso:auth-changed', null);
     stopAccountRefresh();
+    stopInactivityTracking();
+    startLoginCooldownTicker();
   }
 
   function loginMessageForCode(code) {
@@ -262,18 +481,36 @@
       return;
     }
 
+    const cooldownRemaining = loginCooldownRemaining();
+    if (cooldownRemaining > 0) {
+      startLoginCooldownTicker();
+      return;
+    }
+
     setFormBusy('loginForm', true);
     try {
       const result = await window.LSOCloud.login(username, password);
       if (!result?.ok) {
-        setMessage('loginMessage', loginMessageForCode(result?.code));
+        if (result?.code === 'invalid_credentials') {
+          const security = recordInvalidCredentials();
+          if (security.locked) {
+            startLoginCooldownTicker();
+          } else {
+            const attemptWord = security.remainingAttempts === 1 ? 'attempt' : 'attempts';
+            setMessage('loginMessage', `The username or password is incorrect. ${security.remainingAttempts} ${attemptWord} remaining before a 5-minute cooldown.`);
+          }
+        } else {
+          setMessage('loginMessage', loginMessageForCode(result?.code));
+        }
         return;
       }
+      resetLoginSecurity();
       await authorize(result.account, result.token);
     } catch (error) {
       setMessage('loginMessage', error.message || 'The shared database could not be reached.');
     } finally {
       setFormBusy('loginForm', false);
+      renderLoginCooldown();
     }
   }
 
@@ -333,6 +570,7 @@
   }
 
   async function handleLogout() {
+    stopInactivityTracking();
     clearSession();
     try { await window.LSOCloud.logout(); } catch { /* The local session is still cleared. */ }
     showLoginScreen();
@@ -420,11 +658,17 @@
     refreshAccounts,
     getActiveAccount: () => window.LSOCurrentAccount ? { ...window.LSOCurrentAccount } : null,
     signOut: handleLogout,
-    refreshActiveAccount
+    refreshActiveAccount,
+    securitySettings: {
+      maxFailedAttempts: MAX_FAILED_ATTEMPTS,
+      cooldownMinutes: LOGIN_COOLDOWN_MS / 60000,
+      inactivityMinutes: INACTIVITY_TIMEOUT_MS / 60000
+    }
   };
 
   async function initializeAuth() {
     wireAuthEvents();
+    bindActivityListeners();
     showLoginScreen();
 
     if (!window.LSOCloud?.isConfigured?.()) {

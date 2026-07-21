@@ -1,0 +1,20 @@
+UPDATED EXISTING FILES
+- index.html
+- auth.js
+
+NEW WEBSITE FILES
+- website-enhancements.css
+- manifest.webmanifest
+- service-worker.js
+- pwa.js
+- android-chrome-512x512.png
+- maskable-icon-512x512.png
+- WEBSITE_ONLY_UPDATE_INSTRUCTIONS.txt
+- TEST_RESULTS_WEBSITE_ONLY_UPDATE.txt
+- FILE_MANIFEST_WEBSITE_UPDATE.txt
+
+UNCHANGED
+- Supabase configuration and database logic
+- All SQL installers and repairs
+- Duty Hours workflow files
+- Membership, attendance, reporting, and account-role data logic

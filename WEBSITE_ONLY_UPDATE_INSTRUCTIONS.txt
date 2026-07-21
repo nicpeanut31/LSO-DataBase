@@ -1,0 +1,55 @@
+LSO WEBSITE-ONLY SECURITY, PWA, AND RESPONSIVE DESIGN UPDATE
+============================================================
+
+This package changes website files only. It does not modify the Supabase schema,
+SQL installers, member records, attendance records, account roles, or Duty Hours data.
+No SQL script needs to be run for this update.
+
+ADDED WEBSITE SECURITY
+----------------------
+1. Login cooldown
+   - Incorrect username/password attempts are counted only when Supabase returns
+     "invalid_credentials".
+   - After 5 incorrect attempts within 15 minutes, login is paused for 5 minutes.
+   - The login button displays the remaining cooldown time.
+   - A successful login clears the failed-attempt counter.
+   - Pending, rejected, disabled, and connection errors do not count as wrong-password attempts.
+
+2. Automatic inactivity logout
+   - An authenticated account is logged out after 15 minutes without user activity.
+   - A warning appears 1 minute before logout.
+   - Activity includes keyboard, pointer, touch, scrolling, and returning to the active tab.
+   - The elapsed time is rechecked when the browser tab becomes visible again.
+
+PROGRESSIVE WEB APP SUPPORT
+---------------------------
+- manifest.webmanifest enables installation on supported browsers.
+- service-worker.js caches the core website application shell and local assets.
+- Supabase authentication/database requests are never cached.
+- The app shell can open from cache, but live database operations still require internet.
+- An "Install LSO App" button appears when the browser provides an install prompt.
+- GitHub Pages already uses HTTPS, which satisfies the PWA secure-context requirement.
+
+UNIFIED RESPONSIVE DESIGN
+-------------------------
+- website-enhancements.css is loaded after the existing styles.
+- Panels, forms, buttons, empty states, modals, tables, focus states, and mobile spacing
+  are standardized without replacing the existing LSO design system.
+- Mobile layouts are adjusted at 1100px, 920px, 680px, and 460px breakpoints.
+- Tables remain horizontally scrollable where their data cannot safely collapse.
+- Reduced-motion and installed-app safe-area support are included.
+
+DEPLOYMENT
+----------
+1. Back up the currently deployed website folder.
+2. Upload every file from this package to the same GitHub Pages website folder.
+3. Keep the existing supabase-config.js values unless you intentionally changed projects.
+4. Do not run any SQL for this website-only update.
+5. After GitHub Pages finishes deploying, open the site and press Ctrl + Shift + R once.
+6. On a supported browser, use the displayed "Install LSO App" button or the browser's
+   installation option.
+
+IMPORTANT
+---------
+A browser-side cooldown is an additional website safeguard. It does not replace Supabase
+server-side authentication, Row Level Security, or account approval controls.

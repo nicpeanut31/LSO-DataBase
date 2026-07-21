@@ -1,0 +1,83 @@
+LASALLIAN SYMPHONY ORCHESTRA
+ATTENDANCE FINALIZATION, AUDIT HISTORY, ANALYTICS, ALERTS, AND REPORTS
+
+WHAT WAS ADDED
+
+1. Draft and Finalized Attendance
+- Every attendance roster begins as Draft.
+- Draft attendance can be edited and saved by an Administrator.
+- Finalize & Lock Attendance completes the roster and prevents further changes.
+- Any unmarked member is automatically recorded as Absent during finalization.
+- Finalization is stored separately for each Event, Attendance Group, and Roster Mode.
+  Example: Official Members Current Roster is separate from Trainee Members Current Roster.
+
+2. Administrator Editing of Locked Attendance
+- A finalized roster displays Unlock for Editing.
+- The Administrator must enter a correction reason.
+- The roster returns to Draft and becomes editable.
+- After corrections are saved, the Administrator must finalize it again.
+- Each re-finalization increases the attendance revision number.
+
+3. Attendance Audit History
+The system records:
+- Draft attendance saves
+- Finalization date and Administrator
+- Automatic Absent entries created during finalization
+- Unlock date, Administrator, and correction reason
+- Re-finalization revisions
+
+The audit history is shown inside the selected attendance roster and can be exported as CSV.
+
+4. Individual Analytics
+For the selected member, the website now displays:
+- Working Rate: Draft and Finalized records
+- Verified Rate: Finalized records only
+- On-Time Rate: Present divided by Present plus Late
+- Consecutive Absences
+- Total Late records
+- Draft events that are not yet verified
+- Current attendance risk signals
+
+5. Attendance Alerts
+The Action Center can now flag:
+- Past events with no attendance records
+- Past attendance that remains Draft
+- Attendance unlocked for correction but not re-finalized
+- Two or more consecutive absences
+- Three or more Late records
+- Attendance below the configured threshold
+
+An event alert includes an Open Attendance button.
+
+6. Reports and Exports
+- Semester and monthly printable reports include the attendance verification state.
+- Individual printable reports show whether each event is Draft or Finalized.
+- Export Analytics CSV creates a group-level attendance analytics report.
+- Export Member CSV creates an event-by-event member attendance report.
+- Export Audit CSV creates a selected-roster audit report.
+
+INSTALLATION
+
+1. Upload and replace the website files using this package.
+2. Keep the same folder structure.
+3. No Supabase SQL update is required for this feature.
+4. The workflow and audit information are stored inside the existing Events JSON data, so the current database schema remains compatible.
+5. After deployment, press Ctrl + Shift + R.
+6. If the installed PWA still shows an older version, close it completely and reopen it. The service-worker cache version has been updated.
+
+RECOMMENDED TEST
+
+1. Log in as Administrator.
+2. Open Attendance and select a past event.
+3. Mark at least one member and save the Draft.
+4. Select Finalize & Lock Attendance.
+5. Confirm that unmarked members become Absent and all controls are locked.
+6. Open the audit history.
+7. Select Unlock for Editing and enter a reason.
+8. Correct a record, save it, and finalize again.
+9. Select an individual member to review Working Rate, Verified Rate, risk signals, and reports.
+10. Open Action Center to review attendance alerts.
+
+IMPORTANT
+
+Finalized attendance can still be corrected, but only through the Administrator's Unlock for Editing action. This ensures that every correction has an identified Administrator, timestamp, reason, and revision history.

@@ -5,7 +5,7 @@
   const MUTATION_BUTTON_IDS = new Set([
     'addMemberTop', 'addMemberHero', 'addMemberMembers', 'editRecordButton',
     'addEventButton', 'createEventOnSelectedDate', 'editEventButton', 'deleteEventButton',
-    'markAllPresent', 'saveAttendanceButton',
+    'markAllPresent', 'saveAttendanceButton', 'finalizeAttendanceButton', 'unlockAttendanceButton',
     'addInstrumentButton', 'saveSystemSettings', 'clearActivityLog', 'clearDatabase',
     'applyTimelineDefaults', 'previewContractButton', 'downloadContractButton', 'resetContractButton'
   ]);

@@ -1,0 +1,38 @@
+LSO WEBSITE-ONLY UPDATE VALIDATION RESULTS
+==========================================
+
+RESULT: PASS
+
+SECURITY LOGIC TESTS
+- PASS: Five incorrect password results create a five-minute cooldown.
+- PASS: The login button is disabled during cooldown.
+- PASS: The remaining cooldown is shown as a live MM:SS countdown.
+- PASS: A valid login opens the application shell.
+- PASS: A stored activity time older than 15 minutes triggers automatic logout.
+- PASS: The login screen states that logout occurred after 15 minutes of inactivity.
+
+STATIC AND PACKAGE TESTS
+- PASS: All JavaScript files pass Node.js syntax validation.
+- PASS: manifest.webmanifest is valid JSON.
+- PASS: Only the intended existing website files changed: index.html and auth.js.
+- PASS: All existing SQL/database installer files are byte-for-byte unchanged.
+- PASS: Every local HTML stylesheet, script, and image reference exists.
+- PASS: The PWA manifest, service worker, PWA script, install control, and connection banner exist.
+- PASS: The manifest declares standalone display mode and relative scope/start URL.
+- PASS: 192x192, 512x512, and maskable 512x512 icons match their declared dimensions.
+- PASS: Every core service-worker precache path exists.
+- PASS: Supabase requests are explicitly excluded from caching.
+- PASS: Old versioned LSO caches are removed during service-worker activation.
+- PASS: website-enhancements.css parses without CSS syntax errors.
+- PASS: Security constants and invalid-credentials-only counting are present.
+
+AUTOMATED CHECK TOTAL
+- Authentication behavior harness: 6/6 passed.
+- Structural/PWA/security checks: 22/22 passed.
+- JavaScript syntax checks: all passed.
+
+LIMITATION
+A full Chromium visual run could not be completed in this execution environment because
+local HTTP navigation is blocked by an administrator browser policy
+(net::ERR_BLOCKED_BY_ADMINISTRATOR). The website should still be checked once on the actual
+GitHub Pages URL after deployment, especially the install prompt and device-specific layout.
