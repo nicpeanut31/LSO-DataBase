@@ -1,0 +1,12 @@
+LSO ATTENDANCE MONTHLY WORKSPACE — ACTIVE UPDATE FILES
+
+index.html
+management-attendance-month-v2.js
+workflow-attendance-month-v2.js
+attendance-month-workspace-v2.css
+pwa-attendance-month-v4.js
+service-worker-attendance-month-v5.js
+ATTENDANCE_MONTHLY_WORKSPACE_GUIDE.txt
+TEST_RESULTS_ATTENDANCE_MONTHLY_WORKSPACE.txt
+
+All other files are included so the ZIP can replace the complete deployed website.

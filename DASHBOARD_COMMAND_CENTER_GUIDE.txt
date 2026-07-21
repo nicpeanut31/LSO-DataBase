@@ -1,0 +1,37 @@
+LSO DASHBOARD COMMAND CENTER UPGRADE
+====================================
+
+This is a website-only upgrade based on the latest Attendance Monthly Workspace package.
+No Supabase SQL update is required.
+
+WHAT WAS ADDED
+--------------
+1. Role-based Administrator and Staff dashboards.
+   - Trainee/Probationary accounts remain Duty Hours-only, as required by the existing access rule.
+2. Action Center cards with exact record drill-down lists.
+3. Independent monthly activity workspace with Previous, Current, and Next month controls.
+4. Attendance health analytics, configured threshold alerts, consecutive absences, and lateness signals.
+5. Trainee/Probationary duty-hour progress and separate pending punch counters.
+6. Upcoming activity timeline with direct links into Attendance.
+7. Member statistics for Official, Trainee, Probationary, LOA, inactive, and incomplete profiles.
+8. Recent system audit activity.
+9. Data-quality checks for incomplete/duplicate/missing/invalid records and open duty sessions.
+10. Permission-aware quick actions and CSV exports.
+
+DEPLOYMENT
+----------
+1. Upload ALL files from this folder to the same website directory.
+2. Include index.html, dashboard-command-center-v4.js, dashboard-command-center-v4.css,
+   pwa-dashboard-command-v5.js, and service-worker-dashboard-command-v6.js.
+3. Open the deployed site and press Ctrl + Shift + R once.
+4. If installed as a PWA, close and reopen it after the first refresh.
+
+DATA SAFETY
+-----------
+The upgrade reads the current member, event, attendance, duty-hour, account, settings,
+and activity-log records. It does not modify the Supabase schema or delete existing data.
+
+ROLE NOTE
+---------
+The earlier requirement that Trainee/Probationary accounts see only Duty Hours is preserved.
+Their personal progress remains inside the Duty Hours workspace rather than exposing the main Dashboard.

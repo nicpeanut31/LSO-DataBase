@@ -1,0 +1,5 @@
+Build: Attendance Monthly Workspace v2
+Base: LSO Duty Punch Organized Display Fix
+Scope: Website-only Attendance month filtering and organization
+Database migration: Not required
+Active files: management-attendance-month-v2.js, workflow-attendance-month-v2.js, attendance-month-workspace-v2.css, pwa-attendance-month-v4.js, service-worker-attendance-month-v5.js

@@ -1,0 +1,51 @@
+LSO DASHBOARD COMMAND CENTER TEST RESULTS
+=========================================
+Passed: 36
+Failed: 0
+
+[PASS] desktop: no JS errors
+[PASS] desktop: no horizontal overflow — 1440/1440
+[PASS] desktop: seven dashboard panels — 7
+[PASS] desktop: seven monthly indicators — 7
+[PASS] desktop: ten data-quality checks — 10
+[PASS] desktop: seven admin quick actions — 7
+[PASS] desktop: month navigation changes workspace — 2026-07->2026-08
+[PASS] desktop: exact action drill-down opens
+[PASS] desktop: pending account appears in drill-down
+[PASS] desktop: staff has six read-only quick actions — 6
+[PASS] desktop: staff cannot see add-member quick action
+[PASS] desktop: trainee dashboard stays hidden
+[PASS] tablet: no JS errors
+[PASS] tablet: no horizontal overflow — 768/768
+[PASS] tablet: seven dashboard panels — 7
+[PASS] tablet: seven monthly indicators — 7
+[PASS] tablet: ten data-quality checks — 10
+[PASS] tablet: seven admin quick actions — 7
+[PASS] tablet: month navigation changes workspace — 2026-07->2026-08
+[PASS] tablet: exact action drill-down opens
+[PASS] tablet: pending account appears in drill-down
+[PASS] tablet: staff has six read-only quick actions — 6
+[PASS] tablet: staff cannot see add-member quick action
+[PASS] tablet: trainee dashboard stays hidden
+[PASS] mobile: no JS errors
+[PASS] mobile: no horizontal overflow — 390/390
+[PASS] mobile: seven dashboard panels — 7
+[PASS] mobile: seven monthly indicators — 7
+[PASS] mobile: ten data-quality checks — 10
+[PASS] mobile: seven admin quick actions — 7
+[PASS] mobile: month navigation changes workspace — 2026-07->2026-08
+[PASS] mobile: exact action drill-down opens
+[PASS] mobile: pending account appears in drill-down
+[PASS] mobile: staff has six read-only quick actions — 6
+[PASS] mobile: staff cannot see add-member quick action
+[PASS] mobile: trainee dashboard stays hidden
+
+STATIC / PACKAGE VALIDATION
+---------------------------
+[PASS] JavaScript syntax validated for 33 JavaScript files.
+[PASS] index.html contains no duplicate IDs.
+[PASS] All local script and stylesheet references exist.
+[PASS] New Dashboard CSS, JavaScript, and PWA registration are referenced exactly once.
+[PASS] New Dashboard files are included in the PWA application shell cache.
+[PASS] Supabase setup SQL is byte-for-byte unchanged from the base package.
+[PASS] Administrator, Staff, and Trainee/Probationary permission behavior tested.

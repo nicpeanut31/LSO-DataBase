@@ -1,0 +1,5 @@
+Build: LSO Dashboard Command Center v4
+Date: 2026-07-22
+Base: LSO Attendance Monthly Workspace Update
+Scope: Website dashboard only; no database migration
+PWA cache: lso-website-v20260722-dashboard-command-center-6

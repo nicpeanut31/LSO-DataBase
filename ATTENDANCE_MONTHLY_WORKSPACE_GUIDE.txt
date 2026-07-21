@@ -1,0 +1,21 @@
+LSO ATTENDANCE MONTHLY WORKSPACE UPDATE
+
+WHAT CHANGED
+- The calendar month is now the active Attendance workspace.
+- Previous/next month navigation clears the previously selected activity and shows only activities dated in the displayed month.
+- Activities from adjacent-month calendar cells are hidden, so records do not visually spill into another month.
+- The Rehearsals & Activities list is filtered to the displayed month.
+- A clean empty state appears for a month with no activities.
+- New activities created while viewing a month default to the selected date (or the first day of that month).
+- A compact monthly summary shows Activities, Finalized, Draft, and Attendance Marks.
+- All records from previous months remain safely stored and reappear when that month is selected. Nothing is deleted or reset in the database.
+
+DEPLOYMENT
+1. Upload every file from this folder, including index.html.
+2. Do not upload only the JavaScript file because the update uses new cache-safe filenames.
+3. Open the deployed site and press Ctrl + Shift + R once.
+4. Open Attendance and use the previous/next month arrows.
+5. Confirm that the activity list and selected attendance workspace reset to the displayed month.
+
+DATABASE
+No Supabase SQL update is required. Event dates already exist in the current shared data structure.

@@ -1,0 +1,45 @@
+LSO ATTENDANCE MONTHLY WORKSPACE — TEST RESULTS
+
+Result: 26/26 checks passed; 0 failed.
+
+Browser workflow tested with sample June, July, and August activities:
+- July showed only the July activity.
+- The June activity did not appear in July’s adjacent calendar cells.
+- Moving to August cleared the July selection and showed only August activities.
+- Moving to empty September displayed a clean monthly empty state.
+- Creating a new activity while viewing September defaulted the date to 2026-09-01.
+- Desktop width 1440 px and mobile width 390 px had no horizontal overflow.
+
+CHECKS
+[PASS] No duplicate HTML IDs
+[PASS] All local HTML assets exist
+[PASS] Index loads management-attendance-month-v2.js
+[PASS] Index loads workflow-attendance-month-v2.js
+[PASS] Index loads attendance-month-workspace-v2.css
+[PASS] Index loads pwa-attendance-month-v4.js
+[PASS] Monthly workspace summary exists
+[PASS] Monthly event-list heading exists
+[PASS] Month-specific placeholder exists
+[PASS] Event list filters by selected YYYY-MM
+[PASS] Month change clears selected activity
+[PASS] Previous and next controls use month workspace
+[PASS] Adjacent-month activities are hidden
+[PASS] New activity defaults to selected month
+[PASS] Monthly metrics rendered
+[PASS] Records are not deleted on month navigation
+[PASS] Responsive monthly workspace CSS exists
+[PASS] New service worker cache version
+[PASS] Service worker caches new monthly files
+[PASS] PWA registers new service worker
+[PASS] JavaScript syntax: management-attendance-month-v2.js
+[PASS] JavaScript syntax: workflow-attendance-month-v2.js
+[PASS] JavaScript syntax: pwa-attendance-month-v4.js
+[PASS] JavaScript syntax: service-worker-attendance-month-v5.js
+[PASS] Desktop responsive screenshot generated
+[PASS] Mobile responsive screenshot generated
+
+LIMITATION
+The browser test used a controlled local DOM with sample records because direct navigation to local HTTP/file URLs is blocked by the execution environment. The production website should still be checked once after deployment.
+
+DATABASE
+No Supabase schema or SQL migration is required. This update filters the existing event records by their stored date.
