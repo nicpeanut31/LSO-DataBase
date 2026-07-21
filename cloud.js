@@ -536,6 +536,33 @@
     return cloneState();
   }
 
+  async function timeInDuty({ semester, description = '', memberApprovers = '' }) {
+    if (!isTraineeAccount()) throw new Error('Only a Trainee/Probationary account can record Duty Hours.');
+    const nextState = await rpc('lso_duty_time_in', {
+      p_token: sessionToken,
+      p_semester: semester,
+      p_description: description || '',
+      p_member_approvers: memberApprovers || ''
+    });
+    online = true;
+    applyState(nextState, 'duty-time-in');
+    status('online', 'Duty Time In recorded');
+    return cloneState();
+  }
+
+  async function timeOutDuty({ description = '', memberApprovers = '' } = {}) {
+    if (!isTraineeAccount()) throw new Error('Only a Trainee/Probationary account can record Duty Hours.');
+    const nextState = await rpc('lso_duty_time_out', {
+      p_token: sessionToken,
+      p_description: description || '',
+      p_member_approvers: memberApprovers || ''
+    });
+    online = true;
+    applyState(nextState, 'duty-time-out');
+    status('online', 'Duty Time Out submitted for approval');
+    return cloneState();
+  }
+
   async function reviewDutyEntry(entryId, decision) {
     if (!canWriteShared()) throw new Error('Administrator access is required to review duty entries.');
     const nextState = await rpc('lso_review_duty_entry', {
@@ -545,7 +572,22 @@
     });
     online = true;
     applyState(nextState, 'duty-review');
-    status('online', 'Duty entry review saved');
+    status('online', 'Legacy duty entry review saved');
+    return cloneState();
+  }
+
+  async function reviewDutyPunch(entryId, punchType, decision) {
+    if (!canWriteShared()) throw new Error('Administrator access is required to review Duty Hours punches.');
+    if (!['TimeIn', 'TimeOut'].includes(punchType)) throw new Error('Select a valid Time In or Time Out request.');
+    const nextState = await rpc('lso_review_duty_punch', {
+      p_token: sessionToken,
+      p_entry_id: entryId,
+      p_punch_type: punchType,
+      p_decision: decision
+    });
+    online = true;
+    applyState(nextState, 'duty-punch-review');
+    status('online', `${punchType === 'TimeOut' ? 'Time Out' : 'Time In'} review saved`);
     return cloneState();
   }
 
@@ -585,7 +627,10 @@
     deleteAccount,
     saveAccounts,
     submitDutyEntry,
+    timeInDuty,
+    timeOutDuty,
     reviewDutyEntry,
+    reviewDutyPunch,
     flush: flushDirty,
     pollNow: pollState,
     canWrite: canWriteShared

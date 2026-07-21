@@ -1,0 +1,22 @@
+LSO DUTY PUNCH STATE-SYNC AND DISPLAY FIX
+
+CAUSE
+The installed PWA was serving an older cached duty-hours.js while Supabase already used the newer separate Time In / Time Out approval functions. The database therefore saved an open Time In request, but the old screen displayed zero sessions and the old Administrator queue could not interpret the new punch fields.
+
+DEPLOYMENT
+1. Upload every file from this folder to the same website directory. Do not upload only duty-hours.js.
+2. The new index.html deliberately loads duty-hours-state-sync-v8.js and pwa-state-sync-v2.js. Their new filenames bypass the old PWA cache.
+3. Open the deployed website and perform one normal reload. The new service worker will activate and reload the page automatically.
+4. Log in as the member. The existing open request will now appear under Current open request and today's sessions.
+5. Log in as Administrator and press Refresh Queue. The pending Time In request should appear immediately.
+
+OPTIONAL DATABASE NORMALIZATION
+Run LSO_DUTY_PUNCH_STATE_SYNC_REPAIR.sql only when an old entry still lacks separate Time In / Time Out status fields. It preserves all records and only normalizes punch statuses.
+
+EXPECTED BEHAVIOR
+- One Time In click creates one visible pending request.
+- A second click does not create a duplicate; it identifies the already-saved request by date and time.
+- An open request is displayed even when it began on an earlier date.
+- The Administrator can use Refresh Queue to retrieve another device's submission immediately.
+- Time In and Time Out remain separate approvals.
+- No duty minutes are credited until both are approved.

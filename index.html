@@ -24,7 +24,9 @@
 <link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
 <link href="dashboard-v2.css?v=20260718-gender-dashboard-v1" rel="stylesheet"/>
 <link href="monthly-report.css?v=20260719-autosave-layout-v3" rel="stylesheet"/>
-<link href="website-enhancements.css?v=20260721-attendance-governance-v1" rel="stylesheet"/>
+<link href="website-enhancements.css?v=20260721-duty-punch-separate-v2" rel="stylesheet"/>
+<link href="duty-punch-state-sync-display.css?v=20260721-state-sync-v1" rel="stylesheet"/>
+<link href="duty-punch-organized-v10.css?v=20260721-organized-v10" rel="stylesheet"/>
 </head>
 <body>
 <div aria-live="polite" class="connection-banner hidden" id="connectionBanner" role="status"></div>
@@ -676,28 +678,45 @@
 </div>
 
 <article class="panel trainee-only hidden duty-self-entry-panel" id="dutySelfEntryPanel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Duty Hours Self-Service</p><h3>Submit Your Time In and Time Out</h3><p class="panel-subtitle">Your entry remains pending and does not increase your credited duty hours until an Administrator approves it.</p></div><span class="badge badge-gold" id="dutySelfAccountBadge">Pending workflow</span></div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Duty Hours Self-Service</p><h3>Submit Time In and Time Out</h3><p class="panel-subtitle">Each punch is saved to the shared database and reviewed separately. The request status below is the source of truth.</p></div><div class="duty-header-actions"><button class="button button-secondary duty-refresh-button" id="dutySelfRefreshButton" type="button">Refresh Requests</button><span class="badge badge-gold" id="dutySelfAccountBadge">Ready</span></div></div>
 <div class="duty-self-account-status" id="dutySelfAccountStatus"></div>
-<form class="duty-entry-card duty-form-card clock-duty-card" id="dutySelfEntryForm">
-<div class="form-grid two-columns clock-duty-form-grid">
-<label class="field"><span>Duty Period</span><input id="dutySelfPeriod" readonly/></label>
-<label class="field"><span>Semester</span><input id="dutySelfSemester" readonly/></label>
-<label class="field span-2"><span>Date</span><input id="dutySelfDate" type="date" required/></label>
-<div class="clock-input-grid span-2">
-<label class="field"><span>Time In</span><input id="dutySelfTimeIn" type="time" step="60" required/></label>
-<span class="clock-range-arrow" aria-hidden="true">→</span>
-<label class="field"><span>Time Out</span><input id="dutySelfTimeOut" type="time" step="60" required/></label>
+<div class="duty-punch-workspace">
+<form class="duty-entry-card duty-form-card duty-punch-card" id="dutySelfEntryForm">
+<div class="duty-punch-heading"><div><p class="eyebrow">Secure Server Punch</p><h4 id="dutyPunchHeading">Ready to submit Time In</h4><small id="dutyPunchHelper">The database timestamps every request in Philippine time. Administrator approval is required before a punch is official.</small></div><span class="duty-punch-live-dot" aria-hidden="true"></span></div>
+<div class="duty-approval-flow" aria-label="Duty Hours approval flow">
+  <div><span>1</span><strong>Submit Time In</strong><small>Pending until reviewed</small></div>
+  <i aria-hidden="true">→</i>
+  <div><span>2</span><strong>Submit Time Out</strong><small>Reviewed separately</small></div>
+  <i aria-hidden="true">→</i>
+  <div><span>3</span><strong>Credit Duty Time</strong><small>Only after both approvals</small></div>
 </div>
-<div class="clock-duration-preview span-2" id="dutySelfDurationPreview" aria-live="polite"><span>Computed duration</span><strong>Select Time In and Time Out</strong><small>The Administrator will verify this entry before it is credited.</small></div>
-<label class="field span-2"><span>Duty Assignment / Description</span><input id="dutySelfDescription" minlength="3" maxlength="160" placeholder="e.g., Rehearsal setup, documentation, ushering..." required/></label>
+<div class="duty-punch-context-grid">
+<div><span>Duty Period</span><strong id="dutySelfPeriod">—</strong></div>
+<div><span>Semester</span><strong id="dutySelfSemester">—</strong></div>
+<div><span>Duty Date</span><strong id="dutySelfDateLabel">—</strong></div>
+<div><span>Current Session</span><strong id="dutySelfCurrentSession">Not clocked in</strong></div>
 </div>
-<button class="button button-primary" id="dutySelfSubmitButton" type="submit">Submit for Administrator Approval</button>
+<div class="form-grid two-columns">
+<label class="field span-2"><span>Duty Assignment / Description <small>(optional)</small></span><input id="dutySelfDescription" maxlength="160" placeholder="e.g., Rehearsal setup, documentation, ushering..."/></label>
+<label class="field span-2"><span>Member/s Approved <small>(optional)</small></span><input id="dutySelfMemberApprovers" maxlength="200" placeholder="Type the member name/s who approved or witnessed your duty"/></label>
+</div>
+<div class="duty-punch-actions">
+<button class="button button-primary duty-time-in-button" id="dutySelfTimeInButton" type="button">Submit Time In</button>
+<button class="button button-secondary duty-time-out-button" id="dutySelfTimeOutButton" type="button" disabled>Submit Time Out</button>
+</div>
+<p class="duty-punch-note"><strong>Important:</strong> Time In and Time Out are approved separately. You may submit Time Out even while Time In is still pending. After a Time Out request is submitted, you may begin another non-overlapping same-day session. No minutes are credited until both punches are approved.</p>
 </form>
+<section class="duty-today-sessions-card" aria-labelledby="dutyTodaySessionsTitle">
+<div class="duty-today-sessions-header"><div><p class="eyebrow">Duty Request Status</p><h4 id="dutyTodaySessionsTitle">Current and today’s punch requests</h4><small>Open requests remain visible even when they started on an earlier date.</small></div><span class="badge badge-gray" id="dutyTodaySessionsCount">0 sessions</span></div>
+<div class="duty-today-sessions" id="dutyTodaySessions"></div>
+</section>
+</div>
 </article>
 
 <article class="panel admin-only hidden duty-approval-panel" id="dutyApprovalPanel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Confirmation</p><h3>Pending Time In and Time Out Entries</h3><p class="panel-subtitle">Approve verified entries to credit them to the linked individual. Rejected entries remain visible in the member ledger but never affect totals.</p></div><span class="badge badge-gold" id="dutyPendingApprovalCount">0 pending</span></div>
-<div class="table-wrap compact-report-table"><table><thead><tr><th>Submitted By</th><th>Member</th><th>Date</th><th>Time In–Out</th><th>Duration</th><th>Semester / Period</th><th>Description</th><th>Action</th></tr></thead><tbody id="dutyApprovalTableBody"></tbody></table></div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Confirmation</p><h3>Separate Punch Approval Queue</h3><p class="panel-subtitle">Review every Time In and Time Out independently. Use Refresh Queue to immediately retrieve requests submitted from another device.</p></div><div class="duty-header-actions"><button class="button button-secondary duty-refresh-button" id="dutyAdminRefreshButton" type="button">Refresh Queue</button><span class="badge badge-gold" id="dutyPendingApprovalCount">0 pending punches</span></div></div>
+<div class="duty-approval-rules"><div><strong>Time In approval</strong><span>Officially starts the individual session.</span></div><div><strong>Time Out approval</strong><span>Officially closes the session and credits the approved duration.</span></div><div><strong>Rejected request</strong><span>Does not alter the individual record or credited total.</span></div></div>
+<div class="duty-punch-review-list" id="dutyApprovalTableBody"></div>
 </article>
 
 <div class="panel duty-print-center-panel duty-management-only">
@@ -802,7 +821,7 @@
 
 <div class="duty-ledger-section hidden" id="dutyLedgerSection">
 <div class="individual-history-header"><strong>Semester Duty Ledger</strong><span id="dutyLedgerCaption">0 entries</span></div>
-<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Semester</th><th>Period</th><th>Entry</th><th>Computed Time</th><th>Status</th><th>Effect</th><th>Description</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
+<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Semester</th><th>Period</th><th>Entry</th><th>Computed Time</th><th>Status</th><th>Effect</th><th>Description</th><th>Member/s Approved</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
 </div>
 </article>
 
@@ -1077,7 +1096,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20260717-1605"></script>
 <script src="branding.js?v=20260717-simplified-columns-v1"></script>
-<script src="cloud.js?v=20260721-duty-hours-final-v1"></script>
+<script src="cloud.js?v=20260721-duty-punch-separate-v2"></script>
 <script src="app.js?v=20260721-duty-hours-final-v1"></script>
 <script src="auth.js?v=20260721-web-security-v1"></script>
 <script src="management.js?v=20260721-attendance-governance-v1"></script>
@@ -1085,7 +1104,7 @@
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
 <script src="workflow-upgrades.js?v=20260721-attendance-analytics-v3"></script>
 <script src="attendance-governance.js?v=20260721-attendance-governance-v1"></script>
-<script src="duty-hours.js?v=20260721-duty-hours-final-v1"></script>
+<script src="duty-hours-organized-v10.js?v=20260721-organized-v10"></script>
 <script src="pdf-lib.min.js?v=1.17.1"></script>
 <script src="monthly-report-template-data.js?v=20260719-monthly-report-v1"></script>
 <script src="monthly-report.js?v=20260719-autosave-layout-v3"></script>
@@ -1093,6 +1112,6 @@
 <script src="contract-maker.js?v=20260718-contract-v3"></script>
 <script src="dashboard-intelligence.js?v=20260718-gender-dashboard-v2"></script>
 <script src="permissions.js?v=20260721-attendance-governance-v1"></script>
-<script src="pwa.js?v=20260721-pwa-v1"></script>
+<script src="pwa-organized-v3.js?v=20260721-organized-v10"></script>
 </body>
 </html>

@@ -1,0 +1,76 @@
+LASALLIAN SYMPHONY ORCHESTRA
+DUTY HOURS — SEPARATE TIME IN / TIME OUT APPROVAL
+
+WHAT CHANGED
+============
+1. Time In and Time Out are now separate approval requests.
+2. Pressing Submit Time In does not immediately make the member officially timed in.
+3. Pressing Submit Time Out does not immediately make the member officially timed out.
+4. The Administrator must approve each punch separately.
+5. Duty minutes are credited only after both Time In and Time Out have been approved.
+6. Time Out approval is disabled until the linked Time In has been approved.
+7. The member may submit Time Out even while Time In is still pending.
+8. After submitting Time Out, the member may start another same-day session as long as the recorded intervals do not overlap.
+9. Duty Assignment / Description remains optional.
+10. Member/s Approved remains optional.
+
+MEMBER WORKFLOW
+===============
+A. Press Submit Time In.
+   - Supabase records the actual Asia/Manila server time.
+   - The Time In status becomes Pending.
+   - The member is not yet officially timed in.
+
+B. When duty ends, press Submit Time Out.
+   - This can be done even if Time In is still pending.
+   - Supabase records a separate Time Out request.
+   - The member is not yet officially timed out.
+
+C. The member can view separate Time In and Time Out statuses:
+   - Not submitted
+   - Pending
+   - Approved
+   - Rejected
+
+D. No duty time is added to the individual total until both punches are Approved.
+
+ADMINISTRATOR WORKFLOW
+======================
+1. Open Duty Hours.
+2. Review the Separate Punch Approval Queue.
+3. Approve or reject the Time In request.
+4. Review Time Out separately.
+5. Time Out cannot be approved before Time In.
+6. When both are approved, the computed duration is credited to the member.
+7. A rejected punch never contributes minutes to the individual total.
+
+INSTALLATION FOR AN EXISTING SUPABASE PROJECT
+=============================================
+1. Open Supabase.
+2. Open SQL Editor.
+3. Create a new query.
+4. Copy the full contents of:
+   LSO_DUTY_PUNCH_SEPARATE_APPROVAL_INSTALL.sql
+5. Click Run.
+6. Confirm that Supabase displays Success.
+7. Upload all revised website files from this package to the same deployment folder.
+8. Reload the deployed website using Ctrl + Shift + R.
+
+Use only the installer named above for this update. Older Duty Hours hotfix files were removed from this package to prevent accidental installation in the wrong order.
+
+FRESH INSTALLATION
+==================
+For a new Supabase project, run the complete:
+   supabase-setup.sql
+
+DISPLAY IMPROVEMENTS
+====================
+- Member screen now shows a three-step approval flow.
+- Today’s sessions show separate Time In and Time Out status chips.
+- Administrator requests use responsive cards instead of a very wide table.
+- Each card shows the punch type, server time, linked member, period, description, witness/approver names, dependency notices, and review buttons.
+- Mobile layouts stack cleanly without horizontal table overflow.
+
+IMPORTANT
+=========
+The website files cannot alter the live database by themselves. The SQL installer must complete successfully in the connected Supabase project before the new approval buttons can work.

@@ -1,0 +1,530 @@
+/* LSO Duty Hours — organized member and administrator displays (v10)
+   Loaded last so these view-scoped rules override earlier Duty Hours layouts. */
+
+#dutyHoursView,
+#dutyHoursView * {
+  box-sizing: border-box;
+}
+
+#dutyHoursView .duty-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .7rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+#dutyHoursView .duty-header-actions .badge {
+  flex: 0 0 auto;
+}
+
+/* ---------- Member request-status panel ---------- */
+#dutyHoursView .duty-today-sessions-card {
+  width: 100%;
+  min-width: 0;
+  padding: 1.15rem;
+  overflow: hidden;
+}
+
+#dutyHoursView .duty-today-sessions-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .85rem;
+  margin: 0 0 1rem;
+}
+
+#dutyHoursView .duty-today-sessions-header > div {
+  min-width: 0;
+}
+
+#dutyHoursView .duty-today-sessions-header h4,
+#dutyHoursView .duty-today-sessions-header small {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#dutyHoursView .duty-today-sessions-header small {
+  display: block;
+  margin-top: .35rem;
+  line-height: 1.5;
+}
+
+#dutyHoursView #dutyTodaySessionsCount {
+  align-self: start;
+  justify-self: end;
+  max-width: 100%;
+}
+
+#dutyHoursView #dutyTodaySessions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-today-session {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .9rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 1rem !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: 18px;
+  background: #fff;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-today-session.is-open-request {
+  background: linear-gradient(180deg, #fbfffd 0%, #f3fbf7 100%);
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-card-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: .85rem !important;
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-main-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .28rem;
+  min-width: 0;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-date-label {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-time-range {
+  display: block;
+  min-width: 0;
+  color: #073d31;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-description {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  color: #617c75;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-overall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  max-width: 180px;
+  min-width: 0;
+  padding: .4rem .65rem;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-open-request-notice {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .25rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: .85rem .95rem !important;
+  margin: 0 !important;
+  border-radius: 14px;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-open-request-notice strong,
+#dutyHoursView #dutyTodaySessions .duty-open-request-notice span {
+  display: block;
+  min-width: 0;
+  line-height: 1.45;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-approval-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .5rem;
+  width: 100%;
+  min-width: 0;
+  padding: .8rem;
+  border: 1px solid #dce8e3;
+  border-radius: 14px;
+  background: rgba(255,255,255,.8);
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-section-label {
+  color: #607a72;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .055em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-punch-status-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  gap: .65rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#dutyHoursView .duty-punch-status-chip {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: .55rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: .55rem .65rem !important;
+  line-height: 1.25 !important;
+  border-radius: 12px !important;
+  white-space: normal !important;
+}
+
+#dutyHoursView .duty-punch-chip-label,
+#dutyHoursView .duty-punch-chip-value {
+  display: block !important;
+  min-width: 0 !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+#dutyHoursView .duty-punch-chip-label {
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+#dutyHoursView .duty-punch-chip-value {
+  justify-self: end;
+  text-align: right;
+  font-size: .74rem !important;
+  font-weight: 850;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: .65rem !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-summary-grid > div {
+  display: grid !important;
+  justify-items: start !important;
+  align-content: start;
+  gap: .22rem !important;
+  min-width: 0 !important;
+  padding: .72rem .78rem;
+  border: 1px solid #e0e9e5;
+  border-radius: 13px;
+  background: #fbfdfc;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-summary-grid span {
+  color: #71867e;
+  font-size: .68rem;
+  font-weight: 750;
+  letter-spacing: .045em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+#dutyHoursView #dutyTodaySessions .duty-session-summary-grid strong {
+  min-width: 0;
+  color: #244c41;
+  font-size: .82rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Administrator approval queue ---------- */
+#dutyHoursView .duty-approval-panel {
+  overflow: hidden;
+}
+
+#dutyHoursView .duty-approval-rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: .75rem;
+}
+
+#dutyHoursView .duty-approval-rules > div {
+  display: grid;
+  align-content: start;
+  gap: .25rem;
+  min-width: 0;
+  padding: .85rem .95rem;
+}
+
+#dutyHoursView .duty-punch-review-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 620px), 1fr)) !important;
+  align-items: start;
+  gap: 1rem !important;
+  width: 100%;
+  min-width: 0;
+}
+
+#dutyHoursView .duty-punch-review-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+}
+
+#dutyHoursView .duty-review-card-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: 1rem !important;
+  min-width: 0;
+  padding: 1rem 1.1rem .9rem !important;
+}
+
+#dutyHoursView .duty-review-member-copy {
+  min-width: 0;
+}
+
+#dutyHoursView .duty-review-member-copy h4 {
+  margin: .35rem 0 .22rem;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#dutyHoursView .duty-review-member-copy small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+#dutyHoursView .duty-review-card-header > .duty-punch-status-chip {
+  width: auto !important;
+  min-width: 150px !important;
+  max-width: 220px !important;
+}
+
+#dutyHoursView .duty-review-card-body {
+  display: grid;
+  grid-template-columns: minmax(220px, .8fr) minmax(300px, 1.25fr) minmax(240px, .95fr);
+  align-items: stretch;
+  gap: .85rem;
+  min-width: 0;
+  padding: 0 1.1rem 1rem;
+}
+
+#dutyHoursView .duty-review-time-block {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  margin: 0 !important;
+  padding: .9rem !important;
+}
+
+#dutyHoursView .duty-review-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: .65rem;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+#dutyHoursView .duty-review-details-grid > div {
+  min-width: 0;
+  padding: .72rem .78rem;
+  border: 1px solid #e0e9e5;
+  border-radius: 13px;
+  background: #fbfdfc;
+}
+
+#dutyHoursView .duty-review-details-grid span,
+#dutyHoursView .duty-review-notes span {
+  line-height: 1.25;
+}
+
+#dutyHoursView .duty-review-details-grid strong {
+  line-height: 1.4;
+}
+
+#dutyHoursView .duty-review-notes {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: start;
+  gap: .65rem !important;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+#dutyHoursView .duty-review-notes > div {
+  min-width: 0;
+  padding: .72rem .78rem;
+}
+
+#dutyHoursView .duty-review-notes p {
+  line-height: 1.45;
+}
+
+#dutyHoursView .duty-review-dependency {
+  margin: 0 1.1rem 1rem !important;
+}
+
+#dutyHoursView .duty-review-card-actions {
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .75rem !important;
+  width: 100%;
+  padding: .85rem 1.1rem 1rem !important;
+}
+
+#dutyHoursView .duty-review-card-actions .button {
+  width: min(100%, 230px) !important;
+  min-height: 46px;
+}
+
+#dutyHoursView .duty-review-empty {
+  width: 100%;
+  min-height: 150px;
+}
+
+@media (max-width: 1100px) {
+  #dutyHoursView .duty-review-card-body {
+    grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr);
+  }
+
+  #dutyHoursView .duty-review-notes {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  #dutyHoursView .duty-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  #dutyHoursView .duty-today-sessions-header,
+  #dutyHoursView #dutyTodaySessions .duty-session-card-header,
+  #dutyHoursView .duty-review-card-header {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #dutyHoursView #dutyTodaySessionsCount,
+  #dutyHoursView #dutyTodaySessions .duty-session-overall,
+  #dutyHoursView .duty-review-card-header > .duty-punch-status-chip {
+    justify-self: start;
+  }
+
+  #dutyHoursView .duty-approval-rules {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #dutyHoursView .duty-review-card-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #dutyHoursView .duty-review-notes {
+    grid-column: auto;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #dutyHoursView .duty-review-card-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #dutyHoursView .duty-review-card-actions .button {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 520px) {
+  #dutyHoursView .duty-today-sessions-card,
+  #dutyHoursView #dutyTodaySessions .duty-today-session {
+    padding: .85rem !important;
+    border-radius: 15px;
+  }
+
+  #dutyHoursView .duty-header-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #dutyHoursView .duty-header-actions .button {
+    width: 100%;
+  }
+
+  #dutyHoursView .duty-punch-status-row,
+  #dutyHoursView #dutyTodaySessions .duty-session-summary-grid,
+  #dutyHoursView .duty-review-details-grid,
+  #dutyHoursView .duty-review-card-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #dutyHoursView .duty-punch-status-chip,
+  #dutyHoursView .duty-review-card-header > .duty-punch-status-chip {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  #dutyHoursView .duty-review-card-header,
+  #dutyHoursView .duty-review-card-body,
+  #dutyHoursView .duty-review-card-actions {
+    padding-left: .85rem !important;
+    padding-right: .85rem !important;
+  }
+
+  #dutyHoursView .duty-review-dependency {
+    margin-left: .85rem !important;
+    margin-right: .85rem !important;
+  }
+}
+
+/* Narrow-phone specificity guard: prevent older two-column rules from winning. */
+@media (max-width: 520px) {
+  #dutyHoursView #dutyTodaySessions .duty-punch-status-row,
+  #dutyHoursView #dutyTodaySessions .duty-session-summary-grid,
+  #dutyHoursView .duty-review-details-grid,
+  #dutyHoursView .duty-review-card-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #dutyHoursView #dutyTodaySessions .duty-session-summary-grid > div {
+    width: 100%;
+  }
+}

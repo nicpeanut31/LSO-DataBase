@@ -1,0 +1,16 @@
+LSO Duty Punch Organized Display Fix
+Build: 2026-07-21 organized-v10
+
+Active unique website assets:
+- duty-hours-organized-v10.js
+- duty-punch-organized-v10.css
+- pwa-organized-v3.js
+- service-worker-organized-v4.js
+
+Purpose:
+- Reorganize the Trainee/Probationary current-request display.
+- Reorganize the Administrator separate punch approval queue.
+- Prevent compressed or vertical text, overlapping content, uneven spacing, and unused desktop space.
+- Keep the existing Supabase Duty Hours workflow and data unchanged.
+
+The unique filenames intentionally bypass older installed PWA caches.

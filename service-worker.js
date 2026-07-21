@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'lso-website-v20260721-attendance-2';
+const CACHE_VERSION = 'lso-website-v20260721-duty-punch-separate-approval-2';
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const scopeUrl = new URL('./', self.location.href);

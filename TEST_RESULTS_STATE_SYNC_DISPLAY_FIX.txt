@@ -1,0 +1,31 @@
+LSO DUTY PUNCH STATE-SYNC AND DISPLAY FIX — TEST RESULTS
+
+Passed: 25/25
+
+PASS — HTML has no duplicate element IDs — 422 IDs
+PASS — Index loads unique state-sync Duty Hours asset
+PASS — Index loads unique PWA update asset
+PASS — Member refresh control exists
+PASS — Administrator refresh control exists
+PASS — Display repair stylesheet is loaded
+PASS — All local HTML assets exist
+PASS — Open requests are rendered across dates
+PASS — Time In forces a server refresh before validation
+PASS — Existing open request is identified with date and time
+PASS — Time Out also forces a server refresh
+PASS — Member and admin refresh buttons are wired
+PASS — New request is verified after database response
+PASS — Old empty-state wording is removed from active asset
+PASS — Service worker uses a new cache version
+PASS — JavaScript and CSS use network-first caching
+PASS — Old PWA caches are deleted on activation
+PASS — PWA update bypasses browser cache
+PASS — Waiting service worker activates immediately
+PASS — Mobile punch buttons stack cleanly
+PASS — Empty state height is reduced
+PASS — Open request receives a visible notice style
+PASS — Repair SQL preserves data and normalizes status fields
+PASS — Repair SQL refreshes PostgREST schema
+PASS — All JavaScript files pass node --check
+
+LIMITATION — Automated browser navigation to local URLs is blocked by the execution environment. The package was therefore validated through syntax, structure, asset, cache-strategy, and workflow-code checks rather than a live Supabase browser session.

@@ -1,0 +1,42 @@
+LSO DUTY HOURS ORGANIZED DISPLAY FIX
+Build: organized-v10
+
+WHAT WAS FIXED
+1. Trainee/Probationary member display
+   - The current request card now uses one stable full-width layout.
+   - Time In and Time Out approval states are displayed in aligned status boxes.
+   - Duration and Member/s Approved are shown in separate labeled information boxes.
+   - Open-request instructions no longer overlap the session details.
+   - Text no longer collapses into vertical letters on narrow screens.
+   - The header counter and status badge align correctly on desktop and mobile.
+
+2. Administrator approval display
+   - A single pending request now uses the available panel width.
+   - Request time, session details, optional information, and action buttons are aligned in distinct sections.
+   - Approve and Reject buttons remain aligned on desktop and stack on small phones.
+   - The explanatory rule cards and queue header use consistent spacing.
+   - Multiple requests remain responsive through an automatic card grid.
+
+INSTALLATION
+1. Extract the ZIP file.
+2. Upload every website file to the same deployment folder. Do not upload only the CSS file.
+3. Confirm that index.html loads these active files:
+   - duty-punch-organized-v10.css
+   - duty-hours-organized-v10.js
+   - pwa-organized-v3.js
+4. Confirm that service-worker-organized-v4.js is uploaded.
+5. Open the deployed website and press Ctrl + Shift + R once.
+6. When the site is installed as a PWA, close and reopen the installed app after the first refresh.
+
+DATABASE
+No Supabase SQL update is required. This package changes the website display only and preserves the existing Duty Hours approval functions and records.
+
+QUICK CHECK
+Trainee/Probationary:
+- Open Duty Hours.
+- Confirm the open request card shows readable Time In, Time Out, duration, and approver fields.
+
+Administrator:
+- Open Duty Hours.
+- Press Refresh Queue.
+- Confirm each request uses an organized card with aligned details and action buttons.

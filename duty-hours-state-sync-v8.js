@@ -561,34 +561,86 @@
 
 
 
+
+  async function refreshDutyState({ announce = false, button = null } = {}) {
+    const originalLabel = button?.textContent || '';
+    if (button) {
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.textContent = 'Refreshing…';
+    }
+    try {
+      if (window.LSOCloud?.loadSharedState) await window.LSOCloud.loadSharedState({ quiet: true });
+      else if (window.LSOCloud?.pollNow) await window.LSOCloud.pollNow();
+      renderAll();
+      if (announce) window.LSOApp?.showToast?.('Duty Hours requests refreshed from the shared database.');
+      return true;
+    } catch (error) {
+      window.LSOApp?.showToast?.(error.message || 'Duty Hours could not be refreshed.', true);
+      return false;
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.textContent = originalLabel || 'Refresh';
+      }
+    }
+  }
+
   function renderTodaySessions(data, member) {
     const container = el('dutyTodaySessions');
     const count = el('dutyTodaySessionsCount');
+    const title = el('dutyTodaySessionsTitle');
     if (!container || !count) return;
     if (!member) {
       count.textContent = '0 sessions';
-      container.innerHTML = '<div class="empty-state compact-empty"><h4>No linked member</h4><p>Ask the Administrator to link this account to your member record.</p></div>';
+      if (title) title.textContent = 'Current and today’s punch requests';
+      container.innerHTML = '<div class="empty-state compact-empty duty-session-empty"><h4>No linked member</h4><p>Ask the Administrator to link this account to your member record.</p></div>';
       return;
     }
-    const sessions = data.entries
-      .filter((entry) => entry.memberId === member.id && entry.entryType === 'Duty' && entry.date === today())
+
+    const todayValue = today();
+    const memberDutyEntries = data.entries
+      .filter((entry) => entry.memberId === member.id && entry.entryType === 'Duty');
+    const openEntries = memberDutyEntries.filter(isOpenPunch);
+    const todayEntries = memberDutyEntries.filter((entry) => entry.date === todayValue);
+    const ids = new Set();
+    const sessions = [...openEntries, ...todayEntries]
+      .filter((entry) => {
+        if (ids.has(entry.id)) return false;
+        ids.add(entry.id);
+        return true;
+      })
       .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-    count.textContent = `${sessions.length} session${sessions.length === 1 ? '' : 's'}`;
+
+    const openCount = openEntries.length;
+    count.textContent = openCount
+      ? `${openCount} open • ${todayEntries.length} today`
+      : `${todayEntries.length} session${todayEntries.length === 1 ? '' : 's'} today`;
+    if (title) title.textContent = openCount ? 'Current open request and today’s sessions' : 'Today’s punch requests and approvals';
+
     container.innerHTML = sessions.length ? sessions.map((entry) => {
       const display = sessionDisplayStatus(entry);
       const hasComputedDuration = Boolean(entry.timeIn && entry.timeOut);
-      const duration = punchStatus(entry, 'TimeOut') === 'Approved'
+      const outStatus = punchStatus(entry, 'TimeOut');
+      const duration = outStatus === 'Approved'
         ? durationLabel(entry.minutes)
-        : hasComputedDuration ? `${durationLabel(entry.minutes)} requested` : 'Open session';
+        : hasComputedDuration ? `${durationLabel(entry.minutes)} requested` : 'Waiting for Time Out';
       const range = entry.timeOut
         ? `${formatClockTime(entry.timeIn)} – ${formatClockTime(entry.timeOut)}`
-        : `${formatClockTime(entry.timeIn)} – no Time Out yet`;
-      return `<article class="duty-today-session ${safeText(display.className)}">
-        <header class="duty-session-card-header"><div><strong>${safeText(range)}</strong><small>${safeText(entry.description || 'No description provided')}</small></div><span class="duty-session-overall ${safeText(display.className)}">${safeText(display.label)}</span></header>
+        : `${formatClockTime(entry.timeIn)} – open`;
+      const isOpen = isOpenPunch(entry);
+      const dateContext = entry.date === todayValue ? 'Today' : dateLabel(entry.date);
+      return `<article class="duty-today-session ${safeText(display.className)}${isOpen ? ' is-open-request' : ''}" data-duty-session-id="${safeText(entry.id)}">
+        <header class="duty-session-card-header">
+          <div class="duty-session-main-copy"><span class="duty-session-date-label">${safeText(dateContext)}</span><strong>${safeText(range)}</strong><small>${safeText(entry.description || 'No duty description entered')}</small></div>
+          <span class="duty-session-overall ${safeText(display.className)}">${safeText(display.label)}</span>
+        </header>
+        ${isOpen ? '<div class="duty-open-request-notice"><strong>This request is already saved.</strong><span>Use Submit Time Out when your duty ends. The Administrator will review Time In and Time Out separately.</span></div>' : ''}
         <div class="duty-punch-status-row">${punchBadge(punchStatus(entry, 'TimeIn'), 'Time In')}${punchBadge(punchStatus(entry, 'TimeOut'), 'Time Out')}</div>
-        <div class="duty-session-card-footer"><span>${safeText(duration)}</span>${entry.memberApprovers ? `<span>Approved/Witnessed by: ${safeText(entry.memberApprovers)}</span>` : '<span>No member approver entered</span>'}</div>
+        <div class="duty-session-card-footer"><span>${safeText(duration)}</span>${entry.memberApprovers ? `<span>Member/s Approved: ${safeText(entry.memberApprovers)}</span>` : '<span>No member approver entered</span>'}</div>
       </article>`;
-    }).join('') : '<div class="empty-state compact-empty"><h4>No duty session today</h4><p>Press Submit Time In when your duty begins.</p></div>';
+    }).join('') : '<div class="empty-state compact-empty duty-session-empty"><h4>No duty request has been submitted today</h4><p>Press Submit Time In once. The saved request will immediately appear here while it waits for Administrator review.</p></div>';
   }
 
   function renderSelfService() {
@@ -940,29 +992,43 @@
       window.LSOApp?.showToast?.('This account is not linked to a current Trainee or Probationary member record.', true);
       return;
     }
-    const data = loadData();
-    if (activePunchEntry(data, member.id)) {
-      window.LSOApp?.showToast?.('You already have an open Time In request. Submit Time Out before starting another session.', true);
-      renderSelfService();
-      return;
-    }
 
-    if (!window.LSOCloud?.timeInDuty) {
-      window.LSOApp?.showToast?.('The separate punch approval update is not installed yet. Run LSO_DUTY_PUNCH_SEPARATE_APPROVAL_INSTALL.sql in Supabase.', true);
-      return;
-    }
     const button = el('dutySelfTimeInButton');
-    setPunchBusy(button, true, 'Submitting Time In…', 'Submit Time In');
+    setPunchBusy(button, true, 'Checking requests…', 'Submit Time In');
     try {
+      // Always read the server before creating a punch. This prevents a stale PWA
+      // cache or another device from creating duplicate open requests.
+      if (window.LSOCloud?.loadSharedState) await window.LSOCloud.loadSharedState({ quiet: true });
+      const data = loadData();
+      const openEntry = activePunchEntry(data, member.id);
+      if (openEntry) {
+        const inStatus = punchStatus(openEntry, 'TimeIn');
+        const message = inStatus === 'Pending'
+          ? `Your Time In request for ${dateLabel(openEntry.date)} at ${formatClockTime(openEntry.timeIn)} is already saved and waiting for Administrator approval.`
+          : `Your approved Time In for ${dateLabel(openEntry.date)} at ${formatClockTime(openEntry.timeIn)} is still open.`;
+        window.LSOApp?.showToast?.(`${message} Submit Time Out when your duty ends.`, false);
+        renderAll();
+        document.querySelector(`[data-duty-session-id="${CSS.escape(openEntry.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      if (!window.LSOCloud?.timeInDuty) {
+        throw new Error('The separate punch approval update is not installed yet. Run LSO_DUTY_PUNCH_SEPARATE_APPROVAL_INSTALL.sql in Supabase.');
+      }
+      setPunchBusy(button, true, 'Submitting Time In…', 'Submit Time In');
       await window.LSOCloud.timeInDuty({
         semester: activeSemester,
         description: el('dutySelfDescription')?.value.trim() || '',
         memberApprovers: el('dutySelfMemberApprovers')?.value.trim() || ''
       });
-      window.LSOApp?.showToast?.('Time In submitted for Administrator approval. It is not official yet.');
       renderAll();
+      const saved = activePunchEntry(loadData(), member.id);
+      if (!saved) throw new Error('The database accepted the request but the updated record was not returned. Press Refresh Requests and try again.');
+      window.LSOApp?.showToast?.(`Time In at ${formatClockTime(saved.timeIn)} was submitted and is waiting for Administrator approval.`);
+      document.querySelector(`[data-duty-session-id="${CSS.escape(saved.id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch (error) {
       window.LSOApp?.showToast?.(error.message || 'Time In could not be submitted.', true);
+      await refreshDutyState({ announce: false });
     } finally {
       setPunchBusy(button, false, 'Submitting Time In…', 'Submit Time In');
       renderSelfService();
@@ -972,36 +1038,39 @@
   async function timeOutNow() {
     if (!isTraineeAccount()) return;
     const member = linkedMember();
-    const data = loadData();
-    const openEntry = member ? activePunchEntry(data, member.id) : null;
-    if (!openEntry) {
-      window.LSOApp?.showToast?.('There is no open Time In request for this member.', true);
-      renderSelfService();
-      return;
-    }
-
-    const confirmed = typeof window.confirm !== 'function' || window.confirm(
-      `Submit a Time Out request now?\n\nThis will record the secure server time for the session that started at ${formatClockTime(openEntry.timeIn)}. The Time Out will remain pending until an Administrator approves it separately.`
-    );
-    if (!confirmed) return;
-
-    if (!window.LSOCloud?.timeOutDuty) {
-      window.LSOApp?.showToast?.('The separate punch approval update is not installed yet. Run LSO_DUTY_PUNCH_SEPARATE_APPROVAL_INSTALL.sql in Supabase.', true);
-      return;
-    }
     const button = el('dutySelfTimeOutButton');
-    setPunchBusy(button, true, 'Submitting Time Out…', 'Submit Time Out');
+    setPunchBusy(button, true, 'Checking session…', 'Submit Time Out');
     try {
+      if (window.LSOCloud?.loadSharedState) await window.LSOCloud.loadSharedState({ quiet: true });
+      const openEntry = member ? activePunchEntry(loadData(), member.id) : null;
+      if (!openEntry) {
+        window.LSOApp?.showToast?.('There is no open Time In request for this member. The latest Duty Hours data has been refreshed.', true);
+        renderAll();
+        return;
+      }
+
+      const confirmed = typeof window.confirm !== 'function' || window.confirm(
+        `Submit a Time Out request now?
+
+This will record the secure server time for the session that started on ${dateLabel(openEntry.date)} at ${formatClockTime(openEntry.timeIn)}. Time Out remains pending until an Administrator approves it separately.`
+      );
+      if (!confirmed) return;
+      if (!window.LSOCloud?.timeOutDuty) {
+        throw new Error('The separate punch approval update is not installed yet. Run LSO_DUTY_PUNCH_SEPARATE_APPROVAL_INSTALL.sql in Supabase.');
+      }
+
+      setPunchBusy(button, true, 'Submitting Time Out…', 'Submit Time Out');
       await window.LSOCloud.timeOutDuty({
         description: el('dutySelfDescription')?.value.trim() || '',
         memberApprovers: el('dutySelfMemberApprovers')?.value.trim() || ''
       });
       if (el('dutySelfDescription')) el('dutySelfDescription').value = '';
       if (el('dutySelfMemberApprovers')) el('dutySelfMemberApprovers').value = '';
-      window.LSOApp?.showToast?.('Time Out submitted for separate Administrator approval. It is not official yet.');
       renderAll();
+      window.LSOApp?.showToast?.('Time Out was submitted for separate Administrator approval. No minutes are credited until both punches are approved.');
     } catch (error) {
       window.LSOApp?.showToast?.(error.message || 'Time Out could not be submitted.', true);
+      await refreshDutyState({ announce: false });
     } finally {
       setPunchBusy(button, false, 'Submitting Time Out…', 'Submit Time Out');
       renderSelfService();
@@ -1428,6 +1497,8 @@
     el('dutySelfEntryForm')?.addEventListener('submit', (event) => event.preventDefault());
     el('dutySelfTimeInButton')?.addEventListener('click', timeInNow);
     el('dutySelfTimeOutButton')?.addEventListener('click', timeOutNow);
+    el('dutySelfRefreshButton')?.addEventListener('click', (event) => refreshDutyState({ announce: true, button: event.currentTarget }));
+    el('dutyAdminRefreshButton')?.addEventListener('click', (event) => refreshDutyState({ announce: true, button: event.currentTarget }));
     el('dutyApprovalTableBody')?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-duty-punch-review]');
       if (button) reviewDutyPunch(button.dataset.entryId, button.dataset.punchType, button.dataset.dutyPunchReview);
@@ -1488,7 +1559,8 @@
     printMonthlyPeriodReport,
     setSemester,
     setRecordMode: (mode) => { recordMode = mode === 'Archive' ? 'Archive' : 'Active'; renderAll(); },
-    refresh: renderAll
+    refresh: renderAll,
+    refreshFromServer: () => refreshDutyState({ announce: false })
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
