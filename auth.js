@@ -264,7 +264,7 @@
       email: account.email || '',
       username: account.username || '',
       displayName: account.displayName || account.username || 'LSO Account',
-      role: ['Administrator', 'Staff Account', 'Trainee/Probationary'].includes(account.role) ? account.role : 'Staff Account',
+      role: ['Administrator', 'Staff Account', 'Membership', 'General Secretary', 'Trainee/Probationary'].includes(account.role) ? account.role : 'Staff Account',
       memberId: String(account.memberId || account.member_id || ''),
       approvalStatus: normalizeApprovalStatus(account),
       disabled: Boolean(account.disabled),
@@ -330,7 +330,16 @@
     window.LSOCurrentAccount = normalized;
     document.body.dataset.accountRole = normalized.role;
     const traineeAccess = normalized.role === 'Trainee/Probationary';
-    document.body.dataset.accessMode = normalized.role === 'Administrator' ? 'full' : traineeAccess ? 'duty-entry' : 'read-only';
+    const roleAccess = window.LSORoleAccess;
+    document.body.dataset.accessMode = normalized.role === 'Administrator'
+      ? 'full'
+      : normalized.role === 'Membership'
+        ? 'membership-operations'
+        : normalized.role === 'General Secretary'
+          ? 'attendance-operations'
+          : traineeAccess
+            ? 'duty-entry'
+            : 'read-only';
     document.body.dataset.storageMode = 'cloud';
     el('authScreen')?.classList.add('hidden');
     el('appShell')?.classList.remove('hidden');
@@ -338,22 +347,20 @@
     if (el('currentAccountUsername')) el('currentAccountUsername').textContent = `@${normalized.username}`;
     if (el('accountAvatar')) el('accountAvatar').textContent = accountInitial(normalized);
     if (el('currentAccountRole')) {
-      el('currentAccountRole').textContent = normalized.role === 'Administrator'
-        ? 'Administrator • Full Access'
-        : traineeAccess
-          ? 'Trainee/Probationary • Duty Hours Only'
-          : 'Staff Account • Read Only';
+      el('currentAccountRole').textContent = roleAccess?.roleDescription?.(normalized) || normalized.role;
     }
     document.querySelectorAll('.admin-only').forEach((node) => node.classList.toggle('hidden', normalized.role !== 'Administrator'));
     document.querySelectorAll('.trainee-only').forEach((node) => node.classList.toggle('hidden', !traineeAccess));
     document.querySelectorAll('.nav-item').forEach((node) => {
-      const allowed = !traineeAccess || node.dataset.view === 'dutyHoursView';
+      const allowed = roleAccess?.canAccessView?.(node.dataset.view, normalized) ?? (!traineeAccess || node.dataset.view === 'dutyHoursView');
       node.classList.toggle('role-hidden', !allowed);
       node.setAttribute('aria-hidden', String(!allowed));
       if (!allowed) node.tabIndex = -1;
       else node.removeAttribute('tabindex');
     });
-    if (traineeAccess) window.LSOApp?.setView?.('dutyHoursView');
+    const activeView = document.querySelector('.view.active')?.id;
+    const landingView = roleAccess?.defaultView?.(normalized) || (traineeAccess ? 'dutyHoursView' : 'dashboardView');
+    if (!activeView || !(roleAccess?.canAccessView?.(activeView, normalized) ?? true)) window.LSOApp?.setView?.(landingView);
     emit('lso:auth-changed', normalized);
     window.LSOPermissions?.apply?.();
     document.title = traineeAccess ? 'Duty Hours | LSO Orchestra Management System' : 'LSO Orchestra Management System';
@@ -561,7 +568,7 @@
       switchAuthMode('login');
       if (el('loginUsername')) el('loginUsername').value = username;
       if (el('loginPassword')) el('loginPassword').value = '';
-      setMessage('loginMessage', 'Registration submitted. The Administrator will choose your role before approval. Trainee/Probationary accounts will receive Duty Hours–only access.', true);
+      setMessage('loginMessage', 'Registration submitted. The Administrator will choose the final role and access before approval.', true);
     } catch (error) {
       setMessage('registerMessage', error.message || 'The registration could not reach the shared database.');
     } finally {

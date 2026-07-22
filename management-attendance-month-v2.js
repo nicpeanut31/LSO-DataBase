@@ -152,6 +152,15 @@
     return currentAccount()?.role === 'Administrator';
   }
 
+  function can(action) {
+    return window.LSORoleAccess?.can?.(action) ?? isAdmin();
+  }
+
+  function canManageEvents() { return can('manageEvents'); }
+  function canDeleteEvents() { return can('deleteEvents'); }
+  function canSaveDraftAttendance() { return can('saveDraftAttendance'); }
+  function canLogActivity() { return can('writeActivityLog'); }
+
   function toast(message, error = false) {
     if (window.LSOApp?.showToast) {
       window.LSOApp.showToast(message, error);
@@ -161,7 +170,7 @@
   }
 
   function logActivity(action, category = 'System', details = '') {
-    if (!isAdmin()) return;
+    if (!canLogActivity()) return;
     const account = currentAccount();
     const log = loadArray(ACTIVITY_KEY);
     log.unshift({
@@ -257,7 +266,17 @@
   }
 
   function activeAttendanceGroup() {
-    return normalizeAttendanceGroup(window.LSOAttendanceGroup);
+    const selected = normalizeAttendanceGroup(window.LSOAttendanceGroup);
+    if (window.LSORoleAccess?.canUseAttendanceGroup && !window.LSORoleAccess.canUseAttendanceGroup(selected)) {
+      const fallback = window.LSORoleAccess.defaultAttendanceGroup?.() || 'Trainee Members';
+      window.LSOAttendanceGroup = fallback;
+      return normalizeAttendanceGroup(fallback);
+    }
+    return selected;
+  }
+
+  function canUseAttendanceGroup(group = activeAttendanceGroup()) {
+    return window.LSORoleAccess?.canUseAttendanceGroup?.(group) ?? true;
   }
 
   function normalizeAttendanceRosterMode(value) {
@@ -457,7 +476,7 @@
 
   function handleEventSubmit(event) {
     event.preventDefault();
-    if (!isAdmin()) { toast('Administrator access is required to create or edit events.', true); return; }
+    if (!canManageEvents()) { toast('Your role cannot create or edit activities.', true); return; }
     const id = el('editingEventId').value || uid('event');
     const existing = events.find((item) => item.id === id);
     const record = {
@@ -585,7 +604,8 @@
   }
 
   function saveAttendanceRoster() {
-    if (!isAdmin()) { toast('Administrator access is required to record attendance.', true); return; }
+    if (!canSaveDraftAttendance()) { toast('Your role cannot save attendance drafts.', true); return; }
+    if (!canUseAttendanceGroup()) { toast(window.LSORoleAccess?.deniedMessage?.('attendanceGroup') || 'This attendance group is not available for your role.', true); return; }
     if (!selectedEventId) return;
     const workflowEvent = events.find((item) => item.id === selectedEventId);
     if (window.LSOAttendanceGovernance?.isFinalized?.(workflowEvent, activeAttendanceGroup(), activeAttendanceRosterMode())) {
@@ -634,7 +654,7 @@
   }
 
   function deleteSelectedEvent() {
-    if (!isAdmin()) { toast('Administrator access is required to delete events.', true); return; }
+    if (!canDeleteEvents()) { toast('Only the Administrator can delete activities.', true); return; }
     const event = events.find((item) => item.id === selectedEventId);
     if (!event) return;
     if (!window.confirm(`Delete “${event.title}” and all of its attendance records?`)) return;
@@ -943,7 +963,7 @@
   }
 
   function normalizeAccountRole(role) {
-    return ['Administrator', 'Staff Account', 'Trainee/Probationary'].includes(role) ? role : 'Staff Account';
+    return ['Administrator', 'Staff Account', 'Membership', 'General Secretary', 'Trainee/Probationary'].includes(role) ? role : 'Staff Account';
   }
 
   function returnAccountToPending(account) {
@@ -1029,7 +1049,7 @@
       return `<tr data-account-row="${safeText(account.id)}">
         <td><strong>${safeText(account.displayName || account.username)}</strong>${approvalNote}</td>
         <td><strong>@${safeText(account.username)}</strong><small class="table-subtext">${safeText(account.email || 'No optional email')}</small></td>
-        <td><select class="account-role-select account-approval-select" data-account-id="${safeText(account.id)}" aria-label="${approval === 'Pending' ? 'Role to approve' : 'Account role'}" ${account.isDefault ? 'disabled' : ''}><option ${account.role === 'Administrator' ? 'selected' : ''}>Administrator</option><option ${account.role === 'Staff Account' ? 'selected' : ''}>Staff Account</option><option ${account.role === 'Trainee/Probationary' ? 'selected' : ''}>Trainee/Probationary</option></select>${roleInstruction}</td>
+        <td><select class="account-role-select account-approval-select" data-account-id="${safeText(account.id)}" aria-label="${approval === 'Pending' ? 'Role to approve' : 'Account role'}" ${account.isDefault ? 'disabled' : ''}><option ${account.role === 'Administrator' ? 'selected' : ''}>Administrator</option><option ${account.role === 'Membership' ? 'selected' : ''}>Membership</option><option ${account.role === 'General Secretary' ? 'selected' : ''}>General Secretary</option><option ${account.role === 'Staff Account' ? 'selected' : ''}>Staff Account</option><option ${account.role === 'Trainee/Probationary' ? 'selected' : ''}>Trainee/Probationary</option></select>${roleInstruction}</td>
         <td><select class="account-member-select" data-account-id="${safeText(account.id)}" ${account.isDefault || account.role !== 'Trainee/Probationary' ? 'disabled' : ''}>${memberOptions}</select>${memberInstruction}</td>
         <td>${safeText(dateLabel(String(requestedDate || '').slice(0, 10), true))}</td>
         <td><span class="badge ${accessBadge}">${safeText(accessLabel)}</span></td>
@@ -1147,8 +1167,8 @@
       logActivity('Approved account registration', 'Accounts', `${account.username} • ${account.role}${linkedMember ? ` • ${linkedMember.fullName}` : ''}`);
       renderAccounts();
       toast(account.role === 'Trainee/Probationary'
-        ? `@${account.username} is approved. Only Duty Hours will be visible, and submissions will require Administrator approval.`
-        : `@${account.username} is approved as ${account.role}.`);
+        ? `@${account.username} is approved. Only Duty Hours will be visible, and submissions will require Administrator or Membership approval.`
+        : `@${account.username} is approved as ${account.role}. Access is limited to that role's assigned modules.`);
       return;
     }
 
@@ -1490,7 +1510,12 @@
     window.addEventListener('lso:auth-changed', () => {
       setTimeout(() => {
         document.querySelectorAll('.admin-only').forEach((node) => node.classList.toggle('hidden', !isAdmin()));
+        if (!canUseAttendanceGroup(window.LSOAttendanceGroup)) {
+          window.LSOAttendanceGroup = window.LSORoleAccess?.defaultAttendanceGroup?.() || 'Trainee Members';
+          window.dispatchEvent(new CustomEvent('lso:attendance-group-changed', { detail: { group: window.LSOAttendanceGroup, source: 'role-access' } }));
+        }
         renderAccounts();
+        window.LSOPermissions?.apply?.();
       }, 0);
     });
   }
@@ -1512,7 +1537,7 @@
       return membersForEventAttendanceGroup(event).map((member) => ({ ...member }));
     },
     replaceAttendance: (nextAttendance) => {
-      if (!isAdmin() || !Array.isArray(nextAttendance)) return false;
+      if (!canSaveDraftAttendance() || !Array.isArray(nextAttendance)) return false;
       attendance = nextAttendance.map((entry) => ({ ...entry }));
       saveArray(ATTENDANCE_KEY, attendance);
       renderAttendance();
@@ -1520,7 +1545,7 @@
       return true;
     },
     updateEventRecord: (nextEvent) => {
-      if (!isAdmin() || !nextEvent?.id) return false;
+      if (!canManageEvents() || !nextEvent?.id) return false;
       const index = events.findIndex((event) => event.id === nextEvent.id);
       if (index < 0) return false;
       events[index] = { ...nextEvent };

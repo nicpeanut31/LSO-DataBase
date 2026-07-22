@@ -111,7 +111,7 @@
 
   function canModify() {
     if (window.LSOPermissions?.canModify) return window.LSOPermissions.canModify();
-    return (window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount)?.role === 'Administrator';
+    return window.LSORoleAccess?.can?.('editMonthlyReport') ?? (window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount)?.role === 'Administrator';
   }
 
   function status(message, stateName = '') {
@@ -282,7 +282,7 @@
   }
 
   function captureCurrentTrainees() {
-    if (!canModify()) return toast('Administrator access is required to update the permanent Trainee file.', true);
+    if (!canModify()) return toast('Administrator or Membership access is required to update the permanent Trainee file.', true);
     const file = traineeFile();
     const current = reportRoster().filter((member) => memberGroup(member) === 'Trainee');
     const existingKeys = new Set(file.rows.map((row) => row.memberId || normalize(row.name)));
@@ -437,7 +437,7 @@
   }
 
   function syncLoaRows() {
-    if (!canModify()) return toast('Administrator access is required to sync Leave records.', true);
+    if (!canModify()) return toast('Administrator or Membership access is required to sync Leave records.', true);
     const existing = new Set(loaRows().map((row) => row.memberId).filter(Boolean));
     let added = 0;
     members().filter((member) => normalize(member.memberStatus) === 'loa').forEach((member) => {
@@ -590,7 +590,7 @@
   }
 
   function addRow(type) {
-    if (!canModify()) return toast('Administrator access is required to add report rows.', true);
+    if (!canModify()) return toast('Administrator or Membership access is required to add report rows.', true);
     const report = currentReport();
     if (type === 'loa') report.loaRows.push({ id: uid('loa'), memberId: '', purpose: '', until: '' });
     if (type === 'ojt') report.ojtRows.push({ id: uid('ojt'), memberId: '', until: '' });
@@ -601,7 +601,7 @@
   }
 
   function removeRow(type, id) {
-    if (!canModify()) return toast('Administrator access is required to delete report rows.', true);
+    if (!canModify()) return toast('Administrator or Membership access is required to delete report rows.', true);
     const report = currentReport();
     const key = ({ loa: 'loaRows', ojt: 'ojtRows', quitted: 'quittedRows', remaining: 'manualRemainingRows' })[type];
     report[key] = report[key].filter((row) => row.id !== id);
@@ -639,7 +639,7 @@
   }
 
   function fillBlankCivilAsSingle() {
-    if (!canModify()) return toast('Administrator access is required to update Civil Status.', true);
+    if (!canModify()) return toast('Administrator or Membership access is required to update Civil Status.', true);
     let updated = 0;
     reportRoster().forEach((member) => {
       if (civilStatus(member)) return;

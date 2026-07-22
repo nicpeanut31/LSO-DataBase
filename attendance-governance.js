@@ -57,9 +57,19 @@
     return currentAccount()?.role === 'Administrator';
   }
 
+  function can(action) {
+    return window.LSORoleAccess?.can?.(action) ?? isAdmin();
+  }
+
+  function canSaveDraftAttendance() { return can('saveDraftAttendance'); }
+  function canFinalizeAttendance() { return can('finalizeAttendance'); }
+  function canUnlockAttendance() { return can('unlockAttendance'); }
+
   function activeGroup() {
     const value = window.LSOOperations?.getAttendanceGroup?.() || window.LSOAttendanceGroup;
-    return GROUPS.includes(value) ? value : 'Official Members';
+    const fallback = window.LSORoleAccess?.defaultAttendanceGroup?.(currentAccount()) || 'Official Members';
+    const candidate = GROUPS.includes(value) ? value : fallback;
+    return window.LSORoleAccess?.canUseAttendanceGroup?.(candidate, currentAccount()) === false ? fallback : candidate;
   }
 
   function activeMode() {
@@ -228,8 +238,8 @@
   }
 
   function finalizeAttendance() {
-    if (!isAdmin()) {
-      window.LSOApp?.showToast?.('Administrator access is required to finalize attendance.', true);
+    if (!canFinalizeAttendance()) {
+      window.LSOApp?.showToast?.('Only the Administrator can finalize attendance.', true);
       return;
     }
     const event = selectedEvent();
@@ -309,8 +319,8 @@
   }
 
   function unlockAttendance() {
-    if (!isAdmin()) {
-      window.LSOApp?.showToast?.('Administrator access is required to unlock attendance.', true);
+    if (!canUnlockAttendance()) {
+      window.LSOApp?.showToast?.('Only the Administrator can unlock attendance.', true);
       return;
     }
     const event = selectedEvent();
@@ -362,8 +372,8 @@
 
     const finalizeButton = el('finalizeAttendanceButton');
     const unlockButton = el('unlockAttendanceButton');
-    if (finalizeButton) finalizeButton.classList.toggle('hidden', finalized || !isAdmin());
-    if (unlockButton) unlockButton.classList.toggle('hidden', !finalized || !isAdmin());
+    if (finalizeButton) finalizeButton.classList.toggle('hidden', finalized || !canFinalizeAttendance());
+    if (unlockButton) unlockButton.classList.toggle('hidden', !finalized || !canUnlockAttendance());
 
     ['markAllPresent', 'saveAttendanceButton'].forEach((id) => {
       const button = el(id);
@@ -373,7 +383,7 @@
       button.title = finalized ? 'Unlock this attendance roster before editing.' : '';
     });
     document.querySelectorAll('.attendance-status, .attendance-remarks').forEach((control) => {
-      control.disabled = finalized || !isAdmin();
+      control.disabled = finalized || !canSaveDraftAttendance();
       control.classList.toggle('attendance-locked-control', finalized);
       control.title = finalized ? 'Finalized attendance is locked. An Administrator may unlock it for corrections.' : '';
     });

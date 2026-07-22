@@ -1,0 +1,6 @@
+Role,Dashboard,Members,Member Lookup,Contract,Monthly Report,Attendance,Duty Hours,Accounts,Attendance Scope,Finalize/Unlock,Approve Punches,Manual Duty Entry
+Administrator,Full,Full,Full,Full,Full,Full,Full,Full,All groups,Yes,Yes,Yes
+Membership,Full,Manage,View,Generate,Manage,Create activities and save drafts,Manage allowed functions,None,Trainee and Probationary only,No,Yes,Yes
+General Secretary,Full,None,None,None,None,Create activities and save drafts,None,None,All groups,No,No,No
+Staff Account,Read only,Read only,Read only,Read only,Read only,Read only,Read only,None,All groups,No,No,No
+Trainee/Probationary,None,None,None,None,None,None,Personal Duty Hours only,None,Own linked record only,No,No,Time In/Out submission only

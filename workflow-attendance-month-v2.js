@@ -76,7 +76,13 @@
   }
 
   function activeAttendanceGroup() {
-    return normalizeAttendanceGroup(window.LSOAttendanceGroup);
+    const selected = normalizeAttendanceGroup(window.LSOAttendanceGroup);
+    if (window.LSORoleAccess?.canUseAttendanceGroup && !window.LSORoleAccess.canUseAttendanceGroup(selected)) {
+      const fallback = window.LSORoleAccess.defaultAttendanceGroup?.() || 'Trainee Members';
+      window.LSOAttendanceGroup = fallback;
+      return normalizeAttendanceGroup(fallback);
+    }
+    return selected;
   }
 
   function normalizeAttendanceRosterMode(value) {
@@ -799,7 +805,11 @@
 
   function syncAttendanceGroupControls() {
     qsa('[data-attendance-group]', el('attendanceGroupToggle')).forEach((button) => {
-      button.classList.toggle('active', button.dataset.attendanceGroup === activeAttendanceGroup());
+      const allowed = window.LSORoleAccess?.canUseAttendanceGroup?.(button.dataset.attendanceGroup) ?? true;
+      button.classList.toggle('active', allowed && button.dataset.attendanceGroup === activeAttendanceGroup());
+      button.classList.toggle('role-hidden', !allowed);
+      button.disabled = !allowed;
+      button.setAttribute('aria-hidden', String(!allowed));
     });
     qsa('[data-attendance-roster-mode]', el('attendanceRosterModeToggle')).forEach((button) => {
       button.classList.toggle('active', button.dataset.attendanceRosterMode === activeAttendanceRosterMode());
@@ -854,7 +864,12 @@
     el('attendanceGroupToggle')?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-attendance-group]');
       if (!button) return;
-      window.LSOAttendanceGroup = normalizeAttendanceGroup(button.dataset.attendanceGroup);
+      const requestedGroup = normalizeAttendanceGroup(button.dataset.attendanceGroup);
+      if (window.LSORoleAccess?.canUseAttendanceGroup && !window.LSORoleAccess.canUseAttendanceGroup(requestedGroup)) {
+        window.LSOApp?.showToast?.(window.LSORoleAccess.deniedMessage('attendanceGroup'), true);
+        return;
+      }
+      window.LSOAttendanceGroup = requestedGroup;
       selectedAttendanceMemberId = '';
       if (el('attendanceIndividualSelect')) el('attendanceIndividualSelect').value = '';
       window.LSOOperations?.setAttendanceGroup?.(window.LSOAttendanceGroup);
@@ -916,6 +931,8 @@
       renderEverything();
     }, 100));
   }
+
+  window.addEventListener('lso:auth-changed', () => setTimeout(() => { activeAttendanceGroup(); renderAll(); }, 0));
 
   function initialize() {
     if (el('attendanceSemesterLabel')) el('attendanceSemesterLabel').textContent = activeSemester();

@@ -1,0 +1,64 @@
+LSO GITHUB-READY PACKAGE VALIDATION
+===================================
+
+File count before report: 57
+Total uncompressed size: 3.05 MB
+Largest file: pdf-lib.min.js (0.50 MB)
+Files over 100 MB: 0
+Forbidden directories present: []
+HTML local references: 40; missing: []
+HTML duplicate IDs: []
+Manifest icon references missing: []
+Service worker core assets: 44; missing: []
+app-account-roles-login-fix-v4.js present: True
+pwa-account-roles-login-fix-v7.js present: True
+service-worker-account-roles-login-fix-v8.js present: True
+Old service workers included: []
+Old PWA launchers included: []
+CSS brace-balance issues: []
+Unresolved isAdmin() calls in current app: 0
+canManageMembers() present: True
+Membership role marker present: True
+General Secretary marker present: True
+
+JavaScript files checked: 22
+JavaScript syntax failures: 0
+
+Local HTTP index response: 200
+Headless Chromium rendered login page: NOT COMPLETED (sandbox browser timed out)
+
+Packaging target: fewer than 100 files
+Result before this report was added: 57 files
+Result after this report is added: 58 files
+
+JavaScript details
+------------------
+PASS app-account-roles-login-fix-v4.js
+PASS attendance-governance.js
+PASS auth.js
+PASS branding.js
+PASS cloud.js
+PASS contract-maker.js
+PASS contract-template-data.js
+PASS dashboard-command-center-v4.js
+PASS dashboard-enhancements.js
+PASS dashboard-intelligence.js
+PASS duty-hours-organized-v10.js
+PASS management-attendance-month-v2.js
+PASS monthly-report-template-data.js
+PASS monthly-report.js
+PASS pdf-lib.min.js
+PASS permissions.js
+PASS pwa-account-roles-login-fix-v7.js
+PASS role-access-v2.js
+PASS service-worker-account-roles-login-fix-v8.js
+PASS supabase-config.js
+PASS ui-enhancements.js
+PASS workflow-attendance-month-v2.js
+
+Scope of validation
+-------------------
+These checks validate the GitHub package structure, local dependencies, JavaScript
+syntax, PWA references, HTML structure, and browser rendering of the login page.
+A live login and write test against the private Supabase project cannot be performed
+from this environment.

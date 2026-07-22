@@ -71,15 +71,30 @@
     return sessionAccount?.role === 'Administrator';
   }
 
+  function canWriteColumn(column) {
+    if (!sessionAccount) return false;
+    if (window.LSORoleAccess?.canWriteColumn) return window.LSORoleAccess.canWriteColumn(column, sessionAccount);
+    return sessionAccount.role === 'Administrator';
+  }
+
+  function canReviewDuty() {
+    return ['Administrator', 'Membership'].includes(sessionAccount?.role);
+  }
+
   function isTraineeAccount() {
     return sessionAccount?.role === 'Trainee/Probationary';
   }
 
-  function emitReadOnlyDenied() {
+  function emitReadOnlyDenied(column = '') {
+    const role = sessionAccount?.role || 'Staff Account';
     const message = isTraineeAccount()
-      ? 'Trainee/Probationary accounts may submit only their own Duty Hours entries.'
-      : 'Staff Accounts have read-only access. An Administrator is required to save changes.';
-    emit('lso:permission-denied', { message });
+      ? 'Trainee/Probationary accounts may submit only their own Duty Hours punches.'
+      : role === 'Membership'
+        ? 'Membership access cannot save this system area.'
+        : role === 'General Secretary'
+          ? 'General Secretary access can save only activities, attendance drafts, and the related audit log.'
+          : 'Staff Accounts have read-only access.';
+    emit('lso:permission-denied', { message, column });
   }
 
   function safeParse(raw, fallback) {
@@ -288,8 +303,8 @@
   }
 
   function markDirty(column) {
-    if (!canWriteShared()) {
-      emitReadOnlyDenied();
+    if (!canWriteColumn(column)) {
+      emitReadOnlyDenied(column);
       return;
     }
     dirtyVersions.set(column, (dirtyVersions.get(column) || 0) + 1);
@@ -298,8 +313,12 @@
   }
 
   async function flushDirty() {
-    if (!canWriteShared()) return;
     if (flushing || !sessionToken || !dirtyVersions.size) return;
+    for (const column of [...dirtyVersions.keys()]) {
+      if (!canWriteColumn(column)) dirtyVersions.delete(column);
+    }
+    persistDirtyMarkers();
+    if (!dirtyVersions.size) return;
     flushing = true;
     status('syncing', `Saving ${dirtyVersions.size} change${dirtyVersions.size === 1 ? '' : 's'}…`);
 
@@ -341,8 +360,8 @@
 
   function storageSetItem(key, value) {
     const column = KEY_TO_COLUMN[key];
-    if (column && sessionToken && sessionAccount && !canWriteShared()) {
-      emitReadOnlyDenied();
+    if (column && sessionToken && sessionAccount && !canWriteColumn(column)) {
+      emitReadOnlyDenied(column);
       return false;
     }
     const saved = setLocal(key, value);
@@ -352,8 +371,8 @@
 
   function storageRemoveItem(key) {
     const column = KEY_TO_COLUMN[key];
-    if (column && sessionToken && sessionAccount && !canWriteShared()) {
-      emitReadOnlyDenied();
+    if (column && sessionToken && sessionAccount && !canWriteColumn(column)) {
+      emitReadOnlyDenied(column);
       return false;
     }
     const removed = removeLocal(key);
@@ -454,12 +473,17 @@
     sessionAccount = account || null;
     if (sessionToken) {
       startPolling();
-      if (canWriteShared() && dirtyVersions.size) scheduleFlush(500);
-      status('online', canWriteShared()
-        ? 'Shared database connected'
-        : isTraineeAccount()
-          ? 'Shared database connected • Duty Hours submission access'
-          : 'Shared database connected • Staff read-only access');
+      if ([...dirtyVersions.keys()].some((column) => canWriteColumn(column))) scheduleFlush(500);
+      const role = sessionAccount?.role || 'Staff Account';
+      status('online', role === 'Administrator'
+        ? 'Shared database connected • Full access'
+        : role === 'Membership'
+          ? 'Shared database connected • Membership operations access'
+          : role === 'General Secretary'
+            ? 'Shared database connected • Attendance operations access'
+            : isTraineeAccount()
+              ? 'Shared database connected • Duty Hours submission access'
+              : 'Shared database connected • Staff read-only access');
     } else stopPolling();
   }
 
@@ -564,7 +588,7 @@
   }
 
   async function reviewDutyEntry(entryId, decision) {
-    if (!canWriteShared()) throw new Error('Administrator access is required to review duty entries.');
+    if (!canReviewDuty()) throw new Error('Administrator or Membership access is required to review duty entries.');
     const nextState = await rpc('lso_review_duty_entry', {
       p_token: sessionToken,
       p_entry_id: entryId,
@@ -577,7 +601,7 @@
   }
 
   async function reviewDutyPunch(entryId, punchType, decision) {
-    if (!canWriteShared()) throw new Error('Administrator access is required to review Duty Hours punches.');
+    if (!canReviewDuty()) throw new Error('Administrator or Membership access is required to review Duty Hours punches.');
     if (!['TimeIn', 'TimeOut'].includes(punchType)) throw new Error('Select a valid Time In or Time Out request.');
     const nextState = await rpc('lso_review_duty_punch', {
       p_token: sessionToken,
@@ -633,7 +657,8 @@
     reviewDutyPunch,
     flush: flushDirty,
     pollNow: pollState,
-    canWrite: canWriteShared
+    canWrite: canWriteColumn,
+    canReviewDuty
   };
 
   window.addEventListener('online', () => {

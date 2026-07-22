@@ -50,6 +50,15 @@
     return role() === 'Administrator';
   }
 
+
+  function canAction(action) {
+    return window.LSORoleAccess?.can?.(action, currentAccount()) ?? isAdmin();
+  }
+
+  function canView(viewId) {
+    return window.LSORoleAccess?.canAccessView?.(viewId, currentAccount()) ?? role() !== 'Trainee/Probationary';
+  }
+
   function getMembers() {
     return window.LSOApp?.getMembers?.() || load(KEYS.members, []);
   }
@@ -296,14 +305,14 @@
 
   function actionCards(data) {
     const cards = [
-      { key: 'pending-accounts', icon: 'AC', label: 'Pending Accounts', value: data.accounts.filter((item) => item.approvalStatus === 'Pending').length, note: 'Choose a role and approve', tone: 'blue', admin: true },
-      { key: 'pending-time-in', icon: 'IN', label: 'Pending Time In', value: data.pendingTimeIn.length, note: 'Separate punch approvals', tone: 'gold', admin: true },
-      { key: 'pending-time-out', icon: 'OUT', label: 'Pending Time Out', value: data.pendingTimeOut.length, note: 'Review completed sessions', tone: 'gold', admin: true },
-      { key: 'draft-attendance', icon: 'DR', label: 'Draft Attendance', value: data.draftEvents.length, note: 'Save or finalize rosters', tone: 'purple', admin: false },
-      { key: 'unlocked-attendance', icon: 'UL', label: 'Unlocked Attendance', value: data.unlockedEvents.length, note: 'Corrections need re-finalizing', tone: 'red', admin: false },
-      { key: 'incomplete-profiles', icon: 'ID', label: 'Incomplete Profiles', value: data.quality.incomplete.length, note: 'Below 90% completeness', tone: 'green', admin: false }
+      { key: 'pending-accounts', icon: 'AC', label: 'Pending Accounts', value: data.accounts.filter((item) => item.approvalStatus === 'Pending').length, note: 'Choose a role and approve', tone: 'blue', visible: canView('accountsView') },
+      { key: 'pending-time-in', icon: 'IN', label: 'Pending Time In', value: data.pendingTimeIn.length, note: 'Separate punch approvals', tone: 'gold', visible: canAction('reviewDutyPunches') },
+      { key: 'pending-time-out', icon: 'OUT', label: 'Pending Time Out', value: data.pendingTimeOut.length, note: 'Review completed sessions', tone: 'gold', visible: canAction('reviewDutyPunches') },
+      { key: 'draft-attendance', icon: 'DR', label: 'Draft Attendance', value: data.draftEvents.length, note: canAction('finalizeAttendance') ? 'Save or finalize rosters' : 'Review and save draft rosters', tone: 'purple', visible: canView('attendanceView') },
+      { key: 'unlocked-attendance', icon: 'UL', label: 'Unlocked Attendance', value: data.unlockedEvents.length, note: 'Corrections need re-finalizing', tone: 'red', visible: canView('attendanceView') },
+      { key: 'incomplete-profiles', icon: 'ID', label: 'Incomplete Profiles', value: data.quality.incomplete.length, note: 'Below 90% completeness', tone: 'green', visible: canView('membersView') }
     ];
-    return cards.filter((card) => !card.admin || isAdmin());
+    return cards.filter((card) => card.visible);
   }
 
   function renderHeader(data) {
@@ -312,13 +321,13 @@
     const urgent = actionCards(data).filter((item) => item.value > 0).length;
     return `<section class="dcc-hero">
       <div class="dcc-hero-copy"><p class="dcc-kicker">Orchestra Command Center</p><h2>Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${safe(firstName)}</h2><p>${safe(role())} workspace • ${urgent ? `${urgent} action group${urgent === 1 ? '' : 's'} require attention` : 'operations are currently clear'}.</p><div class="dcc-role-row"><span class="dcc-role-pill">${safe(role())}</span><span>${safe(dateLabel(localDate()))}</span><span>Attendance threshold: ${data.threshold}%</span></div></div>
-      <div class="dcc-hero-actions">${isAdmin() ? '<button class="button button-light" data-dcc-action="add-member" type="button">+ Add Member</button><button class="button dcc-ghost" data-dcc-action="create-activity" type="button">Create Activity</button>' : '<button class="button button-light" data-dcc-action="attendance" type="button">Open Attendance</button><button class="button dcc-ghost" data-dcc-action="monthly-report" type="button">View Reports</button>'}</div>
+      <div class="dcc-hero-actions">${canAction('manageMembers') ? '<button class="button button-light" data-dcc-action="add-member" type="button">+ Add Member</button>' : '<button class="button button-light" data-dcc-action="attendance" type="button">Open Attendance</button>'}${canAction('manageEvents') ? '<button class="button dcc-ghost" data-dcc-action="create-activity" type="button">Create Activity</button>' : canView('monthlyReportView') ? '<button class="button dcc-ghost" data-dcc-action="monthly-report" type="button">View Reports</button>' : ''}</div>
     </section>`;
   }
 
   function renderActionCenter(data) {
     const cards = actionCards(data);
-    return `<section class="dcc-section"><div class="dcc-section-heading"><div><p class="dcc-kicker">Action Center</p><h3>What needs attention</h3><p>Each card opens the exact records behind the count.</p></div><button class="dcc-text-button" data-dcc-action="alerts" type="button">Open full alerts →</button></div><div class="dcc-action-grid">${cards.map((card) => `<button class="dcc-action-card tone-${card.tone}${card.value ? ' has-items' : ''}" data-dcc-detail="${card.key}" type="button"><span class="dcc-action-icon">${safe(card.icon)}</span><span class="dcc-action-copy"><small>${safe(card.label)}</small><strong>${card.value}</strong><em>${safe(card.note)}</em></span><span class="dcc-card-arrow">→</span></button>`).join('')}</div></section>`;
+    return `<section class="dcc-section"><div class="dcc-section-heading"><div><p class="dcc-kicker">Action Center</p><h3>What needs attention</h3><p>Each card opens the exact records behind the count.</p></div>${canView('alertsView') ? '<button class="dcc-text-button" data-dcc-action="alerts" type="button">Open full alerts →</button>' : ''}</div><div class="dcc-action-grid">${cards.map((card) => `<button class="dcc-action-card tone-${card.tone}${card.value ? ' has-items' : ''}" data-dcc-detail="${card.key}" type="button"><span class="dcc-action-icon">${safe(card.icon)}</span><span class="dcc-action-copy"><small>${safe(card.label)}</small><strong>${card.value}</strong><em>${safe(card.note)}</em></span><span class="dcc-card-arrow">→</span></button>`).join('')}</div></section>`;
   }
 
   function monthEvents(data) {
@@ -347,7 +356,7 @@
       <div class="dcc-month-list">${eventRows.length ? eventRows.map((event) => {
         const state = eventCancelled(event) ? 'Cancelled' : eventAttendanceState(event, data.attendance);
         return `<button class="dcc-event-row" data-dcc-event="${safe(event.id)}" type="button"><time><strong>${safe(String(event.date || '').slice(8, 10))}</strong><small>${safe(new Intl.DateTimeFormat('en-PH', { month: 'short' }).format(new Date(`${event.date}T00:00:00`)))}</small></time><span><strong>${safe(event.title || 'Untitled activity')}</strong><small>${safe([event.type, timeLabel(event.startTime), event.venue].filter(Boolean).join(' • '))}</small></span><em class="dcc-state state-${normalize(state).replace(/\s+/g, '-')}">${safe(state)}</em></button>`;
-      }).join('') : `<div class="dcc-empty"><span>＋</span><strong>No activities in ${safe(monthLabel(selectedMonth))}</strong><p>This month is ready for a new rehearsal, meeting, performance, or activity.</p>${isAdmin() ? '<button class="button button-primary" data-dcc-action="create-activity" type="button">Create Activity</button>' : ''}</div>`}</div>
+      }).join('') : `<div class="dcc-empty"><span>＋</span><strong>No activities in ${safe(monthLabel(selectedMonth))}</strong><p>This month is ready for a new rehearsal, meeting, performance, or activity.</p>${canAction('manageEvents') ? '<button class="button button-primary" data-dcc-action="create-activity" type="button">Create Activity</button>' : ''}</div>`}</div>
     </section>`;
   }
 
@@ -424,7 +433,7 @@
 
   function renderRecentActivity(data) {
     const log = getActivity().slice(0, 8);
-    return `<section class="dcc-panel"><div class="dcc-panel-heading"><div><p class="dcc-kicker">Recent System Activity</p><h3>Latest recorded changes</h3><p>Administrative actions are shown from the shared audit log.</p></div><button class="dcc-text-button" data-dcc-action="data" type="button">Open audit log →</button></div><div class="dcc-activity-list">${log.length ? log.map((item) => `<div class="dcc-activity-row"><span>${safe(activityIcon(item.category))}</span><div><strong>${safe(item.action || 'System activity')}</strong><small>${safe([item.details, item.account].filter(Boolean).join(' • '))}</small></div><time>${safe(dateTimeLabel(item.timestamp))}</time></div>`).join('') : '<div class="dcc-empty compact"><span>↻</span><strong>No recent activity</strong><p>New member, attendance, account, and duty-hour actions will appear here.</p></div>'}</div></section>`;
+    return `<section class="dcc-panel"><div class="dcc-panel-heading"><div><p class="dcc-kicker">Recent System Activity</p><h3>Latest recorded changes</h3><p>Administrative actions are shown from the shared audit log.</p></div>${canView('dataView') ? '<button class="dcc-text-button" data-dcc-action="data" type="button">Open audit log →</button>' : ''}</div><div class="dcc-activity-list">${log.length ? log.map((item) => `<div class="dcc-activity-row"><span>${safe(activityIcon(item.category))}</span><div><strong>${safe(item.action || 'System activity')}</strong><small>${safe([item.details, item.account].filter(Boolean).join(' • '))}</small></div><time>${safe(dateTimeLabel(item.timestamp))}</time></div>`).join('') : '<div class="dcc-empty compact"><span>↻</span><strong>No recent activity</strong><p>New member, attendance, account, and duty-hour actions will appear here.</p></div>'}</div></section>`;
   }
 
   function qualityRows(data) {
@@ -449,25 +458,40 @@
   }
 
   function renderQuickActions() {
-    const admin = [
-      ['add-member', '+', 'Add Member', 'Create a validated member record'],
-      ['create-activity', '▣', 'Create Activity', 'Add to the selected calendar month'],
-      ['attendance', '✓', 'Open Attendance', 'Record or finalize a roster'],
-      ['duty-hours', '◷', 'Review Duty Hours', 'Approve separate punch requests'],
-      ['accounts', 'AC', 'Approve Accounts', 'Choose roles and linked members'],
-      ['monthly-report', 'PDF', 'Monthly Report', 'Generate and download reports'],
-      ['backup', '↓', 'Export Backup', 'Protect the complete system data']
-    ];
-    const staff = [
-      ['members', 'M', 'Member Directory', 'Search and inspect profiles'],
-      ['attendance', '✓', 'Attendance', 'View monthly rosters and analytics'],
-      ['duty-hours', '◷', 'Duty Hours', 'View progress and records'],
-      ['monthly-report', 'PDF', 'Monthly Report', 'Preview organization reports'],
-      ['alerts', '!', 'Action Center', 'Review current operational alerts'],
-      ['data', '↓', 'Data & Audit', 'View exports and activity history']
-    ];
-    const actions = isAdmin() ? admin : staff;
-    return `<section class="dcc-section"><div class="dcc-section-heading"><div><p class="dcc-kicker">Quick Actions</p><h3>${isAdmin() ? 'Administrative tools' : 'Read-only workspace tools'}</h3><p>Open the most frequently used modules in one click.</p></div></div><div class="dcc-quick-grid">${actions.map(([key, icon, title, note]) => `<button data-dcc-action="${key}" type="button"><span>${safe(icon)}</span><strong>${safe(title)}</strong><small>${safe(note)}</small></button>`).join('')}</div></section>`;
+    const sets = {
+      Administrator: [
+        ['add-member', '+', 'Add Member', 'Create a validated member record'],
+        ['create-activity', '▣', 'Create Activity', 'Add to the selected calendar month'],
+        ['attendance', '✓', 'Open Attendance', 'Record or finalize a roster'],
+        ['duty-hours', '◷', 'Review Duty Hours', 'Approve separate punch requests'],
+        ['accounts', 'AC', 'Approve Accounts', 'Choose roles and linked members'],
+        ['monthly-report', 'PDF', 'Monthly Report', 'Generate and download reports'],
+        ['backup', '↓', 'Export Backup', 'Protect the complete system data']
+      ],
+      Membership: [
+        ['add-member', '+', 'Add Member', 'Manage membership records'],
+        ['create-activity', '▣', 'Create Activity', 'Prepare Trainee/Probationary attendance'],
+        ['attendance', '✓', 'Attendance Drafts', 'Trainee and Probationary rosters'],
+        ['duty-hours', '◷', 'Duty Hours', 'Approve punches and add manual time'],
+        ['monthly-report', 'PDF', 'Monthly Report', 'Prepare official reports'],
+        ['members', 'M', 'Member Directory', 'Open member operations']
+      ],
+      'General Secretary': [
+        ['create-activity', '▣', 'Create Activity', 'Add a monthly attendance activity'],
+        ['attendance', '✓', 'Attendance Drafts', 'Record and save draft rosters']
+      ],
+      'Staff Account': [
+        ['members', 'M', 'Member Directory', 'Search and inspect profiles'],
+        ['attendance', '✓', 'Attendance', 'View monthly rosters and analytics'],
+        ['duty-hours', '◷', 'Duty Hours', 'View progress and records'],
+        ['monthly-report', 'PDF', 'Monthly Report', 'Preview organization reports'],
+        ['alerts', '!', 'Action Center', 'Review current operational alerts'],
+        ['data', '↓', 'Data & Audit', 'View exports and activity history']
+      ]
+    };
+    const actions = sets[role()] || sets['Staff Account'];
+    const heading = isAdmin() ? 'Administrative tools' : role() === 'Staff Account' ? 'Read-only workspace tools' : `${role()} tools`;
+    return `<section class="dcc-section"><div class="dcc-section-heading"><div><p class="dcc-kicker">Quick Actions</p><h3>${safe(heading)}</h3><p>Open the most frequently used modules in one click.</p></div></div><div class="dcc-quick-grid">${actions.map(([key, icon, title, note]) => `<button data-dcc-action="${key}" type="button"><span>${safe(icon)}</span><strong>${safe(title)}</strong><small>${safe(note)}</small></button>`).join('')}</div></section>`;
   }
 
   function render() {
@@ -527,7 +551,8 @@
     el('dccDetailList').innerHTML = detail.items.length ? detail.items.map((item) => `<button data-dcc-detail-item="${safe(item.action)}" data-id="${safe(item.id)}" type="button"><span><strong>${safe(item.title)}</strong><small>${safe(item.meta)}</small></span><b>Open →</b></button>`).join('') : '<div class="dcc-empty compact"><span>✓</span><strong>No matching records</strong><p>This action group is currently clear.</p></div>';
     const moduleButton = el('dccOpenModuleButton');
     moduleButton.dataset.module = detail.module;
-    moduleButton.classList.toggle('hidden', !detail.module);
+    const viewMap = { attendance: 'attendanceView', 'duty-hours': 'dutyHoursView', accounts: 'accountsView', alerts: 'alertsView', data: 'dataView', members: 'membersView', 'monthly-report': 'monthlyReportView' };
+    moduleButton.classList.toggle('hidden', !detail.module || !canView(viewMap[detail.module]));
     modal.classList.remove('hidden');
   }
 
@@ -557,11 +582,13 @@
   }
 
   function openMember(memberId) {
+    if (!canView('membersView')) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'Member records are not assigned to this role.', true); return; }
     closeDetail();
     window.LSOApp?.openRecord?.(memberId);
   }
 
   function openDutyMember(memberId) {
+    if (!canView('dutyHoursView')) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'Duty Hours are not assigned to this role.', true); return; }
     openView('dutyHoursView');
     setTimeout(() => {
       const selector = `[data-duty-member="${window.CSS?.escape ? CSS.escape(memberId) : memberId}"]`;
@@ -574,16 +601,19 @@
     closeDetail();
     const views = { attendance: 'attendanceView', 'duty-hours': 'dutyHoursView', accounts: 'accountsView', alerts: 'alertsView', data: 'dataView', members: 'membersView', 'monthly-report': 'monthlyReportView' };
     if (views[action]) {
+      if (!canView(views[action])) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'This module is not assigned to your role.', true); return; }
       if (action === 'attendance') window.LSOOperations?.setAttendanceMonth?.(selectedMonth);
       openView(views[action]);
       if (action === 'monthly-report') setTimeout(() => { if (el('monthlyReportMonth')) { el('monthlyReportMonth').value = selectedMonth; el('monthlyReportMonth').dispatchEvent(new Event('change', { bubbles: true })); } }, 60);
       return;
     }
     if (action === 'add-member') {
+      if (!canAction('manageMembers')) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'Member management is not assigned to this role.', true); return; }
       el('addMemberTop')?.click();
       return;
     }
     if (action === 'create-activity') {
+      if (!canAction('manageEvents')) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'Activity creation is not assigned to this role.', true); return; }
       window.LSOOperations?.setAttendanceMonth?.(selectedMonth);
       openView('attendanceView');
       setTimeout(() => el('addEventButton')?.click(), 70);
@@ -596,6 +626,7 @@
   }
 
   function performMemberStat(key) {
+    if (!canView('membersView')) { window.LSOApp?.showToast?.(window.LSORoleAccess?.deniedMessage?.() || 'Member records are not assigned to this role.', true); return; }
     if (key === 'members') window.LSOApp?.setMembershipDirectory?.('Membership Period');
     if (key === 'trainees') window.LSOApp?.setMembershipDirectory?.('Trainee Period');
     if (key === 'probationary') window.LSOApp?.setMembershipDirectory?.('Probationary Period');

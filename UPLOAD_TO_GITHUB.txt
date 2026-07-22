@@ -1,24 +1,15 @@
-LSO WEBSITE — GITHUB-READY PACKAGE
-==================================
+LSO GITHUB UPLOAD INSTRUCTIONS
+==============================
 
-This compact package contains fewer than 100 files. It excludes sample PDFs,
-old update notes, screenshots, test pages, and previous-version files that are
-not required by the live website.
-
-HOW TO UPLOAD
--------------
-1. Extract LSO_GitHub_Ready_Under_100_Files.zip.
+1. Extract this ZIP.
 2. Open the extracted folder.
-3. In your GitHub repository, choose Add file > Upload files.
-4. Select all files INSIDE this folder, not the ZIP file itself.
-5. Drag them into GitHub and allow files with the same names to be replaced.
-6. Commit the changes to the branch used by GitHub Pages.
-7. Wait for deployment, then open the website and press Ctrl + F5.
+3. Upload the FILES INSIDE the folder to the GitHub repository publishing root.
+4. Do not upload the ZIP itself.
+5. Keep every filename exactly as provided. Do not add (1), (2), or similar suffixes.
+6. Confirm that index.html is in the repository root used by GitHub Pages.
+7. Commit the upload and wait for GitHub Pages to finish deploying.
+8. Open the website and press Ctrl + Shift + R once.
+9. If the PWA is installed, close it completely and reopen it after the hard refresh.
 
-IMPORTANT
----------
-- Keep the filenames exactly as provided.
-- index.html must be in the GitHub Pages publishing root.
-- Do not rename files with (1), (2), or similar suffixes.
-- supabase-config.js already contains the configured public Supabase details.
-- SQL files are included for setup/upgrade reference; the browser does not load them.
+This package deliberately excludes old test screenshots, prior-version scripts,
+old service workers, duplicate update notes, and previous build reports.

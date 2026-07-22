@@ -77,7 +77,7 @@
 <div class="auth-heading">
 <p class="eyebrow">New account</p>
 <h2>Register an account</h2>
-<p>Submit a registration request. Before approval, the Administrator chooses the final role. Accounts assigned as Trainee/Probationary automatically open Duty Hours only.</p>
+<p>Submit a registration request. Before approval, the Administrator chooses the final role. The Administrator assigns the final role before approval. Trainee/Probationary accounts automatically open Duty Hours only.</p>
 </div>
 <label class="field">
 <span>Display Name *</span>
@@ -393,11 +393,11 @@
 
 <div class="contract-staff-notice panel hidden" id="contractReadOnlyNotice">
 <div class="empty-icon">🔒</div>
-<h3>Administrator access required</h3>
-<p>Staff Accounts may view system records, but only an Administrator can prepare and download membership contracts.</p>
+<h3>Contract access not assigned</h3>
+<p>Contract generation is available to the Administrator and Membership role.</p>
 </div>
 
-<div class="contract-workspace admin-only" id="contractAdminWorkspace">
+<div class="contract-workspace" id="contractAdminWorkspace">
 <article class="panel contract-member-panel">
 <div class="panel-header stack-mobile">
 <div><p class="eyebrow">Step 1</p><h3>Select Official Member</h3><p class="panel-subtitle">Only active records in the Membership Period are listed.</p></div>
@@ -655,7 +655,7 @@
 <div class="hidden" id="attendanceWorkspace">
 <div class="panel-header stack-mobile"><div><p class="eyebrow" id="attendanceEventType">Rehearsal</p><h3 id="attendanceEventTitle"></h3><p class="panel-subtitle" id="attendanceEventMeta"></p><span class="attendance-roster-group-badge">Roster: <strong id="attendanceRosterGroupLabel">Official Members</strong></span></div><div class="inline-actions"><button class="button button-secondary" id="printEventAttendance" type="button">Print Selected Group Roster</button><button class="button button-secondary" id="editEventButton">Edit</button><button class="button button-danger" id="deleteEventButton">Delete</button></div></div>
 <div class="attendance-governance-panel hidden" id="attendanceGovernancePanel">
-  <div class="attendance-workflow-status"><span class="badge badge-gold" id="attendanceWorkflowStatusBadge">Draft</span><div><strong id="attendanceWorkflowStatusTitle">Attendance is open as a draft</strong><small id="attendanceWorkflowStatusMeta">Changes remain editable until an Administrator finalizes this roster.</small></div></div>
+  <div class="attendance-workflow-status"><span class="badge badge-gold" id="attendanceWorkflowStatusBadge">Draft</span><div><strong id="attendanceWorkflowStatusTitle">Attendance is open as a draft</strong><small id="attendanceWorkflowStatusMeta">Draft changes remain editable until the Administrator finalizes this roster.</small></div></div>
   <div class="attendance-workflow-actions admin-only"><button class="button button-primary" id="finalizeAttendanceButton" type="button">Finalize &amp; Lock Attendance</button><button class="button button-secondary hidden" id="unlockAttendanceButton" type="button">Unlock for Editing</button><button class="button button-secondary" id="exportAttendanceAuditCsv" type="button">Export Audit CSV</button></div>
   <details class="attendance-audit-details"><summary>View attendance audit history</summary><div class="attendance-audit-empty" id="attendanceAuditEmpty">No attendance audit activity has been recorded for this roster yet.</div><div class="attendance-audit-history" id="attendanceAuditHistory"></div></details>
 </div>
@@ -717,8 +717,8 @@
 </div>
 </article>
 
-<article class="panel admin-only hidden duty-approval-panel" id="dutyApprovalPanel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Confirmation</p><h3>Separate Punch Approval Queue</h3><p class="panel-subtitle">Review every Time In and Time Out independently. Use Refresh Queue to immediately retrieve requests submitted from another device.</p></div><div class="duty-header-actions"><button class="button button-secondary duty-refresh-button" id="dutyAdminRefreshButton" type="button">Refresh Queue</button><span class="badge badge-gold" id="dutyPendingApprovalCount">0 pending punches</span></div></div>
+<article class="panel hidden duty-approval-panel" id="dutyApprovalPanel">
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Duty Hours Confirmation</p><h3>Separate Punch Approval Queue</h3><p class="panel-subtitle">Review every Time In and Time Out independently. Use Refresh Queue to immediately retrieve requests submitted from another device. Administrator and Membership accounts can review each punch.</p></div><div class="duty-header-actions"><button class="button button-secondary duty-refresh-button" id="dutyAdminRefreshButton" type="button">Refresh Queue</button><span class="badge badge-gold" id="dutyPendingApprovalCount">0 pending punches</span></div></div>
 <div class="duty-approval-rules"><div><strong>Time In approval</strong><span>Officially starts the individual session.</span></div><div><strong>Time Out approval</strong><span>Officially closes the session and credits the approved duration.</span></div><div><strong>Rejected request</strong><span>Does not alter the individual record or credited total.</span></div></div>
 <div class="duty-punch-review-list" id="dutyApprovalTableBody"></div>
 </article>
@@ -778,7 +778,7 @@
 <div class="panel-header stack-mobile"><div><p class="eyebrow">Selected Duty Profile</p><h3 id="dutySelectedTitle">Choose a Trainee or Probationary member</h3><p class="panel-subtitle" id="dutySelectedContext">The selected semester and period control every calculation below.</p></div><span class="badge badge-gray" id="dutySelectedBadge">No selection</span></div>
 <div class="duty-hours-summary" id="dutyHoursSummary"><div class="dashboard-empty-state"><span>◷</span><strong>Select a name from either roster</strong><small>Committed time, rendered time, incentives, and remaining balance will appear here.</small></div></div>
 
-<div class="duty-hours-admin-grid duty-forms-grid admin-only hidden" id="dutyHoursAdminControls">
+<div class="duty-hours-admin-grid duty-forms-grid hidden" id="dutyHoursAdminControls">
 <form class="duty-commitment-card duty-form-card" id="dutyCommitmentForm">
 <div class="duty-card-heading"><div><p class="eyebrow">Required Time</p><h4>Committed Hours</h4></div><span class="duty-card-icon">◎</span></div>
 <p class="duty-form-help">Set the exact commitment for the selected semester and period.</p>
@@ -825,7 +825,7 @@
 
 <div class="duty-ledger-section hidden" id="dutyLedgerSection">
 <div class="individual-history-header"><strong>Semester Duty Ledger</strong><span id="dutyLedgerCaption">0 entries</span></div>
-<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Semester</th><th>Period</th><th>Entry</th><th>Computed Time</th><th>Status</th><th>Effect</th><th>Description</th><th>Member/s Approved</th><th class="admin-only">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
+<div class="table-wrap compact-report-table duty-ledger-table"><table><thead><tr><th>Date</th><th>Clock In–Out</th><th>Semester</th><th>Period</th><th>Entry</th><th>Computed Time</th><th>Status</th><th>Effect</th><th>Description</th><th>Member/s Approved</th><th class="duty-manager-action">Action</th></tr></thead><tbody id="dutyLedgerTableBody"></tbody></table></div>
 </div>
 </article>
 
@@ -872,8 +872,8 @@
 
 <section class="view" id="accountsView">
 <article class="panel">
-<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Only</p><h3>Account Management</h3><p class="panel-subtitle">Review each registration, choose or change its role before approval, and assign access. A Trainee/Probationary account automatically opens Duty Hours only so the member can submit their own Time In and Time Out for Administrator confirmation.</p></div></div>
-<div class="account-security-note"><strong>Approval workflow:</strong> Choose the role before clicking Approve. Administrator = full system access. Staff Account = read-only system access. Trainee/Probationary = Duty Hours only, linked to one current Trainee or Probationary member. The member submits their own Time In and Time Out, and only approved entries are credited.</div>
+<div class="panel-header stack-mobile"><div><p class="eyebrow">Administrator Only</p><h3>Account Management</h3><p class="panel-subtitle">Review each registration, choose or change its role before approval, and assign its exact module permissions. Membership manages member operations, Trainee/Probationary draft attendance, reports, and Duty Hours. General Secretary manages activities and draft attendance. Trainee/Probationary accounts open Duty Hours only.</p></div></div>
+<div class="account-security-note"><strong>Approval workflow:</strong> Choose the role before clicking Approve. <b>Membership</b> = Dashboard, Members, Lookup, Contract, Monthly Report, Trainee/Probationary Attendance drafts, and Duty Hours approval/manual entry. <b>General Secretary</b> = Dashboard and Attendance activity/draft entry. <b>Staff Account</b> = read-only. <b>Trainee/Probationary</b> = personal Duty Hours only and requires a linked member.</div>
 <div class="table-wrap"><table><thead><tr><th>Account</th><th>Username / Optional Email</th><th>Role Before Approval</th><th>Linked Trainee/Probationary Member</th><th>Requested</th><th>Access Status</th><th>Approved</th><th class="actions-column">Actions</th></tr></thead><tbody id="accountsTableBody"></tbody></table></div>
 </article>
 </section>
@@ -1100,23 +1100,24 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20260717-1605"></script>
 <script src="branding.js?v=20260717-simplified-columns-v1"></script>
-<script src="cloud.js?v=20260721-duty-punch-separate-v2"></script>
-<script src="app.js?v=20260721-duty-hours-final-v1"></script>
-<script src="auth.js?v=20260721-web-security-v1"></script>
-<script src="management-attendance-month-v2.js?v=20260721-month-workspace-v2"></script>
+<script src="role-access-v2.js?v=20260722-account-roles-v3"></script>
+<script src="cloud.js?v=20260722-account-roles-v3"></script>
+<script src="app-account-roles-login-fix-v4.js?v=20260722-login-runtime-fix-v4"></script>
+<script src="auth.js?v=20260722-account-roles-v3"></script>
+<script src="management-attendance-month-v2.js?v=20260722-account-roles-v3"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
-<script src="workflow-attendance-month-v2.js?v=20260721-month-workspace-v2"></script>
-<script src="attendance-governance.js?v=20260721-attendance-governance-v1"></script>
-<script src="duty-hours-organized-v10.js?v=20260721-organized-v10"></script>
+<script src="workflow-attendance-month-v2.js?v=20260722-account-roles-v3"></script>
+<script src="attendance-governance.js?v=20260722-account-roles-v3"></script>
+<script src="duty-hours-organized-v10.js?v=20260722-account-roles-v3"></script>
 <script src="pdf-lib.min.js?v=1.17.1"></script>
 <script src="monthly-report-template-data.js?v=20260719-monthly-report-v1"></script>
-<script src="monthly-report.js?v=20260719-autosave-layout-v3"></script>
+<script src="monthly-report.js?v=20260722-account-roles-v3"></script>
 <script src="contract-template-data.js?v=20260718-contract-v3"></script>
-<script src="contract-maker.js?v=20260718-contract-v3"></script>
+<script src="contract-maker.js?v=20260722-account-roles-v3"></script>
 <script src="dashboard-intelligence.js?v=20260718-gender-dashboard-v2"></script>
-<script src="permissions.js?v=20260721-attendance-governance-v1"></script>
-<script src="dashboard-command-center-v4.js?v=20260722-command-center-v4"></script>
-<script src="pwa-dashboard-command-v5.js?v=20260722-command-center-v4"></script>
+<script src="permissions.js?v=20260722-account-roles-v3"></script>
+<script src="dashboard-command-center-v4.js?v=20260722-account-roles-v3"></script>
+<script src="pwa-account-roles-login-fix-v7.js?v=20260722-login-runtime-fix-v4"></script>
 </body>
 </html>

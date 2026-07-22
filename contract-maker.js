@@ -29,7 +29,7 @@
   }
 
   function isAdmin() {
-    return (window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount || {}).role === 'Administrator';
+    return window.LSORoleAccess?.can?.('generateContract') ?? (window.LSOAuth?.getActiveAccount?.() || window.LSOCurrentAccount || {}).role === 'Administrator';
   }
 
   function allMembers() {
