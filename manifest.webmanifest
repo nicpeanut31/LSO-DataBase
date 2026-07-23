@@ -3,14 +3,18 @@
   "name": "LSO Orchestra Management System",
   "short_name": "LSO System",
   "description": "Lasallian Symphony Orchestra membership, attendance, duty-hours, reporting, and administration portal.",
-  "start_url": "./index.html",
+  "start_url": "./?v=20260724-original-color-v13",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f4f8f6",
   "theme_color": "#0b3b2e",
   "lang": "en",
-  "categories": ["productivity", "business", "education"],
+  "categories": [
+    "productivity",
+    "business",
+    "education"
+  ],
   "icons": [
     {
       "src": "android-chrome-192x192.png",

@@ -1,0 +1,38 @@
+LSO ORIGINAL COLOR AND VISIBILITY UPDATE - VALIDATION
+=======================================================
+
+Passed: 30/30
+
+[PASS] Package contains fewer than 100 files: 70 files
+[PASS] No file exceeds GitHub 100 MB limit: pdf-lib.min.js: 0.50 MB
+[PASS] No duplicate HTML IDs: 431 IDs
+[PASS] All local HTML assets exist: 44 references
+[PASS] Original-color stylesheet loads last: load order verified
+[PASS] Superseded mobile color override removed: v2 is not referenced
+[PASS] All CSS files parse without top-level syntax errors: 16 stylesheets
+[PASS] All JavaScript files pass syntax validation: 25 scripts
+[PASS] All PWA core cache assets exist: 49 cached paths
+[PASS] New service worker cache version is active: v13
+[PASS] Manifest uses original LSO theme color: #0b3b2e
+[PASS] Manifest uses original light background: #f4f8f6
+[PASS] Core logic unchanged: supabase-setup.sql: SHA-256 match
+[PASS] Core logic unchanged: supabase-config.js: SHA-256 match
+[PASS] Core logic unchanged: cloud.js: SHA-256 match
+[PASS] Core logic unchanged: auth.js: SHA-256 match
+[PASS] Core logic unchanged: permissions.js: SHA-256 match
+[PASS] Core logic unchanged: role-access-v2.js: SHA-256 match
+[PASS] Core logic unchanged: duty-hours-organized-v10.js: SHA-256 match
+[PASS] Core logic unchanged: management-attendance-month-v2.js: SHA-256 match
+[PASS] Core logic unchanged: attendance-governance.js: SHA-256 match
+[PASS] Core logic unchanged: monthly-report.js: SHA-256 match
+[PASS] Core logic unchanged: contract-maker-membership-v4.js: SHA-256 match
+[PASS] Contrast: Primary button text: 6.03:1 (target 4.5:1)
+[PASS] Contrast: Primary button gradient end: 4.55:1 (target 4.5:1)
+[PASS] Contrast: Main text: 13.89:1 (target 4.5:1)
+[PASS] Contrast: Muted text on white: 5.71:1 (target 4.5:1)
+[PASS] Contrast: Muted text on app background: 5.33:1 (target 4.5:1)
+[PASS] Contrast: Gold focus ring on deep green: 6.47:1 (target 3.0:1)
+[PASS] ZIP integrity: OK
+
+LIMITATION
+Automated Chromium screenshot rendering is unavailable in this execution environment. Structural, syntax, asset, cache, core-file integrity, and palette contrast checks were completed. Final appearance should be confirmed after GitHub Pages deployment on the actual phone and desktop browsers.

@@ -1,0 +1,27 @@
+LSO ORIGINAL COLOR AND VISIBILITY UPDATE
+========================================
+
+WHAT WAS FIXED
+- Restored the established LSO dark-green, emerald, gold, white, and charcoal palette.
+- Preserved the mobile compatibility layout without allowing it to recolor the website.
+- Increased contrast for secondary labels, placeholders, inactive navigation, account role text, tables, panels, cards, badges, alerts, Duty Hours, Monthly Report, Contract, and Dashboard text.
+- Kept the 3D animated login logo and all role/database functions unchanged.
+- Added a new cache version so phones and installed PWAs stop showing the previous color overrides.
+
+DEPLOYMENT
+1. Extract the ZIP.
+2. Upload every file inside the extracted folder to the GitHub Pages publishing root.
+3. Make sure index.html is replaced.
+4. Wait for GitHub Pages deployment to finish.
+5. On desktop, press Ctrl + Shift + R.
+6. On phone, close all browser tabs for the site, reopen it, and refresh once.
+7. If the old colors still appear in the installed PWA, close the app completely and reopen it. If necessary, clear the site cache once.
+
+NEW ACTIVE FILES
+- login-mobile-compat-v3.css
+- lso-original-color-contrast-v1.css
+- pwa-original-color-v13.js
+- service-worker-original-color-v13.js
+
+DATABASE
+No Supabase SQL update is required. No database or permission logic was changed.

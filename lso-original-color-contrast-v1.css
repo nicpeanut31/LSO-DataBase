@@ -1,0 +1,229 @@
+/* LSO original palette restoration and visibility pass.
+   Loaded last to restore the established green/gold identity and improve
+   text, border, status, and control contrast across every module. */
+:root {
+  --green-950: #062b22;
+  --green-900: #0b3b2e;
+  --green-800: #135441;
+  --green-700: #167055;
+  --green-600: #19865f;
+  --green-500: #20a66f;
+  --green-200: #b8efd2;
+  --green-100: #dcf8e9;
+  --green-50: #f2fcf7;
+  --gold: #c7a547;
+  --ink: #18312a;
+  --muted: #566b63;
+  --line: #cfdfd7;
+  --surface: #ffffff;
+  --background: #f4f8f6;
+  --danger: #b53a45;
+  --warning: #8a5a0a;
+}
+
+html { color-scheme: light; }
+body, .app-shell, .main-content { color: var(--ink); background-color: var(--background); }
+
+/* Original navigation colors with stronger legibility. */
+.sidebar {
+  color: #fff;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(62,219,154,.24), transparent 30%),
+    linear-gradient(160deg, var(--green-950), var(--green-800));
+}
+.nav-item { color: rgba(255,255,255,.84); }
+.nav-item:hover, .nav-item.active { color: #fff; }
+.sidebar-footer { color: rgba(255,255,255,.88); }
+.sidebar-footer small,
+.account-copy small { color: rgba(255,255,255,.72); }
+#currentAccountRole { color: #f3d774 !important; }
+.logout-button { color: #fff; border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.10); }
+
+/* Original light content surfaces. */
+.topbar { color: var(--ink); background: rgba(244,248,246,.96); }
+.panel,
+.metric-card,
+.action-card,
+.period-group-card,
+.alert-summary-card,
+.event-card,
+.inventory-metric,
+.modal-card,
+.table-wrap,
+.monthly-table-wrap,
+.dcc-section,
+.dcc-panel { color: var(--ink); background-color: var(--surface); border-color: var(--line); }
+
+/* Primary actions retain the original LSO green while meeting readable contrast. */
+.button-primary,
+.auth-submit {
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--green-700), var(--green-600)) !important;
+}
+.button-secondary { color: var(--green-800); background: #fff; border-color: var(--line); }
+.button-light { color: var(--green-900); background: var(--green-50); }
+.button-danger { color: #fff; background: var(--danger); }
+.icon-button { color: var(--green-900); background: #edf5f1; }
+.table-action,
+.small-button { color: var(--green-800); background: #fff; border-color: var(--line); }
+
+/* Fields and placeholders. */
+.field > span,
+.auth-card .field > span { color: #334f45; }
+input, select, textarea {
+  color: var(--ink);
+  background: #fff;
+  border-color: #c6d8d0;
+}
+input::placeholder,
+textarea::placeholder { color: #6f837b; opacity: 1; }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 4px rgba(25,134,95,.13);
+}
+input:disabled, select:disabled, textarea:disabled,
+.staff-readonly-field {
+  color: #465d54 !important;
+  background: #f2f6f4 !important;
+  opacity: 1 !important;
+}
+
+/* General secondary text: same palette, darker for visibility. */
+.panel-subtitle,
+.metric-card p,
+.recent-item p,
+.member-cell small,
+.lookup-result small,
+.record-header p:last-child,
+.record-field span,
+.record-notes p,
+.action-card p,
+.section-heading p,
+.empty-state p,
+.record-placeholder p,
+.table-subtext,
+.event-copy small,
+.attendance-summary span,
+.alert-preview-item small,
+.alert-row small,
+.directory-toolbar p,
+.auto-stage-label,
+.auto-stage-panel p,
+.stage-timeline-note,
+.monthly-report-help,
+.monthly-summary-card span,
+.monthly-summary-card small,
+.monthly-empty-row,
+.monthly-inline-note,
+.contract-member-list small,
+.contract-selected-profile small,
+.field-help,
+.contract-preview-placeholder p,
+.contract-staff-notice p,
+.duty-session-description,
+.duty-review-card-header small,
+.duty-review-time-block small,
+.duty-review-notes span,
+.duty-review-notes p {
+  color: var(--muted) !important;
+}
+
+/* Tables and cards need visible boundaries on bright phone screens. */
+th { color: #40594f; background: #eef7f2; }
+td { color: var(--ink); }
+tbody tr:hover { background: #f7fcf9; }
+.table-wrap,
+.monthly-table-wrap,
+.panel,
+.metric-card,
+.dcc-section,
+.dcc-panel { box-shadow: 0 8px 28px rgba(9,60,45,.065); }
+
+/* Status colors retain their original meaning with stronger text. */
+.badge-green,
+.approval-status-badge.approved,
+.duty-punch-status-chip.approved { color: #0b5f42 !important; background: #dcf5e7 !important; }
+.badge-gray,
+.duty-punch-status-chip.not-submitted { color: #4f625b !important; background: #e9efec !important; }
+.badge-gold,
+.approval-status-badge.pending,
+.duty-punch-status-chip.pending { color: #705000 !important; background: #ffefb8 !important; }
+.badge-red,
+.approval-status-badge.rejected,
+.duty-punch-status-chip.rejected,
+.duty-punch-status-chip.cancelled { color: #8f2733 !important; background: #fbe1e4 !important; }
+.badge-blue { color: #1e567e !important; background: #dcecf7 !important; }
+.badge-purple { color: #5d3988 !important; background: #ebe1f8 !important; }
+
+/* Dashboard command center visibility. */
+#dashboardCommandCenterV4 {
+  --dcc-green: #0c654a;
+  --dcc-deep: #083d30;
+  --dcc-line: #cfdfd7;
+  --dcc-soft: #f2f8f5;
+  --dcc-muted: #566b63;
+  color: var(--ink);
+}
+.dcc-hero {
+  color: #fff;
+  background: radial-gradient(circle at 84% 12%, rgba(94,239,173,.22), transparent 28%), linear-gradient(125deg, #052d23, #0b5c43 58%, #167055);
+}
+.dcc-hero p,
+.dcc-role-row { color: rgba(255,255,255,.88); }
+.dcc-ghost { border-color: rgba(255,255,255,.42) !important; background: rgba(255,255,255,.13) !important; }
+.dcc-action-copy em,
+.dcc-section-heading p:not(.dcc-kicker),
+.dcc-panel-heading p:not(.dcc-kicker),
+.dcc-month-metrics span,
+.dcc-inline-kpis span,
+.dcc-health-kpis span,
+.dcc-event-row > span small,
+.dcc-upcoming-row > span small,
+.dcc-risk-row > span:nth-child(2) small,
+.dcc-rate-ring small { color: var(--dcc-muted) !important; }
+
+/* Authentication page: original dark-green gradient, white headline, LSO gold accent. */
+.auth-screen {
+  color: #fff;
+  background:
+    radial-gradient(circle at 9% 17%, rgba(68,199,137,.18), transparent 24%),
+    radial-gradient(circle at 88% 84%, rgba(199,165,71,.16), transparent 27%),
+    linear-gradient(135deg, #05291f 0%, #0a4937 56%, #176a4c 100%) !important;
+}
+.auth-brand-panel h1 { color: #fff !important; }
+.auth-eyebrow { color: #a9f2ce !important; }
+.auth-brand-summary { color: rgba(255,255,255,.86) !important; }
+.auth-motto { color: rgba(255,255,255,.94) !important; }
+.auth-brand-rule { background: linear-gradient(90deg, var(--gold), rgba(199,165,71,.12)); }
+.auth-card { color: var(--ink) !important; background: rgba(255,255,255,.985) !important; }
+.auth-heading h2 { color: var(--green-950) !important; }
+.auth-heading > p:last-child { color: var(--muted) !important; }
+.auth-tab { color: var(--muted) !important; }
+.auth-tab.active { color: var(--green-900) !important; background: #fff !important; }
+.password-toggle { color: var(--green-800) !important; }
+
+/* Connectivity and toast messages. */
+.connection-banner[data-state="online"] { color: #fff; background: var(--green-700); }
+.connection-banner[data-state="offline"] { color: #fff; background: #805211; }
+.toast { color: #fff; background: var(--green-900); }
+.toast.error { color: #fff; background: var(--danger); }
+
+/* Keyboard visibility and touch clarity. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (max-width: 920px) {
+  .auth-card { border-color: rgba(255,255,255,.88) !important; }
+  .auth-tabs { background: #eaf4ef !important; }
+  .topbar { background: rgba(244,248,246,.985); }
+}
+
+@media (forced-colors: active) {
+  .panel, .metric-card, .auth-card, .dcc-section, .dcc-panel { border: 1px solid CanvasText; }
+}
