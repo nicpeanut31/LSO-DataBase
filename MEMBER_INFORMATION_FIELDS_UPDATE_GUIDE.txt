@@ -1,0 +1,29 @@
+LSO MEMBER INFORMATION FIELDS UPDATE
+
+Removed from Register New Member Information:
+- Contact Number
+- Emergency Contact Name
+- Relationship
+- Emergency Contact Number
+- Alternative Contact
+
+Also removed from:
+- Required-field validation
+- Member record completeness scoring
+- Member Lookup record display
+- Printed member record
+- CSV member export
+- Dashboard safety-contact alerts
+- Duty Hours member contact display
+
+Existing records are not deleted. Legacy values remain preserved internally when an existing member is edited, but the website no longer collects, displays, validates, exports, or uses them.
+
+DEPLOYMENT
+1. Extract the ZIP.
+2. Upload every file inside the folder to the GitHub Pages repository.
+3. Replace index.html and all changed JavaScript/PWA files.
+4. Wait for deployment to finish.
+5. Desktop: press Ctrl + Shift + R.
+6. Mobile/PWA: close the app completely, reopen, and refresh once.
+
+No Supabase SQL update is required.

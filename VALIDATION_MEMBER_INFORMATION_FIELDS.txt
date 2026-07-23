@@ -1,0 +1,43 @@
+LSO MEMBER INFORMATION CONTACT-FIELD REMOVAL — VALIDATION REPORT
+
+Result: 33/33 checks passed
+
+[PASS] Form field removed: contactNumber
+[PASS] Form field removed: emergencyContactName
+[PASS] Form field removed: emergencyContactRelationship
+[PASS] Form field removed: emergencyContactNumber
+[PASS] Form field removed: alternativeContactNumber
+[PASS] Personal information description updated
+[PASS] DLSUD Outlook spans full row
+[PASS] CSV/display label removed: Contact Number
+[PASS] CSV/display label removed: Emergency Contact Name
+[PASS] CSV/display label removed: Emergency Contact Relationship
+[PASS] CSV/display label removed: Emergency Contact Number
+[PASS] CSV/display label removed: Alternative Contact Number
+[PASS] No removed DOM lookup: contactNumber
+[PASS] No removed DOM lookup: emergencyContactName
+[PASS] No removed DOM lookup: emergencyContactRelationship
+[PASS] No removed DOM lookup: emergencyContactNumber
+[PASS] No removed DOM lookup: alternativeContactNumber
+[PASS] Legacy contact fields preserved for existing records
+[PASS] Completeness no longer requires removed fields
+[PASS] Validation no longer requires emergency fields
+[PASS] Emergency-contact alert removed
+[PASS] Dashboard safety-contact metric removed
+[PASS] Duty reports no longer show contact number
+[PASS] No duplicate HTML IDs
+[PASS] All local HTML references exist
+[PASS] All service-worker core assets exist
+[PASS] New service worker cache version active
+[PASS] PWA registers new service worker
+[PASS] Index loads new cache-safe scripts
+[PASS] JavaScript syntax (25 files)
+[PASS] GitHub file count below 100 — 65
+[PASS] No file exceeds GitHub 100 MB limit — pdf-lib.min.js: 0.50 MB
+[PASS] No Supabase SQL migration required — No database schema files were changed for this update.
+
+Scope:
+- Removed five requested fields from registration and all active displays/validation/export logic.
+- Existing legacy values are preserved internally when editing older records.
+- No Supabase SQL update is required.
+- Original LSO colors, mobile compatibility, roles, Attendance, Duty Hours, Contract, Monthly Report, and Dashboard files remain included.
