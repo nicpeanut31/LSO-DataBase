@@ -13,6 +13,86 @@
   const el = (id) => document.getElementById(id);
   const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
 
+  let authenticationGateObserver = null;
+
+  function hasAuthenticatedApplicationState() {
+    return Boolean(window.LSOCurrentAccount && document.body?.dataset.authenticated === 'true');
+  }
+
+  function lockApplicationShell() {
+    document.documentElement.classList.add('lso-auth-locked');
+    if (document.body) delete document.body.dataset.authenticated;
+
+    const shell = el('appShell');
+    if (shell) {
+      shell.classList.add('hidden', 'auth-locked');
+      shell.hidden = true;
+      shell.setAttribute('hidden', '');
+      shell.setAttribute('inert', '');
+      shell.setAttribute('aria-hidden', 'true');
+      shell.style.setProperty('display', 'none', 'important');
+    }
+
+    const auth = el('authScreen');
+    if (auth) {
+      auth.classList.remove('hidden');
+      auth.hidden = false;
+      auth.removeAttribute('hidden');
+      auth.removeAttribute('inert');
+      auth.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function unlockApplicationShell() {
+    if (!window.LSOCurrentAccount) {
+      lockApplicationShell();
+      return false;
+    }
+
+    document.body.dataset.authenticated = 'true';
+    const auth = el('authScreen');
+    if (auth) {
+      auth.classList.add('hidden');
+      auth.hidden = true;
+      auth.setAttribute('hidden', '');
+      auth.setAttribute('inert', '');
+      auth.setAttribute('aria-hidden', 'true');
+    }
+
+    const shell = el('appShell');
+    if (shell) {
+      shell.style.removeProperty('display');
+      shell.classList.remove('hidden', 'auth-locked');
+      shell.hidden = false;
+      shell.removeAttribute('hidden');
+      shell.removeAttribute('inert');
+      shell.setAttribute('aria-hidden', 'false');
+    }
+    document.documentElement.classList.remove('lso-auth-locked');
+    return true;
+  }
+
+  function enforceAuthenticationGate() {
+    if (!hasAuthenticatedApplicationState()) lockApplicationShell();
+  }
+
+  function installAuthenticationGateObserver() {
+    if (authenticationGateObserver || !document.body) return;
+    const shell = el('appShell');
+    if (!shell) return;
+    authenticationGateObserver = new MutationObserver(() => {
+      if (!hasAuthenticatedApplicationState() && (!shell.hidden || !shell.classList.contains('hidden') || shell.style.display !== 'none')) {
+        lockApplicationShell();
+      }
+    });
+    authenticationGateObserver.observe(shell, { attributes: true, attributeFilter: ['class', 'hidden', 'style', 'inert', 'aria-hidden'] });
+    window.addEventListener('pageshow', enforceAuthenticationGate);
+    window.addEventListener('popstate', enforceAuthenticationGate);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') enforceAuthenticationGate();
+    });
+  }
+
   let accountsCache = [];
   let accountRefreshTimer = null;
   let loginCooldownTimer = null;
@@ -341,8 +421,7 @@
             ? 'duty-entry'
             : 'read-only';
     document.body.dataset.storageMode = 'cloud';
-    el('authScreen')?.classList.add('hidden');
-    el('appShell')?.classList.remove('hidden');
+    // The application stays fail-closed until role setup is complete.
     if (el('currentAccountName')) el('currentAccountName').textContent = normalized.displayName || normalized.username;
     if (el('currentAccountUsername')) el('currentAccountUsername').textContent = `@${normalized.username}`;
     if (el('accountAvatar')) el('accountAvatar').textContent = accountInitial(normalized);
@@ -361,6 +440,7 @@
     const activeView = document.querySelector('.view.active')?.id;
     const landingView = roleAccess?.defaultView?.(normalized) || (traineeAccess ? 'dutyHoursView' : 'dashboardView');
     if (!activeView || !(roleAccess?.canAccessView?.(activeView, normalized) ?? true)) window.LSOApp?.setView?.(landingView);
+    if (!unlockApplicationShell()) return;
     emit('lso:auth-changed', normalized);
     window.LSOPermissions?.apply?.();
     document.title = traineeAccess ? 'Duty Hours | LSO Orchestra Management System' : 'LSO Orchestra Management System';
@@ -374,8 +454,7 @@
     delete document.body.dataset.accountRole;
     delete document.body.dataset.accessMode;
     document.body.dataset.storageMode = 'cloud';
-    el('appShell')?.classList.add('hidden');
-    el('authScreen')?.classList.remove('hidden');
+    lockApplicationShell();
     el('sidebar')?.classList.remove('open');
     el('memberModal')?.classList.add('hidden');
     document.body.style.overflow = '';
@@ -674,6 +753,8 @@
   };
 
   async function initializeAuth() {
+    lockApplicationShell();
+    installAuthenticationGateObserver();
     wireAuthEvents();
     bindActivityListeners();
     showLoginScreen();

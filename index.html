@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html class="lso-auth-locked" lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
@@ -15,10 +15,37 @@
 <meta content="LSO System" name="apple-mobile-web-app-title"/>
 <meta content="Lasallian Symphony Orchestra membership, recruitment, attendance, reporting, and administration system" name="description"/>
 <title>LSO Orchestra Management System</title>
+<script id="lso-auth-gate-bootstrap">
+  document.documentElement.classList.add('lso-auth-locked');
+</script>
+<style id="lso-auth-security-gate-v1">
+  /* Fail closed: the management system is never rendered until auth.js explicitly unlocks it. */
+  html.lso-auth-locked #appShell,
+  body:not([data-authenticated="true"]) #appShell,
+  #appShell[hidden],
+  #appShell.auth-locked {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    content-visibility: hidden !important;
+  }
+  html.lso-auth-locked #authScreen,
+  body:not([data-authenticated="true"]) #authScreen:not([hidden]) {
+    display: grid !important;
+  }
+</style>
 <link rel="icon" href="favicon.ico?v=20260717-logos" sizes="any"/>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=20260717-logos"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260721-pwa-v1"/>
-<link rel="manifest" href="manifest.webmanifest?v=20260721-pwa-v1"/>
+<link rel="manifest" href="manifest.webmanifest?v=20260724-auth-security-v15"/>
 <link href="styles.css?v=20260720-member-table-v2" rel="stylesheet"/>
 <link href="duty-roster-layout.css?v=20260717-1605" rel="stylesheet"/>
 <link href="access-control.css?v=20260721-role-approval-v2" rel="stylesheet"/>
@@ -42,7 +69,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 <body>
 <div aria-live="polite" class="connection-banner hidden" id="connectionBanner" role="status"></div>
 <button class="pwa-install-button hidden" id="installAppButton" type="button">Install LSO App</button>
-<section aria-labelledby="authTitle" class="auth-screen" id="authScreen">
+<section aria-hidden="false" aria-labelledby="authTitle" class="auth-screen" id="authScreen">
 <div aria-hidden="true" class="auth-decoration auth-decoration-one"></div>
 <div aria-hidden="true" class="auth-decoration auth-decoration-two"></div>
 <div class="auth-brand-panel">
@@ -134,7 +161,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 </form>
 </div>
 </section>
-<div class="app-shell hidden" id="appShell">
+<div aria-hidden="true" class="app-shell hidden auth-locked" hidden id="appShell" inert style="display:none">
 <aside aria-label="Primary navigation" class="sidebar" id="sidebar">
 <button aria-label="Close navigation" class="sidebar-close" id="sidebarCloseButton" type="button">×</button>
 <div class="brand">
@@ -999,7 +1026,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 <label class="field"><span>Birthdate</span><input id="birthdate" type="date"/></label>
 <label class="field"><span>Sex</span><select id="sex"><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></label>
 <label class="field"><span>Student Number *</span><input id="studentNumber" required=""/></label>
-<label class="field span-3"><span>DLSUD Outlook *</span><input id="outlook" placeholder="name@dlsud.edu.ph" required="" type="email"/></label>
+<label class="field span-2"><span>DLSUD Outlook *</span><input id="outlook" placeholder="name@dlsud.edu.ph" required="" type="email"/></label>
 <label class="field span-3"><span>Home Address</span><textarea id="homeAddress" placeholder="Complete home address" rows="2"></textarea></label>
 </div>
 </div>
@@ -1122,7 +1149,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 <script src="role-access-v2.js?v=20260722-account-roles-v3"></script>
 <script src="cloud.js?v=20260722-account-roles-v3"></script>
 <script src="app-member-information-v5.js?v=20260724-member-information-v5"></script>
-<script src="auth.js?v=20260722-account-roles-v3"></script>
+<script src="auth.js?v=20260724-auth-security-v15"></script>
 <script src="management-attendance-member-info-v3.js?v=20260724-member-information-v3"></script>
 <script src="ui-enhancements.js?v=20260717-1605"></script>
 <script src="dashboard-enhancements.js?v=20260717-1605"></script>
@@ -1138,6 +1165,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 <script src="permissions.js?v=20260722-account-roles-v3"></script>
 <script src="dashboard-command-center-v4.js?v=20260722-account-roles-v3"></script>
 <script src="login-logo-3d-v1.js?v=20260723-login-logo-3d-v1"></script>
-<script src="pwa-member-info-v14.js?v=20260724-member-information-v14"></script>
+<script src="pwa-auth-security-v15.js?v=20260724-auth-security-v15"></script>
 </body>
 </html>

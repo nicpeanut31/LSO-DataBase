@@ -1,0 +1,37 @@
+LSO MOBILE AUTHENTICATION SECURITY FIX - VALIDATION REPORT
+
+Result: 30/30 checks passed
+
+[PASS] HTML starts in locked mode — ['lso-auth-locked']
+[PASS] Application shell exists
+[PASS] Application shell has hidden attribute
+[PASS] Application shell is inert before login
+[PASS] Application shell is aria-hidden before login
+[PASS] Application shell has fail-closed class
+[PASS] Application shell has inline display none
+[PASS] Authentication screen is visible by default
+[PASS] Head contains fail-closed security gate
+[PASS] Security gate appears before stylesheet links
+[PASS] Login lock function exists
+[PASS] Authenticated unlock function exists
+[PASS] Mutation observer protection exists
+[PASS] Authenticated state is explicit
+[PASS] Application unlock occurs through guarded function
+[PASS] Shared data loads only during authorization
+[PASS] Session is saved before application unlock
+[PASS] Authorization order is load state, save session, then show app — [19748, 19900, 20056]
+[PASS] No other script can unlock application shell
+[PASS] All local HTML assets exist
+[PASS] All JavaScript files pass syntax check
+[PASS] All PWA core cache assets exist
+[PASS] PWA registers new security service worker
+[PASS] Old PWA entry points removed
+[PASS] Supabase setup SQL is unchanged — 6b7124e4a90db78980e7dfbe16523489fbca68d1e0645d0d9c4edebae09425cd
+[PASS] Account-role installer SQL is unchanged
+[PASS] GitHub package has fewer than 100 files — 66
+[PASS] No file exceeds GitHub 100 MB limit — pdf-lib.min.js: 525099 bytes
+[PASS] No duplicate HTML IDs
+[PASS] Fail-closed CSS uses !important — 13
+
+Browser note:
+The container browser blocks localhost by organization policy, so a live local navigation screenshot could not be completed. Static fail-closed, syntax, asset, PWA, permission, and database-integrity checks were completed instead.

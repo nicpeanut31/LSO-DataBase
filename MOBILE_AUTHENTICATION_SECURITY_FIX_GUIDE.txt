@@ -1,0 +1,38 @@
+LSO MOBILE AUTHENTICATION SECURITY FIX
+
+PURPOSE
+This update fixes the mobile issue where the management system could appear below the Login page before authentication.
+
+WHAT CHANGED
+1. The complete application shell starts with the native HTML hidden attribute.
+2. It also starts inert, aria-hidden, and display:none.
+3. A fail-closed security rule is loaded in the document head before the normal stylesheets.
+4. The application unlocks only after Supabase validates the session, loads the authorized shared state, and stores the active session.
+5. A MutationObserver immediately restores the lock if another stale script or stylesheet attempts to expose the application while no authenticated account exists.
+6. Logout, invalid sessions, failed initialization, page restoration, and visibility changes all restore the locked Login-only state.
+7. A new service-worker version removes old LSO caches and prevents the previous mobile layout from remaining installed.
+
+DATABASE
+No SQL update is required. Supabase setup and account-role SQL files were not changed.
+
+GITHUB DEPLOYMENT
+1. Extract LSO_Mobile_Authentication_Security_Fix.zip.
+2. Upload every file inside the extracted folder to the GitHub Pages publishing root.
+3. Replace index.html and auth.js; do not upload only one file.
+4. Confirm that these new files are uploaded:
+   - pwa-auth-security-v15.js
+   - service-worker-auth-security-v15.js
+5. Wait until GitHub Pages finishes deployment.
+
+PHONE CACHE RESET
+1. Close every open tab of the LSO website.
+2. Close the installed LSO PWA completely, when installed.
+3. Reopen the normal GitHub Pages address while connected to the internet.
+4. Refresh once.
+5. When an old screen still appears, clear the site storage/cache for the LSO GitHub Pages address or uninstall the old PWA once, then reopen the website.
+
+EXPECTED RESULT
+- Before login: only Login or Register Account is visible.
+- Scrolling cannot reveal Dashboard, Members, Attendance, Duty Hours, Accounts, or any other system module.
+- After valid login: only the modules allowed for the approved account role are shown.
+- After logout or session expiry: the system is immediately hidden again.
