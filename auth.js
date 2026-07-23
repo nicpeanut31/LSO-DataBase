@@ -13,6 +13,8 @@
   const el = (id) => document.getElementById(id);
   const normalizeUsername = (value) => String(value || '').trim().toLowerCase();
 
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
   let authenticationGateObserver = null;
 
   function hasAuthenticatedApplicationState() {
@@ -70,6 +72,67 @@
     }
     document.documentElement.classList.remove('lso-auth-locked');
     return true;
+  }
+
+  let viewportResetTimer = null;
+
+  function defaultLandingView(account) {
+    const normalized = normalizeAccount(account);
+    const roleAccess = window.LSORoleAccess;
+    return roleAccess?.defaultView?.(normalized) || (normalized?.role === 'Trainee/Probationary' ? 'dutyHoursView' : 'dashboardView');
+  }
+
+  function resetAuthenticatedViewport(viewId) {
+    const html = document.documentElement;
+    const body = document.body;
+    if (!html || !body) return;
+
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    body.classList.remove('sidebar-open');
+    body.style.overflow = '';
+    el('sidebar')?.classList.remove('open');
+
+    const previousHtmlScrollBehavior = html.style.scrollBehavior;
+    const previousBodyScrollBehavior = body.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    body.style.scrollBehavior = 'auto';
+
+    const reset = () => {
+      window.scrollTo(0, 0);
+      html.scrollTop = 0;
+      body.scrollTop = 0;
+      const shell = el('appShell');
+      const main = document.querySelector('.main-content');
+      const activeView = viewId ? el(viewId) : document.querySelector('.view.active');
+      if (shell) shell.scrollTop = 0;
+      if (main) main.scrollTop = 0;
+      if (activeView) activeView.scrollTop = 0;
+    };
+
+    reset();
+    requestAnimationFrame(() => {
+      reset();
+      requestAnimationFrame(reset);
+    });
+    [80, 220, 520].forEach((delay) => window.setTimeout(reset, delay));
+
+    clearTimeout(viewportResetTimer);
+    viewportResetTimer = window.setTimeout(() => {
+      html.style.scrollBehavior = previousHtmlScrollBehavior;
+      body.style.scrollBehavior = previousBodyScrollBehavior;
+      const title = el('pageTitle');
+      if (title) {
+        title.setAttribute('tabindex', '-1');
+        try { title.focus({ preventScroll: true }); } catch { /* Older mobile browsers */ }
+      }
+    }, 620);
+  }
+
+  function openAuthenticatedLanding(account) {
+    const landingView = defaultLandingView(account);
+    window.LSOApp?.setView?.(landingView);
+    resetAuthenticatedViewport(landingView);
+    return landingView;
   }
 
   function enforceAuthenticationGate() {
@@ -437,10 +500,10 @@
       if (!allowed) node.tabIndex = -1;
       else node.removeAttribute('tabindex');
     });
-    const activeView = document.querySelector('.view.active')?.id;
-    const landingView = roleAccess?.defaultView?.(normalized) || (traineeAccess ? 'dutyHoursView' : 'dashboardView');
-    if (!activeView || !(roleAccess?.canAccessView?.(activeView, normalized) ?? true)) window.LSOApp?.setView?.(landingView);
+    const landingView = defaultLandingView(normalized);
+    window.LSOApp?.setView?.(landingView);
     if (!unlockApplicationShell()) return;
+    openAuthenticatedLanding(normalized);
     emit('lso:auth-changed', normalized);
     window.LSOPermissions?.apply?.();
     document.title = traineeAccess ? 'Duty Hours | LSO Orchestra Management System' : 'LSO Orchestra Management System';
@@ -459,6 +522,11 @@
     el('memberModal')?.classList.add('hidden');
     document.body.style.overflow = '';
     document.title = 'Login | LSO Orchestra Management System';
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    requestAnimationFrame(() => window.scrollTo(0, 0));
     el('loginForm')?.reset();
     el('registerForm')?.reset();
     if (el('loginUsername')) el('loginUsername').value = '';
@@ -536,10 +604,8 @@
       await refreshAccounts();
       window.LSOApp?.refresh?.();
       window.LSOOperations?.refreshAll?.();
-      if (normalized.role === 'Trainee/Probationary') {
-        window.LSOApp?.setView?.('dutyHoursView');
-        window.LSODutyHours?.refresh?.();
-      }
+      openAuthenticatedLanding(normalized);
+      if (normalized.role === 'Trainee/Probationary') window.LSODutyHours?.refresh?.();
       if (migrated) {
         setTimeout(() => window.LSOApp?.showToast?.('Existing records from this browser were moved to the shared online database.'), 60);
       } else if (!resumed) {

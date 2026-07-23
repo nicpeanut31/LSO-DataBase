@@ -1,0 +1,32 @@
+LSO AUTOMATIC DASHBOARD LOGIN FIX - VALIDATION REPORT
+=========================================================
+
+01. PASS - All JavaScript files pass node --check
+02. PASS - Authentication script uses new cache version
+03. PASS - New PWA registration script is loaded
+04. PASS - Old PWA authentication scripts are absent
+05. PASS - New service worker exists
+06. PASS - Authentication transition contains: history.scrollRestoration = 'manual'
+07. PASS - Authentication transition contains: function resetAuthenticatedViewport(viewId)
+08. PASS - Authentication transition contains: document.activeElement.blur()
+09. PASS - Authentication transition contains: window.scrollTo(0, 0)
+10. PASS - Authentication transition contains: function openAuthenticatedLanding(account)
+11. PASS - Authentication transition contains: openAuthenticatedLanding(normalized)
+12. PASS - Authentication transition contains: normalized?.role === 'Trainee/Probationary' ? 'dutyHoursView' : 'dashboardView'
+13. PASS - Viewport reset runs after shared-state refresh
+14. PASS - Login screen also resets to top
+15. PASS - Application shell remains hidden by default
+16. PASS - HTML starts authentication-locked
+17. PASS - All local HTML asset references exist
+18. PASS - Manifest JSON is valid
+19. PASS - Manifest uses new start URL
+20. PASS - Service worker uses new cache namespace
+21. PASS - Service worker caches new PWA script
+22. PASS - All service-worker core assets exist
+23. PASS - Package contains fewer than 100 files (67 files)
+24. PASS - No file exceeds GitHub 100 MB limit
+25. PASS - Supabase SQL files are unchanged
+
+Result: 25/25 checks passed.
+Live authentication against the private Supabase project was not executed in this environment.
+The package was validated structurally, by JavaScript parsing, cache references, and permission-preserving source checks.

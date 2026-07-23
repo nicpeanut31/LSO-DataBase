@@ -3,7 +3,7 @@
   "name": "LSO Orchestra Management System",
   "short_name": "LSO System",
   "description": "Lasallian Symphony Orchestra membership, attendance, duty-hours, reporting, and administration portal.",
-  "start_url": "./?v=20260724-auth-security-v15",
+  "start_url": "./?v=20260724-auth-dashboard-redirect-v16",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

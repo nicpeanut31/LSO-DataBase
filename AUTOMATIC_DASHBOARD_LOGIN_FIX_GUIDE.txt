@@ -1,0 +1,35 @@
+LSO AUTOMATIC DASHBOARD AFTER LOGIN FIX
+=======================================
+
+Problem fixed
+-------------
+On mobile devices, a valid login could unlock the system while preserving the scroll position from the long login page. The account was authenticated, but the user landed lower in the application and had to scroll manually to find the Dashboard.
+
+What changed
+------------
+1. A successful login now opens the role's correct landing view immediately.
+   - Administrator, Membership, General Secretary, and Staff Account: Dashboard
+   - Trainee/Probationary: Duty Hours
+2. The focused password field is blurred to close the mobile keyboard.
+3. Window, document, application shell, main content, and active-view scroll positions are reset to the top.
+4. The reset is repeated after layout/render updates to handle mobile browser and virtual-keyboard timing.
+5. Browser scroll restoration is disabled for the authenticated transition.
+6. Logout also returns the user to the top of the Login page.
+7. The PWA service worker and cache version were changed so phones do not reuse the previous authentication script.
+
+Deployment
+----------
+1. Extract the ZIP.
+2. Upload every file inside the extracted folder to the GitHub Pages repository.
+3. Replace index.html and auth.js.
+4. Include these new files:
+   - pwa-auth-dashboard-redirect-v16.js
+   - service-worker-auth-dashboard-redirect-v16.js
+5. Wait for GitHub Pages to finish deploying.
+6. Close all browser tabs and the installed LSO app.
+7. Reopen the site while online and refresh once.
+8. If an old version still appears, clear the site's stored data or uninstall/reinstall the PWA once.
+
+Database impact
+---------------
+No Supabase SQL update is required. No member, account, attendance, duty-hour, contract, or report data is modified.
