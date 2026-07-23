@@ -1,0 +1,23 @@
+LSO LOGIN 3D LOGO UPDATE
+
+WHAT CHANGED
+- The login logo is rendered as a layered 3D card through HTML, CSS, and JavaScript.
+- The original LSO logo remains the source artwork; no pre-rendered 3D image is used.
+- The design includes physical-looking depth layers, dynamic lighting, an idle float, a moving highlight, and pointer-based tilt on desktop.
+- Motion is reduced automatically for users who enable Reduce Motion.
+- Tablet and mobile layouts use a lighter, compact 3D presentation.
+
+DEPLOYMENT
+1. Upload every file in this folder to the GitHub Pages publishing root.
+2. Keep index.html in the root.
+3. Press Ctrl + Shift + R after GitHub Pages finishes deploying.
+4. If the site is installed as a PWA, close it completely and reopen it once.
+
+NEW ACTIVE FILES
+- login-logo-3d-v1.css
+- login-logo-3d-v1.js
+- pwa-login-3d-v8.js
+- service-worker-login-3d-v9.js
+
+DATABASE
+No Supabase SQL update is required. This is a website-design-only modification.

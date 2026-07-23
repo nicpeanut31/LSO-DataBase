@@ -21,6 +21,7 @@
 <link href="access-control.css?v=20260721-role-approval-v2" rel="stylesheet"/>
 <link href="branding.css?v=20260717-logos" rel="stylesheet"/>
 <link href="login-page.css?v=20260717-landing-v2" rel="stylesheet"/>
+<link href="login-logo-3d-v1.css?v=20260723-login-logo-3d-v1" rel="stylesheet"/>
 <link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
 <link href="dashboard-v2.css?v=20260718-gender-dashboard-v1" rel="stylesheet"/>
 <link href="dashboard-command-center-v4.css?v=20260722-command-center-v4" rel="stylesheet"/>
@@ -37,8 +38,23 @@
 <div aria-hidden="true" class="auth-decoration auth-decoration-one"></div>
 <div aria-hidden="true" class="auth-decoration auth-decoration-two"></div>
 <div class="auth-brand-panel">
-<div class="auth-logo-card" aria-hidden="true">
-<img class="auth-brand-logo" src="lso-logo.png?v=20260717-login-polish" alt=""/>
+<div class="auth-logo-scene" id="authLogoScene" aria-hidden="true">
+<div class="auth-logo-orbit auth-logo-orbit-one"></div>
+<div class="auth-logo-orbit auth-logo-orbit-two"></div>
+<div class="auth-logo-tilt" id="authLogoTilt">
+<div class="auth-logo-float">
+<span class="auth-logo-depth auth-logo-depth-back"></span>
+<span class="auth-logo-depth auth-logo-depth-mid"></span>
+<span class="auth-logo-depth auth-logo-depth-front"></span>
+<div class="auth-logo-card">
+<span class="auth-logo-grid"></span>
+<span class="auth-logo-shine"></span>
+<img class="auth-brand-logo" src="lso-login-logo.png?v=20260723-login-logo-3d-v1" alt=""/>
+<span class="auth-logo-edge-light"></span>
+</div>
+</div>
+</div>
+<div class="auth-logo-ground-shadow"></div>
 </div>
 <div class="auth-brand-copy">
 <p class="eyebrow auth-eyebrow">Lasallian Symphony Orchestra</p>
@@ -1114,10 +1130,11 @@
 <script src="monthly-report-template-data.js?v=20260719-monthly-report-v1"></script>
 <script src="monthly-report.js?v=20260722-account-roles-v3"></script>
 <script src="contract-template-data.js?v=20260718-contract-v3"></script>
-<script src="contract-maker.js?v=20260722-account-roles-v3"></script>
+<script src="contract-maker-membership-v4.js?v=20260723-membership-contract-v4"></script>
 <script src="dashboard-intelligence.js?v=20260718-gender-dashboard-v2"></script>
 <script src="permissions.js?v=20260722-account-roles-v3"></script>
 <script src="dashboard-command-center-v4.js?v=20260722-account-roles-v3"></script>
-<script src="pwa-account-roles-login-fix-v7.js?v=20260722-login-runtime-fix-v4"></script>
+<script src="login-logo-3d-v1.js?v=20260723-login-logo-3d-v1"></script>
+<script src="pwa-membership-contract-v9.js?v=20260723-membership-contract-v4"></script>
 </body>
 </html>

@@ -1,0 +1,27 @@
+LSO MEMBERSHIP CONTRACT FULL ACCESS - VALIDATION REPORT
+
+Files in package before ZIP: 64
+Checks passed: 16/16
+
+[PASS] All JavaScript files pass node --check
+[PASS] Membership is listed in generateContract action rule
+[PASS] Contract download uses action permission, not Administrator-only permission
+[PASS] Old Administrator-only contract error is removed
+[PASS] Contract workspace uses canGenerateContract helper
+[PASS] Permission layer enables contract form for generateContract roles
+[PASS] HTML loads new contract script
+[PASS] HTML loads new PWA bootstrap
+[PASS] PWA registers new service worker
+[PASS] Service worker has new cache version
+[PASS] Service worker caches new contract script
+[PASS] Service worker does not cache removed contract script
+[PASS] All local HTML assets exist
+[PASS] All service-worker core assets exist
+[PASS] Role runtime test: Administrator and Membership allowed; other roles denied
+[PASS] Package remains under 100 files — 64 files
+
+Scope:
+- Membership can use the complete Contract workspace and download the generated PDF.
+- Administrator retains the same Contract access.
+- General Secretary, Staff Account, and Trainee/Probationary remain denied.
+- No Supabase schema or database migration is required.

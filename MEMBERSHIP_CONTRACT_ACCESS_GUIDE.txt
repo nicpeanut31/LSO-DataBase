@@ -1,0 +1,36 @@
+LSO MEMBERSHIP CONTRACT FULL ACCESS UPDATE
+
+Purpose
+-------
+This update gives the Membership role full access to the Contract workspace.
+
+Membership role permissions in Contract
+---------------------------------------
+- Open the Contract module.
+- Search and select an active official member.
+- Review and correct the postal address for the generated contract.
+- Enter the contract date, officer in charge, semester, and academic year.
+- Generate and refresh the live two-page contract preview.
+- Open the large preview.
+- Download the completed membership contract PDF.
+- Clear and prepare another contract.
+
+Unchanged restrictions
+----------------------
+- Staff Account, General Secretary, and Trainee/Probationary cannot generate contracts.
+- Account management and other Administrator-only functions remain restricted.
+- No Supabase SQL update is required because contract generation is performed in the website and the Membership role already has access to the Contract module.
+
+Deployment
+----------
+1. Upload every file from this folder to the GitHub Pages repository.
+2. Keep index.html in the publishing root.
+3. Do not rename files or allow GitHub to add suffixes such as (1).
+4. Open the deployed website and press Ctrl + Shift + R.
+5. If installed as a PWA, close the app completely and reopen it once.
+6. Sign in with a Membership account and test Preview, Open Large Preview, and Download Contract PDF.
+
+The active cache-safe files are:
+- contract-maker-membership-v4.js
+- pwa-membership-contract-v9.js
+- service-worker-membership-contract-v10.js

@@ -1,0 +1,55 @@
+LSO LOGIN 3D LOGO UPDATE — VALIDATION REPORT
+
+Checks passed: 50/50
+Checks failed: 0
+
+[PASS] Package remains below 100 files — 62 files
+[PASS] JavaScript syntax: ui-enhancements.js
+[PASS] JavaScript syntax: supabase-config.js
+[PASS] JavaScript syntax: management-attendance-month-v2.js
+[PASS] JavaScript syntax: dashboard-intelligence.js
+[PASS] JavaScript syntax: branding.js
+[PASS] JavaScript syntax: dashboard-enhancements.js
+[PASS] JavaScript syntax: pdf-lib.min.js
+[PASS] JavaScript syntax: contract-maker.js
+[PASS] JavaScript syntax: dashboard-command-center-v4.js
+[PASS] JavaScript syntax: workflow-attendance-month-v2.js
+[PASS] JavaScript syntax: auth.js
+[PASS] JavaScript syntax: app-account-roles-login-fix-v4.js
+[PASS] JavaScript syntax: attendance-governance.js
+[PASS] JavaScript syntax: monthly-report.js
+[PASS] JavaScript syntax: permissions.js
+[PASS] JavaScript syntax: service-worker-login-3d-v9.js
+[PASS] JavaScript syntax: role-access-v2.js
+[PASS] JavaScript syntax: monthly-report-template-data.js
+[PASS] JavaScript syntax: cloud.js
+[PASS] JavaScript syntax: duty-hours-organized-v10.js
+[PASS] JavaScript syntax: pwa-login-3d-v8.js
+[PASS] JavaScript syntax: login-logo-3d-v1.js
+[PASS] JavaScript syntax: contract-template-data.js
+[PASS] No duplicate HTML IDs
+[PASS] All local HTML assets exist
+[PASS] Login uses supplied high-resolution logo asset
+[PASS] 3D logo scene markup exists
+[PASS] 3D stylesheet is loaded after base login stylesheet
+[PASS] 3D motion script is loaded
+[PASS] All PWA core assets exist
+[PASS] PWA caches 3D CSS
+[PASS] PWA caches 3D JavaScript
+[PASS] PWA caches supplied login logo
+[PASS] New service worker registration is active
+[PASS] Core file unchanged: supabase-setup.sql
+[PASS] Core file unchanged: LSO_ACCOUNT_ROLES_MEMBERSHIP_GENERAL_SECRETARY_INSTALL.sql
+[PASS] Core file unchanged: app-account-roles-login-fix-v4.js
+[PASS] Core file unchanged: auth.js
+[PASS] Core file unchanged: cloud.js
+[PASS] Core file unchanged: permissions.js
+[PASS] Desktop layout has no horizontal overflow
+[PASS] Desktop logo and login card are visible — scene={'x': 112, 'y': 359, 'width': 225, 'height': 300}; card={'x': 1265, 'y': 295.3125, 'width': 540, 'height': 427.375}
+[PASS] Tablet layout has no horizontal overflow
+[PASS] Tablet logo and login card are visible — scene={'x': 125, 'y': 43.1875, 'width': 118, 'height': 118}; card={'x': 160, 'y': 202.375, 'width': 580, 'height': 427.375}
+[PASS] Mobile layout has no horizontal overflow
+[PASS] Mobile logo and login card are visible — scene={'x': 12, 'y': 18, 'width': 82, 'height': 82}; card={'x': 12, 'y': 118, 'width': 366, 'height': 419.375}
+[PASS] Pointer movement changes 3D tilt — 6deg -> 14.80deg
+[PASS] Pointer leave restores resting tilt — 6deg
+[PASS] Reduced-motion preference disables continuous animation — none
