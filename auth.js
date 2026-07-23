@@ -42,6 +42,7 @@
       auth.removeAttribute('hidden');
       auth.removeAttribute('inert');
       auth.setAttribute('aria-hidden', 'false');
+      ['display','visibility','pointer-events','position','inset','min-height','height','overflow','opacity'].forEach((property) => auth.style.removeProperty(property));
     }
   }
 
@@ -59,16 +60,40 @@
       auth.setAttribute('hidden', '');
       auth.setAttribute('inert', '');
       auth.setAttribute('aria-hidden', 'true');
+      // Use an inline important rule because older mobile layout CSS used
+      // `.auth-screen { display:grid !important; }`, which could otherwise
+      // keep the login screen in the page flow after a valid login.
+      auth.style.setProperty('display', 'none', 'important');
+      auth.style.setProperty('visibility', 'hidden', 'important');
+      auth.style.setProperty('pointer-events', 'none', 'important');
+      auth.style.setProperty('position', 'fixed', 'important');
+      auth.style.setProperty('inset', '0', 'important');
+      auth.style.setProperty('min-height', '0', 'important');
+      auth.style.setProperty('height', '0', 'important');
+      auth.style.setProperty('overflow', 'hidden', 'important');
     }
 
     const shell = el('appShell');
     if (shell) {
-      shell.style.removeProperty('display');
       shell.classList.remove('hidden', 'auth-locked');
       shell.hidden = false;
       shell.removeAttribute('hidden');
       shell.removeAttribute('inert');
       shell.setAttribute('aria-hidden', 'false');
+      const mobileLayout = window.matchMedia?.('(max-width: 920px)')?.matches;
+      shell.style.setProperty('display', mobileLayout ? 'block' : 'grid', 'important');
+      shell.style.setProperty('visibility', 'visible', 'important');
+      shell.style.setProperty('pointer-events', 'auto', 'important');
+      shell.style.setProperty('position', 'relative', 'important');
+      shell.style.setProperty('inset', 'auto', 'important');
+      shell.style.setProperty('width', '100%', 'important');
+      shell.style.setProperty('height', 'auto', 'important');
+      shell.style.setProperty('min-height', '100dvh', 'important');
+      shell.style.setProperty('max-width', 'none', 'important');
+      shell.style.setProperty('max-height', 'none', 'important');
+      shell.style.setProperty('overflow', 'visible', 'important');
+      shell.style.setProperty('opacity', '1', 'important');
+      shell.style.setProperty('content-visibility', 'visible', 'important');
     }
     document.documentElement.classList.remove('lso-auth-locked');
     return true;
@@ -104,7 +129,10 @@
       const shell = el('appShell');
       const main = document.querySelector('.main-content');
       const activeView = viewId ? el(viewId) : document.querySelector('.view.active');
-      if (shell) shell.scrollTop = 0;
+      if (shell) {
+        shell.scrollTop = 0;
+        try { shell.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'auto' }); } catch { /* Older mobile browsers */ }
+      }
       if (main) main.scrollTop = 0;
       if (activeView) activeView.scrollTop = 0;
     };

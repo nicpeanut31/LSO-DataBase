@@ -1,0 +1,27 @@
+LSO AUTHENTICATED VIEW STRUCTURAL TRANSITION — VALIDATION REPORT
+===================================================================
+
+01. PASS — HTML parses
+    429 IDs found
+02. PASS — No duplicate HTML IDs
+03. PASS — All local index references exist
+04. PASS — Mobile auth display selector respects hidden state
+05. PASS — Old unconditional mobile auth display removed
+06. PASS — Inline structural transition CSS included
+07. PASS — Auth hides login with inline important rule
+08. PASS — Auth reveals app shell with device layout
+09. PASS — Auth scrolls app shell into view
+10. PASS — Independent authenticated-view controller included
+11. PASS — Controller remains fail-closed
+12. PASS — One-click cache reset page included
+13. PASS — New PWA registration referenced
+14. PASS — New service-worker cache version active
+15. PASS — Manifest uses new start URL
+16. PASS — All JavaScript files pass syntax check
+    24 files checked
+17. PASS — All service-worker core assets exist
+18. PASS — GitHub package remains under 100 files
+    70 files
+
+Passed: 18/18
+Failed: 0

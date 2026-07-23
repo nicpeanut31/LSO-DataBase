@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b3b2e">
+<title>Refresh LSO System</title>
+<style>
+  :root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#17372f;background:#f4f8f6}
+  *{box-sizing:border-box}body{min-height:100dvh;margin:0;display:grid;place-items:center;padding:24px}
+  main{width:min(520px,100%);padding:28px;border:1px solid #dce9e3;border-radius:22px;background:#fff;box-shadow:0 22px 55px rgba(5,41,31,.16);text-align:center}
+  h1{margin:0 0 10px;color:#0b3b2e;font-size:26px}p{margin:0;color:#566b63;line-height:1.55}.spinner{width:42px;height:42px;margin:0 auto 20px;border:4px solid #dcefe7;border-top-color:#19865f;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main>
+<div class="spinner" aria-hidden="true"></div>
+<h1>Updating the LSO website</h1>
+<p id="status">Removing the previous offline version and loading the corrected login transition…</p>
+</main>
+<script>
+(async()=>{
+  const status=document.getElementById('status');
+  try{
+    if('serviceWorker' in navigator){
+      const registrations=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(registration=>registration.unregister()));
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(key=>key.startsWith('lso-website-')).map(key=>caches.delete(key)));
+    }
+    status.textContent='Update complete. Opening the corrected LSO login…';
+  }catch(error){
+    status.textContent='Opening the corrected LSO login…';
+  }
+  location.replace('./?v=20260724-auth-structural-transition-v17&cache-reset='+Date.now());
+})();
+</script>
+</body>
+</html>

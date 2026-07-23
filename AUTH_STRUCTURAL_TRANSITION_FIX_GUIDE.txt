@@ -1,0 +1,57 @@
+LSO AUTHENTICATED VIEW STRUCTURAL TRANSITION FIX
+=================================================
+
+ROOT CAUSE
+----------
+The mobile compatibility stylesheet contained this type of rule:
+
+  .auth-screen { display: grid !important; }
+
+That rule could override the hidden attribute after a successful login. The
+login page therefore remained in the document above the application. Login
+was valid, but the Dashboard appeared farther down the page and required
+manual scrolling.
+
+WHAT WAS FIXED
+--------------
+1. Mobile login layout rules now apply only while the login screen is not
+   hidden.
+2. Successful authentication removes the login screen from the page layout
+   using inline important rules.
+3. The application shell is displayed as grid on desktop and block on mobile.
+4. A separate authenticated-view controller watches the authentication state
+   and enforces the correct screen even if an older layout script interferes.
+5. The browser, application shell, main content, and active page are all reset
+   to the top after login.
+6. A new service worker and cache version replace the previous PWA files.
+7. refresh-lso.html is included to remove an older installed/cached build.
+
+GITHUB DEPLOYMENT
+-----------------
+1. Extract the ZIP file.
+2. Upload ALL files inside the extracted folder to the GitHub Pages publishing
+   folder. Replace index.html and auth.js.
+3. Confirm these new files are uploaded:
+     auth-view-controller-v17.js
+     pwa-auth-structural-transition-v17.js
+     service-worker-auth-structural-transition-v17.js
+     refresh-lso.html
+4. Wait until the GitHub Pages deployment is complete.
+5. On the phone, open this page once:
+
+     https://YOUR-GITHUB-PAGES-ADDRESS/refresh-lso.html
+
+   It removes the previous service worker/cache and opens the corrected site.
+6. Log in normally. The login screen should disappear and the Dashboard should
+   begin at the top automatically. A Trainee/Probationary account opens Duty
+   Hours instead, based on its role permission.
+
+IMPORTANT
+---------
+Do not upload only auth.js. The fix depends on index.html, the new controller,
+and the new PWA/service-worker files being deployed together.
+
+DATABASE SAFETY
+---------------
+No Supabase schema, table, SQL installer, account record, member record,
+Attendance record, or Duty Hours record was changed by this update.
