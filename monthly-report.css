@@ -357,3 +357,24 @@
   .monthly-control-block .monthly-count-pill { width: 100%; }
   .monthly-remaining-actions #monthlyAddRemaining { grid-column: auto; }
 }
+
+/* Table 5 editable monthly Trainee / Probationary filing */
+.monthly-trainee-filing-table { min-width: 930px !important; }
+.monthly-trainee-filing-table th:nth-child(1),
+.monthly-trainee-filing-table td:nth-child(1) { min-width: 230px; }
+.monthly-trainee-filing-table th:nth-child(2),
+.monthly-trainee-filing-table td:nth-child(2) { min-width: 180px; }
+.monthly-trainee-filing-table th:nth-child(3),
+.monthly-trainee-filing-table td:nth-child(3) { min-width: 115px; }
+.monthly-trainee-filing-table th:nth-child(4),
+.monthly-trainee-filing-table td:nth-child(4) { min-width: 175px; }
+.monthly-trainee-filing-table th:last-child,
+.monthly-trainee-filing-table td:last-child { width: 76px; text-align: center; }
+.monthly-trainee-filing-table input { width: 100%; min-width: 0; }
+.monthly-original-entry-date { min-width: 150px !important; }
+#monthlyTraineeFileStatus { align-items: flex-start; }
+#monthlyTraineeFileStatus small { line-height: 1.5; }
+@media (max-width: 620px) {
+  .monthly-report-actions #monthlySyncTrainees,
+  .monthly-report-actions #monthlyAddTrainee { width: 100%; }
+}

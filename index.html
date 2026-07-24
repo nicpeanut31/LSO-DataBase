@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<meta content="#0b3b2e" name="theme-color"/>
+<meta content="#0B3D2E" name="theme-color"/>
 <meta content="light" name="color-scheme"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
@@ -55,13 +55,19 @@
 <link href="contract-maker-v3.css?v=20260718-contract-v3" rel="stylesheet"/>
 <link href="dashboard-v2.css?v=20260718-gender-dashboard-v1" rel="stylesheet"/>
 <link href="dashboard-command-center-v4.css?v=20260722-command-center-v4" rel="stylesheet"/>
-<link href="monthly-report.css?v=20260719-autosave-layout-v3" rel="stylesheet"/>
+<link href="monthly-report.css?v=20260725-editable-table5-v1" rel="stylesheet"/>
 <link href="website-enhancements.css?v=20260721-duty-punch-separate-v2" rel="stylesheet"/>
 <link href="duty-punch-state-sync-display.css?v=20260721-state-sync-v1" rel="stylesheet"/>
 <link href="duty-punch-organized-v10.css?v=20260721-organized-v10" rel="stylesheet"/>
 <link href="attendance-month-workspace-v2.css?v=20260721-month-workspace-v2" rel="stylesheet"/>
 <link href="login-mobile-compat-v3.css?v=20260724-original-color-v3" rel="stylesheet"/>
 <link href="lso-original-color-contrast-v1.css?v=20260724-color-contrast-v1" rel="stylesheet"/>
+<link href="lso-modern-lasallian-emerald-v2.css?v=20260724-modern-emerald-v2" rel="stylesheet"/>
+<link href="lso-accessible-contrast-v4.css?v=20260724-accessible-contrast-v4" rel="stylesheet"/>
+<link href="lso-login-color-final-v6.css?v=20260724-login-color-final-v6" rel="stylesheet"/>
+<style id="lso-login-color-critical-v6">
+.auth-card .auth-heading p:not(.eyebrow){color:#42584E!important;opacity:1!important;-webkit-text-fill-color:#42584E!important}.auth-card .auth-heading h2{color:#0B3D2E!important}.auth-card .field>span{color:#2F453B!important}.auth-card input::placeholder{color:#66736D!important;opacity:1!important}.auth-tab{color:#4F6259!important}.auth-tab.active{color:#0B3D2E!important}.auth-submit{color:#fff!important}
+</style>
 <style id="lso-mobile-login-critical-v3">
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{box-sizing:border-box}[hidden],.hidden,.auth-form.hidden{display:none!important}.auth-screen,.auth-card,.auth-form,.auth-brand-panel,.auth-brand-copy,.field,.password-field{min-width:0}@media(max-width:920px){.auth-screen:not([hidden]):not(.hidden){display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-content:start!important;gap:18px!important;width:100%!important;min-height:100dvh!important;padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;overflow-x:clip!important;overflow-y:auto!important}.auth-brand-panel{width:min(100%,620px)!important;display:grid!important;grid-template-columns:104px minmax(0,1fr)!important;align-items:center!important;gap:18px!important;margin:0 auto!important;text-align:left!important}.auth-logo-scene{width:96px!important;aspect-ratio:3/4!important}.auth-brand-summary,.auth-brand-rule,.auth-motto{display:none!important}.auth-brand-panel h1{margin:7px 0 0!important;color:#fff!important;font-size:clamp(27px,7.2vw,39px)!important;line-height:1.02!important}.auth-card{width:min(100%,580px)!important;margin:0 auto!important;padding:14px 16px 22px!important;border-radius:24px!important;background:rgba(255,255,255,.985)!important;color:#18312a!important;overflow:hidden!important}.auth-tabs{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;width:100%!important;margin:0 0 20px!important;padding:5px!important}.auth-form{display:grid!important;gap:15px!important;width:100%!important}.auth-form.hidden{display:none!important}.auth-card .field{display:grid!important;gap:8px!important}.auth-card input,.auth-card select,.auth-card textarea{width:100%!important;max-width:100%!important;min-height:52px!important;padding:12px 14px!important;border-radius:14px!important;font-size:16px!important}.password-field{position:relative!important}.password-field input{padding-right:72px!important}.password-toggle{position:absolute!important;right:9px!important;top:50%!important;transform:translateY(-50%)!important}.auth-submit{width:100%!important;min-height:52px!important}}@media(max-width:430px){.auth-screen:not([hidden]):not(.hidden){gap:14px!important;padding-inline:10px!important}.auth-brand-panel{grid-template-columns:82px minmax(0,1fr)!important;gap:13px!important}.auth-logo-scene{width:76px!important}.auth-brand-panel h1{font-size:clamp(24px,7vw,30px)!important}.auth-card{padding:12px 13px 19px!important}.auth-tabs{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}}
 </style>
@@ -549,7 +555,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
     <div>
       <p class="eyebrow">Official Administrative Filing</p>
       <h3>Overall Monthly Report</h3>
-      <p>Prepare the Lasallian Symphony Orchestra manpower complement, monthly member summaries, Leave and OJT records, and the permanent Trainee filing in one official PDF.</p>
+      <p>Prepare the Lasallian Symphony Orchestra manpower complement, monthly member summaries, Leave and OJT records, and an editable Trainee/Probationary filing in one official PDF.</p>
     </div>
     <div class="monthly-report-command-badge"><span>PDF</span><div><strong>Automated official report</strong><small>Shared records • Fillable filing tables • Direct PDF download</small></div></div>
   </div>
@@ -557,7 +563,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
   <div class="monthly-report-filing-map" aria-label="Official report sequence">
     <div><strong>Cover &amp; Complement</strong><small>Official cover, comparative counts, and continuous manpower roster.</small></div>
     <div><strong>Member Summaries</strong><small>Gender, year level, Leave, and OJT tables follow the reference format.</small></div>
-    <div><strong>Trainee Filing</strong><small>Permanent Trainee file, removed records, and remaining roster are retained by semester.</small></div>
+    <div><strong>Trainee Filing</strong><small>Editable Trainee/Probationary rows, removed records, and remaining roster are maintained separately for each monthly report.</small></div>
     <div><strong>Print-ready PDF</strong><small>Letter portrait pages, repeated official template, automatic pagination, and direct download.</small></div>
   </div>
 
@@ -646,9 +652,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
   <div class="monthly-report-tab-panel" data-monthly-panel="trainees">
     <div class="monthly-section-grid">
       <article class="panel monthly-report-panel full">
-        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 5</p><h3>Permanent Summary of Trainees</h3><p class="panel-subtitle">Once captured, names remain in the semester file even when members progress to another stage. Updating only adds new Trainees.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyTraineeFileCount">0</span><button class="button button-primary" id="monthlyCaptureTrainees" data-monthly-write type="button">Update Permanent Trainee File</button></div></div>
+        <div class="panel-header stack-mobile"><div><p class="eyebrow">Table 5</p><h3>Editable Summary of Trainees and Probationary Members</h3><p class="panel-subtitle">This table belongs only to the selected monthly report. You may add, edit, or remove rows, and the Original Entry Date must be entered by the user.</p></div><div class="monthly-report-actions"><span class="monthly-count-pill" id="monthlyTraineeFileCount">0</span><button class="button button-secondary" id="monthlySyncTrainees" data-monthly-write type="button">Sync Current Roster</button><button class="button button-primary" id="monthlyAddTrainee" data-monthly-write type="button">+ Add Record</button></div></div>
         <div class="monthly-snapshot-banner" id="monthlyTraineeFileStatus"></div>
-        <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Year</th><th>Original Entry Date</th></tr></thead><tbody id="monthlyTraineeFileBody"></tbody></table></div>
+        <datalist id="monthlyCurrentTraineeNames"></datalist>
+        <div class="monthly-table-wrap"><table class="monthly-trainee-filing-table"><thead><tr><th>Name</th><th>Course</th><th>Year</th><th>Original Entry Date</th><th>Action</th></tr></thead><tbody id="monthlyTraineeFileBody"></tbody></table></div>
       </article>
 
       <article class="panel monthly-report-panel full">
@@ -658,7 +665,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
       </article>
 
       <article class="panel monthly-report-panel full">
-        <div class="panel-header stack-mobile monthly-remaining-header"><div><p class="eyebrow">Table 7</p><h3>Remaining Trainees</h3><p class="panel-subtitle">Use automatic mode to calculate the permanent Trainee file less Quitted/Removed records, or switch to a manual list.</p></div><div class="monthly-report-actions monthly-remaining-actions"><div class="monthly-control-block"><span class="monthly-control-label">Current total</span><span class="monthly-count-pill" id="monthlyRemainingCount">0</span></div><label class="monthly-control-field"><span>List mode</span><select class="monthly-mode-select" id="monthlyRemainingMode" data-monthly-edit><option value="automatic">Automatic Calculation</option><option value="manual">Manual List</option></select></label><button class="button button-primary hidden" id="monthlyAddRemaining" data-monthly-write type="button">+ Add Remaining Trainee</button></div></div>
+        <div class="panel-header stack-mobile monthly-remaining-header"><div><p class="eyebrow">Table 7</p><h3>Remaining Trainees</h3><p class="panel-subtitle">Use automatic mode to calculate the editable Table 5 list less Quitted/Removed records, or switch to a manual list.</p></div><div class="monthly-report-actions monthly-remaining-actions"><div class="monthly-control-block"><span class="monthly-control-label">Current total</span><span class="monthly-count-pill" id="monthlyRemainingCount">0</span></div><label class="monthly-control-field"><span>List mode</span><select class="monthly-mode-select" id="monthlyRemainingMode" data-monthly-edit><option value="automatic">Automatic Calculation</option><option value="manual">Manual List</option></select></label><button class="button button-primary hidden" id="monthlyAddRemaining" data-monthly-write type="button">+ Add Remaining Trainee</button></div></div>
         <div class="monthly-table-wrap"><table><thead><tr><th>Name</th><th>Course</th><th>Source / Action</th></tr></thead><tbody id="monthlyRemainingBody"></tbody></table></div>
       </article>
     </div>
@@ -1196,13 +1203,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}*,*::before,*::after{bo
 <script src="duty-hours-member-info-v11.js?v=20260724-member-information-v11"></script>
 <script src="pdf-lib.min.js?v=1.17.1"></script>
 <script src="monthly-report-template-data.js?v=20260719-monthly-report-v1"></script>
-<script src="monthly-report.js?v=20260722-account-roles-v3"></script>
+<script src="monthly-report.js?v=20260725-editable-table5-v1"></script>
 <script src="contract-template-data.js?v=20260718-contract-v3"></script>
 <script src="contract-maker-membership-v4.js?v=20260723-membership-contract-v4"></script>
 <script src="dashboard-intelligence-member-info-v3.js?v=20260724-member-information-v3"></script>
 <script src="permissions.js?v=20260722-account-roles-v3"></script>
 <script src="dashboard-command-center-v4.js?v=20260722-account-roles-v3"></script>
 <script src="login-logo-3d-v1.js?v=20260723-login-logo-3d-v1"></script>
-<script src="pwa-auth-structural-transition-v17.js?v=20260724-auth-structural-transition-v17"></script>
+<script src="pwa-monthly-table5-v22.js?v=20260725-monthly-table5-v22"></script>
 </body>
 </html>

@@ -1,0 +1,328 @@
+/*
+ * LSO Accessible Contrast Layer v4
+ * Final cascade layer for Deep Green + Emerald + Warm Gold + White.
+ * This file changes presentation only. It does not alter permissions,
+ * authentication, Supabase, attendance, duty hours, or stored records.
+ */
+:root {
+  --lso-on-dark: #FFFFFF;
+  --lso-on-dark-muted: #E4F0EA;
+  --lso-on-dark-accent: #F6D978;
+  --lso-readable-muted: #4F6259;
+  --lso-readable-placeholder: #66736D;
+  --lso-readable-label: #2F453B;
+  --lso-dark-panel: #0B3D2E;
+}
+
+/* Do not allow older module styles to recolor headings on dark surfaces. */
+.sidebar,
+.auth-screen,
+.hero-card,
+.dashboard-hero,
+.dcc-hero,
+.contract-command-header,
+.monthly-report-command,
+.attendance-command-header,
+.duty-command-header,
+.monthly-summary-card.highlight {
+  --ink: var(--lso-on-dark);
+  --muted: var(--lso-on-dark-muted);
+}
+
+/* Sidebar brand, account, and navigation readability. */
+.sidebar .brand,
+.sidebar .brand > div,
+.sidebar .brand h1,
+.sidebar .brand h2,
+.sidebar .brand h3,
+.sidebar .brand p,
+.sidebar .brand small,
+.sidebar .account-panel,
+.sidebar .account-panel strong,
+.sidebar .account-panel small,
+.sidebar .sidebar-footer,
+.sidebar .sidebar-footer p,
+.sidebar .sidebar-footer small {
+  color: var(--lso-on-dark) !important;
+}
+.sidebar .brand p,
+.sidebar .brand small,
+.sidebar .account-panel small,
+.sidebar .sidebar-footer small {
+  color: var(--lso-on-dark-muted) !important;
+}
+.sidebar .brand h1,
+.sidebar .account-panel strong {
+  text-shadow: 0 1px 2px rgba(0,0,0,.30);
+}
+.sidebar #currentAccountRole {
+  color: var(--lso-on-dark-accent) !important;
+}
+.sidebar .nav-item {
+  color: #EDF6F1 !important;
+}
+.sidebar .nav-item:hover,
+.sidebar .nav-item.active {
+  color: #FFFFFF !important;
+}
+.sidebar .nav-item:focus-visible {
+  outline-color: var(--lso-on-dark-accent) !important;
+}
+
+/* All dark hero/command panels use explicit light foreground colors. */
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header) {
+  color: var(--lso-on-dark) !important;
+  isolation: isolate;
+}
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)
+:is(h1,h2,h3,h4,h5,h6,strong,label) {
+  color: var(--lso-on-dark) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.20);
+}
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)
+:is(p,small,span,li) {
+  color: var(--lso-on-dark-muted) !important;
+}
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)
+.eyebrow,
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)
+.dcc-kicker {
+  color: var(--lso-on-dark-accent) !important;
+}
+
+/* Keep decorative lettering behind content and very subtle. */
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)::before,
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header)::after {
+  opacity: .055 !important;
+  pointer-events: none !important;
+}
+:is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header) > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero badges: gold gets dark text; translucent badges get light text. */
+.hero-status-row .badge,
+.contract-header-badge,
+.event-list-month-badge,
+.attendance-roster-group-badge,
+.semester-live-label,
+.attendance-group-live-label,
+.monthly-count-pill,
+.contract-count-badge {
+  color: #17211D !important;
+}
+.monthly-report-command-badge {
+  color: var(--lso-on-dark) !important;
+  background: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.30) !important;
+}
+.monthly-report-command-badge strong {
+  color: var(--lso-on-dark) !important;
+}
+.monthly-report-command-badge small {
+  color: var(--lso-on-dark-muted) !important;
+}
+
+/* Highlight cards with green gradients. */
+.monthly-summary-card.highlight,
+.monthly-summary-card.highlight :is(h1,h2,h3,h4,strong,span) {
+  color: #FFFFFF !important;
+}
+.monthly-summary-card.highlight :is(p,small) {
+  color: #E4F0EA !important;
+}
+
+/* Light surfaces: prevent pale green and gray text from disappearing. */
+body,
+.main-content,
+.panel,
+.metric-card,
+.action-card,
+.quick-action-card,
+.dcc-section,
+.dcc-panel,
+.modal-card,
+.table-wrap,
+.monthly-table-wrap {
+  color: #17211D;
+}
+.panel h1,.panel h2,.panel h3,.panel h4,.panel h5,.panel h6,
+.metric-card strong,
+.action-card strong,
+.quick-action-card strong,
+.dcc-section h1,.dcc-section h2,.dcc-section h3,
+.dcc-panel h1,.dcc-panel h2,.dcc-panel h3,
+.modal-card h1,.modal-card h2,.modal-card h3 {
+  color: #0B3D2E !important;
+}
+.panel-subtitle,
+.section-heading p,
+.field-help,
+.table-subtext,
+.empty-state p,
+.record-placeholder p,
+.dashboard-empty-state p,
+.monthly-report-help,
+.monthly-inline-note,
+.duty-form-help,
+.duty-punch-note,
+.contract-preview-placeholder p,
+.metric-card p,
+.action-card p,
+.quick-action-card p,
+.dcc-stat-card p,
+.dcc-risk-card p,
+.dcc-action-card p,
+.dcc-upcoming-row p,
+.dcc-event-row p,
+.dcc-risk-row p {
+  color: var(--lso-readable-muted) !important;
+}
+.field > span,
+.auth-card .field > span,
+.monthly-control-label,
+label,
+legend {
+  color: var(--lso-readable-label) !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--lso-readable-placeholder) !important;
+  opacity: 1 !important;
+}
+
+/* Tables and list rows. */
+thead,
+th {
+  color: #0B3D2E !important;
+  background: #E3EFE8 !important;
+}
+td,
+.list-row,
+.lookup-result,
+.member-cell,
+.record-field {
+  color: #17211D !important;
+}
+td small,
+.list-row small,
+.lookup-result small,
+.member-cell small,
+.record-field small {
+  color: var(--lso-readable-muted) !important;
+}
+
+/* Tabs, inactive controls, and disabled controls remain readable. */
+.segment-button,
+.auth-tab,
+.monthly-report-tab,
+.compact-segmented button,
+.stage-segmented-control button {
+  color: #4F6259 !important;
+}
+.segment-button.active,
+.auth-tab.active,
+.monthly-report-tab.active,
+.compact-segmented button.active,
+.stage-segmented-control button.active {
+  color: #0B3D2E !important;
+}
+:disabled,
+[aria-disabled="true"],
+.staff-readonly-field {
+  color: #4A5550 !important;
+  opacity: 1 !important;
+}
+
+/* Buttons: protect foreground/background pairings. */
+.button-primary,
+.auth-submit,
+.duty-time-in-button,
+.file-button,
+.connection-banner[data-state="online"] {
+  color: #FFFFFF !important;
+}
+.button-gold,
+.button-accent,
+.hero-ghost-button,
+.duty-time-out-button,
+.nav-count,
+.notification-badge {
+  color: #17211D !important;
+}
+.button-secondary,
+.button-light,
+.table-action,
+.small-button,
+.text-button,
+.duty-refresh-button {
+  color: #0B3D2E !important;
+}
+.button-danger,
+.toast,
+.toast.error {
+  color: #FFFFFF !important;
+}
+
+/* Semantic status colors. */
+:is(.badge-success,.badge-green,.status-approved,.status-present,.approval-status-badge.approved,.duty-punch-status-chip.approved) {
+  color: #12663C !important;
+}
+:is(.badge-warning,.badge-gold,.status-pending,.status-draft,.status-late,.approval-status-badge.pending,.duty-punch-status-chip.pending) {
+  color: #704B00 !important;
+}
+:is(.badge-danger,.badge-red,.status-rejected,.status-absent,.approval-status-badge.rejected,.duty-punch-status-chip.rejected) {
+  color: #9B1C1C !important;
+}
+:is(.badge-info,.badge-blue,.status-info,.status-excused) {
+  color: #184A9C !important;
+}
+
+/* Login card remains a light surface even though its parent is dark. */
+.auth-card,
+.auth-card :is(h1,h2,h3,h4,strong,label,span,p,small) {
+  text-shadow: none;
+}
+.auth-card h1,.auth-card h2,.auth-card h3,.auth-card h4,
+.auth-card strong {
+  color: #0B3D2E !important;
+}
+.auth-card p,.auth-card small {
+  color: var(--lso-readable-muted) !important;
+}
+.auth-card .auth-message.error,
+.auth-card .form-message.error {
+  color: #9B1C1C !important;
+}
+
+/* Mobile: preserve the same contrast without oversized shadows. */
+@media (max-width: 920px) {
+  .sidebar .brand h1 {
+    color: #FFFFFF !important;
+    font-size: 1rem !important;
+    line-height: 1.2 !important;
+  }
+  .sidebar .brand p {
+    color: #E4F0EA !important;
+    font-size: .9rem !important;
+    line-height: 1.3 !important;
+  }
+  :is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header) {
+    background-color: #0B3D2E !important;
+  }
+}
+
+/* High-contrast and forced-color accessibility. */
+@media (prefers-contrast: more) {
+  :root { --lso-readable-muted: #34483F; }
+  .panel,.metric-card,.action-card,.quick-action-card,.dcc-section,.dcc-panel,
+  input,select,textarea,button { border-width: 2px !important; }
+}
+@media (forced-colors: active) {
+  .sidebar,
+  .auth-screen,
+  :is(.hero-card,.dashboard-hero,.dcc-hero,.contract-command-header,.monthly-report-command,.attendance-command-header,.duty-command-header) {
+    forced-color-adjust: auto;
+  }
+}

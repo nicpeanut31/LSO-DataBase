@@ -1,0 +1,18 @@
+LSO LOGIN COLOR FINAL FIX
+
+What changed
+- Restored strong readable colors in the Login and Register Account cards.
+- The descriptive sentence now uses #42584E on white.
+- Headings, labels, tabs, placeholders, inputs, password toggle, messages, and buttons use explicit high-contrast colors.
+- Added a critical inline fallback so the subtitle stays readable even while the last stylesheet is loading.
+- Added cache-safe PWA v21 files.
+
+Deployment
+1. Extract the ZIP.
+2. Upload every file inside the extracted folder to the GitHub Pages publishing folder.
+3. Make sure index.html, lso-login-color-final-v6.css, pwa-login-color-final-v21.js, and service-worker-login-color-final-v21.js are uploaded.
+4. Wait for GitHub Pages deployment to finish.
+5. Open refresh-lso.html once on each phone that still shows the old colors.
+6. Reopen the website or installed PWA while online.
+
+No Supabase SQL update is required. No database function or role permission was changed.

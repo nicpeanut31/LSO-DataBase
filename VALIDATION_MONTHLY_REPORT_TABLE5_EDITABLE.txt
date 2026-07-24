@@ -1,0 +1,27 @@
+LSO MONTHLY REPORT TABLE 5 EDITABLE UPDATE — VALIDATION
+
+RESULT: PASSED
+
+Validated items:
+- All JavaScript files passed Node.js syntax checking.
+- HTML parsed successfully with no duplicate IDs.
+- All local HTML script, stylesheet, and image references exist.
+- All service-worker core asset references exist.
+- Table 5 has editable Name, Course, Year, and Original Entry Date fields.
+- Original Entry Date uses an HTML date input and is blank for newly synced rows.
+- Current Trainee and Probationary members can be synced into the selected monthly report.
+- Manual Table 5 records can be added.
+- Table 5 records can be removed.
+- A removed linked member remains excluded from later roster synchronization for that same monthly report.
+- Table 6 suggestions use the editable Table 5 names.
+- Table 7 automatic calculations use the editable Table 5 rows.
+- PDF generation reads the user-entered Original Entry Date and does not substitute a system date.
+- Existing role checks remain in place for Administrator and Membership users.
+- No Supabase schema or SQL file was modified.
+- Package remains below 100 files.
+
+Automated workflow unit result:
+PASS {"rows":2,"excluded":["m1"]}
+
+Limitations:
+The live shared-state write could not be tested against the user's private Supabase project. Final confirmation requires deployment and one saved monthly-report test in the live website.

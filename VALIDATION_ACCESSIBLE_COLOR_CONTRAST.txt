@@ -1,0 +1,45 @@
+LSO Accessible Color and Contrast Validation
+============================================
+Passed: 25
+Failed: 0
+
+[PASS] Final contrast CSS referenced after modern palette
+[PASS] PWA v20 referenced
+[PASS] Sidebar brand white rule present
+[PASS] Monthly Report h3 light rule present
+[PASS] Decorative watermark reduced
+[PASS] All CSS files parse without top-level syntax errors
+[PASS] Final PWA JavaScript exists
+[PASS] Final service worker exists
+[PASS] All local HTML assets exist
+[PASS] All PWA core assets exist
+[PASS] Service worker cache is version 20
+[PASS] Contrast: White on Deep Green — 12.20:1
+[PASS] Contrast: Light copy on Deep Green — 10.43:1
+[PASS] Contrast: Gold eyebrow on Deep Green — 8.78:1
+[PASS] Contrast: Main text on White — 16.51:1
+[PASS] Contrast: Muted text on White — 6.51:1
+[PASS] Contrast: Placeholder on White — 4.96:1
+[PASS] Contrast: Dark text on Warm Gold — 6.95:1
+[PASS] Contrast: Success text on success background — 6.07:1
+[PASS] Contrast: Warning text on warning background — 6.98:1
+[PASS] Contrast: Danger text on danger background — 6.74:1
+[PASS] Contrast: Info text on info background — 7.21:1
+[PASS] Database and core workflow files unchanged
+[PASS] Package contains fewer than 100 files — 81
+[PASS] No file exceeds GitHub 100 MB limit — login-desktop.png: 0.68 MB
+
+Verified contrast ratios:
+- White on Deep Green: 12.20:1
+- Light copy on Deep Green: 10.43:1
+- Gold eyebrow on Deep Green: 8.78:1
+- Main text on White: 16.51:1
+- Muted text on White: 6.51:1
+- Placeholder on White: 4.96:1
+- Dark text on Warm Gold: 6.95:1
+- Success text on success background: 6.07:1
+- Warning text on warning background: 6.98:1
+- Danger text on danger background: 6.74:1
+- Info text on info background: 7.21:1
+
+Scope: website styling and PWA cache only. No SQL update is required.

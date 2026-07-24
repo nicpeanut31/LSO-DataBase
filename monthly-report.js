@@ -93,6 +93,9 @@
       loaRows: [],
       ojtRows: [],
       quittedRows: [],
+      traineeRows: [],
+      traineeExcludedMemberIds: [],
+      traineeRowsInitialized: true,
       remainingMode: 'automatic',
       manualRemainingRows: [],
       updatedAt: new Date().toISOString()
@@ -106,6 +109,22 @@
     report.ojtRows = Array.isArray(report.ojtRows) ? report.ojtRows : [];
     report.quittedRows = Array.isArray(report.quittedRows) ? report.quittedRows : [];
     report.manualRemainingRows = Array.isArray(report.manualRemainingRows) ? report.manualRemainingRows : [];
+    report.traineeExcludedMemberIds = Array.isArray(report.traineeExcludedMemberIds) ? report.traineeExcludedMemberIds : [];
+    if (!Array.isArray(report.traineeRows)) {
+      const legacy = activeReportKey === currentMonthKey() ? state.traineeFiles?.[semesterKey(report)] : null;
+      report.traineeRows = Array.isArray(legacy?.rows)
+        ? legacy.rows.map((row) => ({
+          id: row.id || uid('trainee-row'),
+          memberId: row.memberId || '',
+          name: row.name || '',
+          course: row.course || '',
+          year: row.year || '',
+          date: row.date || ''
+        }))
+        : [];
+      report.traineeRowsInitialized = true;
+      if (report.traineeRows.length) report.legacyTraineeRowsImportedAt = new Date().toISOString();
+    }
     return report;
   }
 
@@ -261,45 +280,45 @@
     return `${report.semester || 'Semester'}|${report.academicYear || 'Academic Year'}`;
   }
 
-  function traineeFile(report = currentReport()) {
-    const key = semesterKey(report);
-    if (!state.traineeFiles[key]) state.traineeFiles[key] = { key, createdAt: '', updatedAt: '', rows: [] };
-    const file = state.traineeFiles[key];
-    file.rows = Array.isArray(file.rows) ? file.rows : [];
-    return file;
+  function traineeRows(report = currentReport()) {
+    report.traineeRows = Array.isArray(report.traineeRows) ? report.traineeRows : [];
+    return report.traineeRows;
   }
 
-  function snapshotRowFromMember(member) {
+  function editableTraineeRowFromMember(member) {
     return {
-      id: uid('trainee-file'),
+      id: uid('trainee-row'),
       memberId: member.id || '',
       name: member.fullName || '',
       course: member.course || member.college || '',
       year: member.yearLevel || '',
-      date: member.traineeStartDate || member.dateRegistered || today(),
-      capturedAt: new Date().toISOString()
+      date: ''
     };
   }
 
-  function captureCurrentTrainees() {
-    if (!canModify()) return toast('Administrator or Membership access is required to update the permanent Trainee file.', true);
-    const file = traineeFile();
-    const current = reportRoster().filter((member) => memberGroup(member) === 'Trainee');
-    const existingKeys = new Set(file.rows.map((row) => row.memberId || normalize(row.name)));
+  function currentTraineeProbationaryRoster() {
+    return reportRoster().filter((member) => ['Trainee', 'Probationary'].includes(memberGroup(member)));
+  }
+
+  function syncCurrentTrainees() {
+    if (!canModify()) return toast('Administrator or Membership access is required to update Table 5.', true);
+    const rows = traineeRows();
+    const existingKeys = new Set(rows.map((row) => row.memberId || normalize(row.name)).filter(Boolean));
+    const excludedIds = new Set(currentReport().traineeExcludedMemberIds || []);
     let added = 0;
-    current.forEach((member) => {
+    currentTraineeProbationaryRoster().forEach((member) => {
       const key = member.id || normalize(member.fullName);
-      if (existingKeys.has(key)) return;
-      file.rows.push(snapshotRowFromMember(member));
+      if (!key || existingKeys.has(key) || (member.id && excludedIds.has(member.id))) return;
+      rows.push(editableTraineeRowFromMember(member));
       existingKeys.add(key);
       added += 1;
     });
-    if (!file.createdAt) file.createdAt = new Date().toISOString();
-    file.updatedAt = new Date().toISOString();
     saveState({ quiet: true });
     renderAll();
-    logActivity('Updated permanent Trainee file', `${semesterKey()} • ${added} new record${added === 1 ? '' : 's'}`);
-    toast(added ? `${added} current Trainee record${added === 1 ? '' : 's'} added to the permanent semester file.` : 'The permanent Trainee file is already current.');
+    logActivity('Synced editable Table 5 roster', `${monthLabel(activeReportKey)} • ${added} new record${added === 1 ? '' : 's'}`);
+    toast(added
+      ? `${added} current Trainee/Probationary record${added === 1 ? '' : 's'} added. Enter each Original Entry Date manually.`
+      : 'Table 5 already contains the current Trainee/Probationary roster.');
   }
 
   function genderKey(member) {
@@ -487,18 +506,29 @@
   }
 
   function renderTraineeFile() {
-    const file = traineeFile();
+    const rows = traineeRows();
     const body = el('monthlyTraineeFileBody');
     const count = el('monthlyTraineeFileCount');
     const statusNode = el('monthlyTraineeFileStatus');
-    if (count) count.textContent = file.rows.length;
+    if (count) count.textContent = rows.length;
     if (statusNode) {
-      statusNode.innerHTML = file.rows.length
-        ? `<strong>Permanent file: ${safeText(semesterKey())}</strong><small>${safeText(file.rows.length)} original Trainee record${file.rows.length === 1 ? '' : 's'} retained. Updating adds new names without removing previous entries.</small>`
-        : `<strong>No permanent Trainee file captured</strong><small>Use “Update Permanent Trainee File” to capture the current Trainee roster for ${safeText(semesterKey())}.</small>`;
+      const missingDates = rows.filter((row) => !row.date).length;
+      statusNode.innerHTML = rows.length
+        ? `<strong>Editable monthly filing: ${safeText(monthLabel(activeReportKey))}</strong><small>${safeText(rows.length)} record${rows.length === 1 ? '' : 's'} in this report. ${missingDates ? `${safeText(missingDates)} Original Entry Date${missingDates === 1 ? '' : 's'} still need to be entered.` : 'All Original Entry Dates are complete.'}</small>`
+        : `<strong>No Table 5 records for ${safeText(monthLabel(activeReportKey))}</strong><small>Use “Sync Current Roster” or “+ Add Record.” Names are not permanent and may be edited or removed.</small>`;
     }
+    const datalist = el('monthlyCurrentTraineeNames');
+    if (datalist) datalist.innerHTML = currentTraineeProbationaryRoster()
+      .map((member) => `<option value="${safeText(member.fullName || '')}">${safeText(memberGroup(member))}</option>`)
+      .join('');
     if (!body) return;
-    body.innerHTML = file.rows.length ? file.rows.map((row) => `<tr><td>${safeText(row.name)}</td><td>${safeText(row.course || '—')}</td><td>${safeText(row.year || '—')}</td><td>${safeText(dateLabel(row.date, { short: true }))}</td></tr>`).join('') : '<tr><td colspan="4" class="monthly-empty-row">No permanent Trainee records captured for this semester.</td></tr>';
+    body.innerHTML = rows.length ? rows.map((row) => `<tr data-monthly-trainee-row="${safeText(row.id)}">
+      <td><input data-monthly-edit data-monthly-trainee-field="name" list="monthlyCurrentTraineeNames" value="${safeText(row.name || '')}" placeholder="Trainee or Probationary name"/></td>
+      <td><input data-monthly-edit data-monthly-trainee-field="course" value="${safeText(row.course || '')}" placeholder="Course"/></td>
+      <td><input data-monthly-edit data-monthly-trainee-field="year" value="${safeText(row.year || '')}" placeholder="Year"/></td>
+      <td><input class="monthly-original-entry-date" data-monthly-edit data-monthly-trainee-field="date" type="date" value="${safeText(row.date || '')}" aria-label="Original Entry Date for ${safeText(row.name || 'record')}"/></td>
+      <td><button class="monthly-row-delete" data-monthly-write data-monthly-delete-trainee="${safeText(row.id)}" type="button" aria-label="Remove ${safeText(row.name || 'Table 5 record')}">×</button></td>
+    </tr>`).join('') : '<tr><td colspan="5" class="monthly-empty-row">No editable Trainee/Probationary records entered for this monthly report.</td></tr>';
   }
 
   function quittedRows() {
@@ -510,7 +540,7 @@
     const count = el('monthlyQuittedCount');
     if (!body) return;
     if (count) count.textContent = quittedRows().length;
-    const snapshotNames = traineeFile().rows.map((row) => row.name).filter(Boolean);
+    const snapshotNames = traineeRows().map((row) => row.name).filter(Boolean);
     body.innerHTML = quittedRows().length ? quittedRows().map((row) => `<tr data-monthly-quitted-row="${safeText(row.id)}">
       <td><input data-monthly-edit data-monthly-quitted-field="name" list="monthlyTraineeNames" value="${safeText(row.name || '')}" placeholder="Trainee name"/></td>
       <td><textarea data-monthly-edit data-monthly-quitted-field="reason" placeholder="Reason/s">${safeText(row.reason || '')}</textarea></td>
@@ -523,7 +553,7 @@
 
   function automaticRemainingRows() {
     const removed = new Set(quittedRows().map((row) => normalize(row.name)).filter(Boolean));
-    return traineeFile().rows.filter((row) => !removed.has(normalize(row.name))).map((row) => ({ id: row.id, name: row.name, course: row.course }));
+    return traineeRows().filter((row) => !removed.has(normalize(row.name))).map((row) => ({ id: row.id, name: row.name, course: row.course }));
   }
 
   function effectiveRemainingRows() {
@@ -594,6 +624,7 @@
     const report = currentReport();
     if (type === 'loa') report.loaRows.push({ id: uid('loa'), memberId: '', purpose: '', until: '' });
     if (type === 'ojt') report.ojtRows.push({ id: uid('ojt'), memberId: '', until: '' });
+    if (type === 'trainee') report.traineeRows.push({ id: uid('trainee-row'), memberId: '', name: '', course: '', year: '', date: '' });
     if (type === 'quitted') report.quittedRows.push({ id: uid('quitted'), name: '', reason: '', remarks: '' });
     if (type === 'remaining') report.manualRemainingRows.push({ id: uid('remaining'), name: '', course: '' });
     saveState({ quiet: true });
@@ -603,17 +634,22 @@
   function removeRow(type, id) {
     if (!canModify()) return toast('Administrator or Membership access is required to delete report rows.', true);
     const report = currentReport();
-    const key = ({ loa: 'loaRows', ojt: 'ojtRows', quitted: 'quittedRows', remaining: 'manualRemainingRows' })[type];
+    const key = ({ loa: 'loaRows', ojt: 'ojtRows', trainee: 'traineeRows', quitted: 'quittedRows', remaining: 'manualRemainingRows' })[type];
+    if (type === 'trainee') {
+      const removed = report.traineeRows.find((row) => row.id === id);
+      if (removed?.memberId && !report.traineeExcludedMemberIds.includes(removed.memberId)) report.traineeExcludedMemberIds.push(removed.memberId);
+    }
     report[key] = report[key].filter((row) => row.id !== id);
     saveState({ quiet: true });
     renderAll();
   }
 
-  function updateDynamicRow(target) {
+  function updateDynamicRow(target, eventType = 'change') {
     const report = currentReport();
     const containers = [
       ['monthlyLoaRow', 'loaRows', 'monthlyLoaField'],
       ['monthlyOjtRow', 'ojtRows', 'monthlyOjtField'],
+      ['monthlyTraineeRow', 'traineeRows', 'monthlyTraineeField'],
       ['monthlyQuittedRow', 'quittedRows', 'monthlyQuittedField'],
       ['monthlyRemainingRow', 'manualRemainingRows', 'monthlyRemainingField']
     ];
@@ -631,8 +667,22 @@
         row.course = member?.course || '';
         row.year = member?.yearLevel || '';
       }
+      if (collection === 'traineeRows' && field === 'name') {
+        const member = currentTraineeProbationaryRoster().find((item) => normalize(item.fullName) === normalize(target.value));
+        if (member) {
+          row.memberId = member.id || '';
+          row.course = member.course || member.college || row.course || '';
+          row.year = member.yearLevel || row.year || '';
+          report.traineeExcludedMemberIds = report.traineeExcludedMemberIds.filter((id) => id !== member.id);
+        } else row.memberId = '';
+      }
       queueSave();
       if (field === 'memberId') renderAll();
+      if (collection === 'traineeRows' && eventType === 'change') {
+        renderTraineeFile();
+        renderQuitted();
+        renderRemaining();
+      }
       return true;
     }
     return false;
@@ -1095,29 +1145,28 @@
       rowStyle() { return { minHeight: 24 }; }
     });
 
-    // Table 5: Permanent Summary of Trainees.
-    const snapshot = traineeFile();
-    const filingDate = snapshot.createdAt ? dateLabel(snapshot.createdAt) : dateLabel(report.asOfDate);
-    const traineeRows = snapshot.rows.map((row, index) => [
+    // Table 5: Editable Summary of Trainees and Probationary Members.
+    const filingDate = dateLabel(report.asOfDate);
+    const traineePdfRows = traineeRows().map((row, index) => [
       `${index + 1}. ${String(row.name || '-').toUpperCase()}`,
       String(row.course || '-').toUpperCase(),
       yearDisplay(row.year),
-      dateLabel(row.date || snapshot.createdAt || report.asOfDate)
+      row.date ? dateLabel(row.date) : '-'
     ]);
     await drawPaginatedTable({
       columns: [
         { label: 'NAME', width: 178 }, { label: 'COURSE', width: 108, align: 'center' },
-        { label: 'YEAR', width: 72, align: 'center' }, { label: 'DATE', width: 134, align: 'center' }
+        { label: 'YEAR', width: 72, align: 'center' }, { label: 'ORIGINAL ENTRY DATE', width: 134, align: 'center' }
       ],
-      rows: traineeRows,
-      totalRow: [`TOTAL: ${traineeRows.length}`, '', '', ''],
+      rows: traineePdfRows,
+      totalRow: [`TOTAL: ${traineePdfRows.length}`, '', '', ''],
       emptyRow: ['-', '-', '-', '-'],
       fontSize: 7.2,
       continuationHeading: false,
       drawHeading(page, continued) {
         if (continued) return 632;
-        page.drawText('Table 5. Summary of Trainees', { x: bounds.left, y: 622, size: 10, font: timesBold, color: colors.ink });
-        const subtitle = `As of ${filingDate}, Auditions Result (Results are Submitted on ${filingDate})`;
+        page.drawText('Table 5. Summary of Trainees / Probationary Members', { x: bounds.left, y: 622, size: 9.4, font: timesBold, color: colors.ink });
+        const subtitle = `Monthly filing as of ${filingDate}. Original Entry Dates are entered by the report preparer.`;
         page.drawText(subtitle, { x: bounds.left, y: 601, size: 7.2, font: times, color: colors.ink });
         return 584;
       },
@@ -1241,7 +1290,8 @@
     el('monthlySyncLoa')?.addEventListener('click', syncLoaRows);
     el('monthlyAddLoa')?.addEventListener('click', () => addRow('loa'));
     el('monthlyAddOjt')?.addEventListener('click', () => addRow('ojt'));
-    el('monthlyCaptureTrainees')?.addEventListener('click', captureCurrentTrainees);
+    el('monthlySyncTrainees')?.addEventListener('click', syncCurrentTrainees);
+    el('monthlyAddTrainee')?.addEventListener('click', () => addRow('trainee'));
     el('monthlyAddQuitted')?.addEventListener('click', () => addRow('quitted'));
     el('monthlyAddRemaining')?.addEventListener('click', () => addRow('remaining'));
     el('monthlyRemainingMode')?.addEventListener('change', (event) => {
@@ -1259,15 +1309,16 @@
         queueSave();
         return;
       }
-      updateDynamicRow(target);
+      updateDynamicRow(target, 'change');
     });
-    document.addEventListener('input', (event) => updateDynamicRow(event.target));
+    document.addEventListener('input', (event) => updateDynamicRow(event.target, 'input'));
 
     document.addEventListener('click', (event) => {
       const target = event.target.closest('button');
       if (!target) return;
       if (target.dataset.monthlyDeleteLoa) removeRow('loa', target.dataset.monthlyDeleteLoa);
       if (target.dataset.monthlyDeleteOjt) removeRow('ojt', target.dataset.monthlyDeleteOjt);
+      if (target.dataset.monthlyDeleteTrainee) removeRow('trainee', target.dataset.monthlyDeleteTrainee);
       if (target.dataset.monthlyDeleteQuitted) removeRow('quitted', target.dataset.monthlyDeleteQuitted);
       if (target.dataset.monthlyDeleteRemaining) removeRow('remaining', target.dataset.monthlyDeleteRemaining);
     });

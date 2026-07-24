@@ -1,0 +1,34 @@
+LSO MONTHLY REPORT — TABLE 5 EDITABLE UPDATE
+
+WHAT CHANGED
+1. Table 5 is no longer a permanent semester filing.
+2. Each selected monthly report has its own editable Trainee/Probationary list.
+3. Administrator and Membership users can:
+   - Sync the current Trainee/Probationary roster.
+   - Add a manual record.
+   - Edit Name, Course, Year, and Original Entry Date.
+   - Remove any row from the selected monthly report.
+4. Original Entry Date is never automatically assigned to newly synced rows. The report preparer enters it manually.
+5. Removed synced members stay removed from that monthly report even when Sync Current Roster is pressed again.
+6. Table 6 name suggestions and Table 7 automatic remaining records now use the editable Table 5 list.
+7. The generated PDF uses the user-entered Original Entry Date for every row.
+
+EXISTING DATA
+- Existing legacy Table 5 data is preserved in storage.
+- For compatibility, legacy rows may be imported once into the current month's report, where they can then be edited or removed.
+- Other monthly reports begin with their own independent Table 5 list.
+
+DEPLOYMENT
+1. Extract the ZIP.
+2. Upload all files inside the extracted folder to the GitHub Pages repository.
+3. Replace index.html, monthly-report.js, and monthly-report.css.
+4. Confirm these new files are uploaded:
+   pwa-monthly-table5-v22.js
+   service-worker-monthly-table5-v22.js
+5. Wait for GitHub Pages to finish deployment.
+6. Press Ctrl + Shift + R on desktop.
+7. On mobile or the installed PWA, close and reopen it while online.
+8. Open refresh-lso.html once if the previous Table 5 remains cached.
+
+DATABASE
+No Supabase SQL update is required. Table 5 remains inside the existing monthly-report shared JSON state.

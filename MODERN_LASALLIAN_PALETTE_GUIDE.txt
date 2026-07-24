@@ -1,0 +1,52 @@
+LSO MODERN LASALLIAN EMERALD PALETTE — DEPLOYMENT GUIDE
+=======================================================
+
+This package applies the new Deep Green + Emerald + Warm Gold + White design system across the entire LSO website.
+
+CORE PALETTE
+------------
+Deep Green / Primary navigation: #0B3D2E
+Emerald / Primary actions:       #146C43
+Emerald hover:                    #105A38
+Warm Gold / Accent:               #D4A017
+Page background:                  #F6F8F5
+White panels:                     #FFFFFF
+Main text:                        #17211D
+Secondary text:                   #5F6B65
+Borders:                          #D8E2DC
+Selected surfaces:                #E9F3ED
+
+STATUS COLORS
+-------------
+Approved / Present: #DDF4E7 background, #12663C text
+Pending / Draft:    #FFF2CC background, #704B00 text
+Rejected / Absent:  #FDE4E2 background, #9B1C1C text
+Information:        #E5EEFF background, #184A9C text
+Inactive / Archive: #ECEFED background, #4A5550 text
+
+WHAT WAS UPDATED
+----------------
+- Login page and 3D logo environment
+- Sidebar, active navigation, top bar, notifications, and account panel
+- Dashboard command center, hero panels, action cards, statistics, and quick actions
+- Members directory, Member Lookup, record panels, forms, and tables
+- Attendance calendar, semester and roster controls, statuses, analytics, and reports
+- Duty Hours punch cards, approval queue, ledgers, rosters, and progress panels
+- Contract workspace and Monthly Report workspace
+- Accounts, Action Center, settings, Data & Backup, modals, alerts, and empty states
+- Buttons, fields, tables, badges, focus indicators, disabled states, and mobile layouts
+- PWA theme color, manifest, service worker, and cached application shell
+
+DEPLOYMENT
+----------
+1. Extract the ZIP.
+2. Upload every file and folder inside this package to the GitHub Pages publishing root.
+3. Replace the existing index.html.
+4. Wait for GitHub Pages to finish deploying.
+5. On desktop, use Ctrl + Shift + R.
+6. On mobile or the installed PWA, close the app completely, reopen it while online, and refresh once.
+7. When an older palette remains, open refresh-lso.html once to unregister the previous service worker and clear old LSO caches.
+
+DATABASE SAFETY
+---------------
+No Supabase table, SQL schema, database record, role permission, Attendance workflow, Duty Hours workflow, account authentication, or contract/report logic was changed by this design update.

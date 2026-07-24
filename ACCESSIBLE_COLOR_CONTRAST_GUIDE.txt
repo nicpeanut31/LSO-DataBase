@@ -1,0 +1,31 @@
+LSO Accessible Color and Contrast Update
+========================================
+
+This is a presentation-only update. It does not change Supabase, account roles,
+authentication logic, Attendance, Duty Hours, Contracts, or stored records.
+
+Fixed areas
+-----------
+1. Sidebar logo title and subtitle now use white / light text on deep green.
+2. All dark command banners, including Overall Monthly Report, explicitly use
+   white headings and light body copy.
+3. Decorative watermark text was reduced so it cannot compete with content.
+4. Light cards, forms, tables, placeholders, inactive tabs, and helper text use
+   darker readable colors.
+5. Buttons and status badges retain appropriate foreground/background pairs.
+6. Mobile and high-contrast preferences are supported.
+
+Deployment
+----------
+1. Extract the ZIP.
+2. Upload every file inside the folder to the GitHub Pages publishing root.
+3. Confirm index.html and these new files are present:
+   - lso-accessible-contrast-v4.css
+   - pwa-modern-emerald-v20.js
+   - service-worker-modern-emerald-v20.js
+4. Wait for GitHub Pages to finish deploying.
+5. On desktop, press Ctrl + Shift + R.
+6. On mobile or the installed PWA, close the app completely and reopen it online.
+7. When the old colors remain, open refresh-lso.html once.
+
+No SQL update is required.

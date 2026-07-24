@@ -1,0 +1,116 @@
+LSO MODERN LASALLIAN EMERALD PALETTE — VALIDATION REPORT
+================================================================
+Passed: 94
+Failed: 0
+Files in package: 80
+
+CONTRAST RATIOS
+------------------------------
+White on Deep Green: 12.20:1
+White on Emerald: 6.45:1
+White on Emerald hover: 8.26:1
+Charcoal on White: 16.51:1
+Charcoal on background: 15.46:1
+Charcoal on Gold: 6.95:1
+Muted on White: 5.56:1
+Approved status: 6.07:1
+Pending status: 6.98:1
+Rejected status: 6.74:1
+Information status: 7.21:1
+
+CHECKS
+------------------------------
+[PASS] JavaScript syntax: app-member-information-v5.js
+[PASS] JavaScript syntax: attendance-governance.js
+[PASS] JavaScript syntax: auth-view-controller-v17.js
+[PASS] JavaScript syntax: auth.js
+[PASS] JavaScript syntax: branding.js
+[PASS] JavaScript syntax: cloud.js
+[PASS] JavaScript syntax: contract-maker-membership-v4.js
+[PASS] JavaScript syntax: contract-template-data.js
+[PASS] JavaScript syntax: dashboard-command-center-v4.js
+[PASS] JavaScript syntax: dashboard-enhancements.js
+[PASS] JavaScript syntax: dashboard-intelligence-member-info-v3.js
+[PASS] JavaScript syntax: duty-hours-member-info-v11.js
+[PASS] JavaScript syntax: login-logo-3d-v1.js
+[PASS] JavaScript syntax: management-attendance-member-info-v3.js
+[PASS] JavaScript syntax: monthly-report-template-data.js
+[PASS] JavaScript syntax: monthly-report.js
+[PASS] JavaScript syntax: pdf-lib.min.js
+[PASS] JavaScript syntax: permissions.js
+[PASS] JavaScript syntax: pwa-auth-structural-transition-v17.js
+[PASS] JavaScript syntax: pwa-modern-emerald-v18.js
+[PASS] JavaScript syntax: role-access-v2.js
+[PASS] JavaScript syntax: service-worker-auth-structural-transition-v17.js
+[PASS] JavaScript syntax: service-worker-modern-emerald-v18.js
+[PASS] JavaScript syntax: supabase-config.js
+[PASS] JavaScript syntax: ui-enhancements.js
+[PASS] JavaScript syntax: workflow-attendance-month-v2.js
+[PASS] No duplicate HTML IDs — 0 duplicates
+[PASS] All local HTML assets exist
+[PASS] Modern palette stylesheet is loaded last
+[PASS] New PWA loader is active
+[PASS] Fail-closed authentication gate remains
+[PASS] Palette CSS braces are balanced — 134 / 134
+[PASS] Palette token: Deep Green
+[PASS] Palette token: Emerald
+[PASS] Palette token: Emerald hover
+[PASS] Palette token: Warm Gold
+[PASS] Palette token: Background
+[PASS] Palette token: White surface
+[PASS] Palette token: Main text
+[PASS] Palette token: Muted text
+[PASS] Palette token: Border
+[PASS] Palette token: Selected surface
+[PASS] Design coverage: Application navigation
+[PASS] Design coverage: Top bar and global shell
+[PASS] Design coverage: Panels, cards, empty states
+[PASS] Design coverage: Buttons
+[PASS] Design coverage: Form controls
+[PASS] Design coverage: Tables
+[PASS] Design coverage: Status badges and alerts
+[PASS] Design coverage: Login page
+[PASS] Design coverage: Dashboard and command center
+[PASS] Design coverage: Members and lookup
+[PASS] Design coverage: Attendance
+[PASS] Design coverage: Duty Hours
+[PASS] Design coverage: Contracts and monthly reports
+[PASS] Design coverage: Accounts, alerts, data, settings
+[PASS] Manifest theme color — #0B3D2E
+[PASS] Manifest background color — #F6F8F5
+[PASS] All service-worker core assets exist
+[PASS] Service worker caches new palette CSS
+[PASS] Service worker uses new cache generation
+[PASS] Core logic unchanged: supabase-setup.sql
+[PASS] Core logic unchanged: LSO_ACCOUNT_ROLES_MEMBERSHIP_GENERAL_SECRETARY_INSTALL.sql
+[PASS] Core logic unchanged: auth.js
+[PASS] Core logic unchanged: cloud.js
+[PASS] Core logic unchanged: permissions.js
+[PASS] Core logic unchanged: attendance-governance.js
+[PASS] Core logic unchanged: duty-hours-member-info-v11.js
+[PASS] Core logic unchanged: contract-maker-membership-v4.js
+[PASS] Contrast: White on Deep Green — 12.20:1
+[PASS] Contrast: White on Emerald — 6.45:1
+[PASS] Contrast: White on Emerald hover — 8.26:1
+[PASS] Contrast: Charcoal on White — 16.51:1
+[PASS] Contrast: Charcoal on background — 15.46:1
+[PASS] Contrast: Charcoal on Gold — 6.95:1
+[PASS] Contrast: Muted on White — 5.56:1
+[PASS] Contrast: Approved status — 6.07:1
+[PASS] Contrast: Pending status — 6.98:1
+[PASS] Contrast: Rejected status — 6.74:1
+[PASS] Contrast: Information status — 7.21:1
+[PASS] Login layout has no horizontal overflow at 360px
+[PASS] Palette computed correctly at 360px — {'overflow': False, 'primary': '#0B3D2E', 'secondary': '#146C43', 'accent': '#D4A017'}
+[PASS] Dashboard layout has no horizontal overflow at 360px
+[PASS] Login layout has no horizontal overflow at 390px
+[PASS] Palette computed correctly at 390px — {'overflow': False, 'primary': '#0B3D2E', 'secondary': '#146C43', 'accent': '#D4A017'}
+[PASS] Dashboard layout has no horizontal overflow at 390px
+[PASS] Login layout has no horizontal overflow at 768px
+[PASS] Palette computed correctly at 768px — {'overflow': False, 'primary': '#0B3D2E', 'secondary': '#146C43', 'accent': '#D4A017'}
+[PASS] Dashboard layout has no horizontal overflow at 768px
+[PASS] Login layout has no horizontal overflow at 1440px
+[PASS] Palette computed correctly at 1440px — {'overflow': False, 'primary': '#0B3D2E', 'secondary': '#146C43', 'accent': '#D4A017'}
+[PASS] Dashboard layout has no horizontal overflow at 1440px
+[PASS] GitHub package remains below 100 files — 80
+[PASS] No file exceeds GitHub 100 MB limit

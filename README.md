@@ -1,5 +1,9 @@
-# LSO Automatic Dashboard Login Fix
+# Latest update: Login Color Contrast Final v6
 
-This GitHub-ready package fixes the mobile post-login transition. After authentication, the system opens the account's authorized landing view and resets the viewport to its top. The Supabase schema and stored records are unchanged.
+The Login and Register Account cards now use explicit readable colors, including a 7.67:1 subtitle contrast ratio on white. This update is presentation-only.
 
-See `AUTOMATIC_DASHBOARD_LOGIN_FIX_GUIDE.txt` for deployment steps.
+# LSO Modern Lasallian Emerald System
+
+This GitHub-ready package applies a unified Deep Green, Emerald, Warm Gold, and White design system across the complete Lasallian Symphony Orchestra database website.
+
+See `MODERN_LASALLIAN_PALETTE_GUIDE.txt` for deployment instructions and `VALIDATION_MODERN_LASALLIAN_PALETTE.txt` for the verification results.

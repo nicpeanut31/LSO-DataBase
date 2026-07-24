@@ -1,0 +1,145 @@
+/*
+ * LSO Login Color Contrast Final v6
+ * Presentation-only override for the Login and Register Account panels.
+ * Loaded after every other stylesheet so older palette rules cannot fade text.
+ */
+:root {
+  --lso-login-heading: #0B3D2E;
+  --lso-login-copy: #42584E;
+  --lso-login-label: #2F453B;
+  --lso-login-placeholder: #66736D;
+  --lso-login-tab: #4F6259;
+  --lso-login-border: #BFCFC6;
+  --lso-login-focus: #146C43;
+}
+
+/* Light card surface and explicit foreground hierarchy. */
+.auth-card {
+  color: #17211D !important;
+  background: #FFFFFF !important;
+  border-color: #D8E2DC !important;
+}
+.auth-card .auth-heading,
+.auth-card .auth-form,
+.auth-card .field,
+.auth-card .password-field {
+  color: #17211D !important;
+}
+.auth-card .auth-heading .eyebrow,
+#loginForm .auth-heading .eyebrow,
+#registerForm .auth-heading .eyebrow {
+  color: #386B55 !important;
+  opacity: 1 !important;
+}
+.auth-card .auth-heading h1,
+.auth-card .auth-heading h2,
+.auth-card .auth-heading h3,
+#loginForm .auth-heading h2,
+#registerForm .auth-heading h2 {
+  color: var(--lso-login-heading) !important;
+  opacity: 1 !important;
+}
+.auth-card .auth-heading p:not(.eyebrow),
+#loginForm .auth-heading p:not(.eyebrow),
+#registerForm .auth-heading p:not(.eyebrow) {
+  color: var(--lso-login-copy) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: var(--lso-login-copy) !important;
+}
+.auth-card .field > span,
+.auth-card label,
+.auth-card legend {
+  color: var(--lso-login-label) !important;
+  opacity: 1 !important;
+}
+.auth-card .field > span small {
+  color: var(--lso-login-copy) !important;
+}
+
+/* Tabs remain clearly distinguishable in both states. */
+.auth-tabs {
+  background: #EEF4F1 !important;
+  border: 1px solid #E0EAE4 !important;
+}
+.auth-tab {
+  color: var(--lso-login-tab) !important;
+  opacity: 1 !important;
+}
+.auth-tab.active,
+.auth-tab[aria-selected="true"] {
+  color: var(--lso-login-heading) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 6px 18px rgba(11,61,46,.10) !important;
+}
+
+/* Inputs and controls use readable text on white. */
+.auth-card input,
+.auth-card select,
+.auth-card textarea {
+  color: #17211D !important;
+  -webkit-text-fill-color: #17211D !important;
+  background: #FFFFFF !important;
+  border-color: var(--lso-login-border) !important;
+  opacity: 1 !important;
+}
+.auth-card input::placeholder,
+.auth-card textarea::placeholder {
+  color: var(--lso-login-placeholder) !important;
+  -webkit-text-fill-color: var(--lso-login-placeholder) !important;
+  opacity: 1 !important;
+}
+.auth-card input:focus,
+.auth-card select:focus,
+.auth-card textarea:focus {
+  border-color: var(--lso-login-focus) !important;
+  box-shadow: 0 0 0 4px rgba(20,108,67,.16) !important;
+}
+.password-toggle {
+  color: #0F5B3B !important;
+  opacity: 1 !important;
+}
+.auth-submit,
+#loginForm .auth-submit,
+#registerForm .auth-submit {
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #146C43, #105A38) !important;
+  border-color: #105A38 !important;
+  text-shadow: 0 1px 1px rgba(0,0,0,.18) !important;
+}
+.auth-submit:hover,
+.auth-submit:focus-visible {
+  color: #FFFFFF !important;
+  background: #0B3D2E !important;
+}
+
+/* Messages use semantic contrast and never inherit pale text. */
+.auth-card .auth-message,
+.auth-card .form-message {
+  color: #184A9C !important;
+}
+.auth-card .auth-message.error,
+.auth-card .form-message.error {
+  color: #8E1B1B !important;
+}
+.auth-card .auth-message.success,
+.auth-card .form-message.success {
+  color: #12663C !important;
+}
+
+/* Mobile keeps the exact same readable foreground colors. */
+@media (max-width: 920px) {
+  .auth-card .auth-heading p:not(.eyebrow) {
+    color: var(--lso-login-copy) !important;
+    -webkit-text-fill-color: var(--lso-login-copy) !important;
+  }
+  .auth-card {
+    box-shadow: 0 18px 44px rgba(3,25,18,.22) !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --lso-login-copy: #34483F;
+    --lso-login-placeholder: #53635B;
+  }
+}

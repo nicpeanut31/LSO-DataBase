@@ -16,7 +16,7 @@
 <main>
 <div class="spinner" aria-hidden="true"></div>
 <h1>Updating the LSO website</h1>
-<p id="status">Removing the previous offline version and loading the corrected login transition…</p>
+<p id="status">Removing the previous offline version and loading the corrected login colors…</p>
 </main>
 <script>
 (async()=>{
@@ -30,11 +30,11 @@
       const keys=await caches.keys();
       await Promise.all(keys.filter(key=>key.startsWith('lso-website-')).map(key=>caches.delete(key)));
     }
-    status.textContent='Update complete. Opening the corrected LSO login…';
+    status.textContent='Update complete. Opening the corrected LSO login colors…';
   }catch(error){
-    status.textContent='Opening the corrected LSO login…';
+    status.textContent='Opening the corrected LSO login colors…';
   }
-  location.replace('./?v=20260724-auth-structural-transition-v17&cache-reset='+Date.now());
+  location.replace('./?v=20260724-login-color-final-v21&cache-reset='+Date.now());
 })();
 </script>
 </body>
